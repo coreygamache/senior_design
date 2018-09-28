@@ -196,3 +196,6 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+add_executable(drive_motor_node src/drive_motor_node.cpp)
+target_link_libraries(drive_motor_node ${catkin_LIBRARIES} wiringPi)
