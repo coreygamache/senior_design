@@ -7,6 +7,7 @@
   *
 **/
 
+#include <errno.h>
 #include <ros/ros.h>
 #include <sstream>
 #include <wiringPiI2C.h>
@@ -25,21 +26,25 @@ int main(int argc, char **argv)
 
   int fd;
   int result;
+  int message = 5;
 
   //initialize i2c protocol
-  fd = wiringPiI2CSetup(0x40);
+  fd = wiringPiI2CSetup(0x04);
   ROS_INFO("i2c connection result: %d", fd);
 
   while (ros::ok())
   {
 
+    //notify of message to be sent
+    ROS_INFO("sending message: %d", message);
+
     //output message via i2c protocol
-    result = wiringPiI2CWrite(fd, 5);
+    result = wiringPiI2CWrite(fd, message);
 
     //output notification message if error occurs
     if (result == -1)
     {
-      ROS_INFO("error");
+      ROS_INFO("error: %d", errno);
     }
 
     //sleep until next cycle
