@@ -18,12 +18,12 @@ class EncoderMotor
   //private properties
   private:
     Encoder _encoder = Encoder(-1, -1, 0);
-    Motor _motor = Motor(-1, -1, 0);
+    Motor _motor = Motor(-1, -1, 0, 0);
 
   public:
 
     //basic functions
-    EncoderMotor(int fPin, int rPin, int maxRPM, int channelA, int channelB, int countableEventsPerRev);
+    EncoderMotor(int fPin, int rPin, float gearRatio, int maxRPM, int channelA, int channelB, int countableEventsPerRev);
     Encoder getEncoder();
     Motor getMotor();
     void setEncoder(Encoder encoder);
@@ -32,8 +32,6 @@ class EncoderMotor
     //advanced functions
 
     //encoder functions
-    double getRadPerSec();
-    double getRPM();
     void addChannelACount();
     void addChannelBCount();
     void preventOverflow();
@@ -44,6 +42,10 @@ class EncoderMotor
     void reverse();
     void reverse(int pwmValue);
     void stop();
+
+    //encoder motor functions
+    double getRadPerSec();
+    double getRPM();
 
 };
 

@@ -1,7 +1,3 @@
-//to do
-//1. i2c stuff
-
-
 //includes
 #include <EncoderMotor.h>
 #include <PID_v1.h>
@@ -18,6 +14,8 @@ const int encoder2chanA = 3;
 const int encoder2chanB = 12;
 
 //motor parameter constants
+const float motor1gearRatio = 10.0;
+const float motor2gearRatio = 10.0;
 const int encoder1countsPerRev = 10;
 const int encoder2countsPerRev = 10;
 const int motor1maxRPM = 10;
@@ -34,8 +32,8 @@ const int msPerCycle = 200; //ms
 const int serialPrintInterval = 5000; //ms
 
 //EncoderMotor objects int (fPin, int rPin, int maxRPM, int channelA, int channelB, int countableEventsPerRev)
-EncoderMotor motor1(motor1fwd, motor1rev, motor1maxRPM, encoder1chanA, encoder1chanB, encoder1countsPerRev);
-EncoderMotor motor2(motor2fwd, motor2rev, motor2maxRPM, encoder2chanA, encoder2chanB, encoder2countsPerRev);
+EncoderMotor motor1(motor1fwd, motor1rev, motor1gearRatio, motor1maxRPM, encoder1chanA, encoder1chanB, encoder1countsPerRev);
+EncoderMotor motor2(motor2fwd, motor2rev, motor2gearRatio, motor2maxRPM, encoder2chanA, encoder2chanB, encoder2countsPerRev);
 
 //PID variables
 double setPoint_motor1, input_motor1, output_motor1;
@@ -48,24 +46,26 @@ PID PID_Motor2(&input_motor2, &output_motor2, &setPoint_motor2, pidKP, pidKI, pi
 void setup()
 {
 
-  //initialize PID variables
-  input_motor1 = 0;
-  input_motor2 = 0;
-  setPoint_motor1 = 0;
-  setPoint_motor2 = 0;
-
   //enable PID and adjust settings
   PID_Motor1.SetMode(AUTOMATIC);
   PID_Motor2.SetMode(AUTOMATIC);
   PID_Motor1.SetSampleTime(pidSampleTime);
   PID_Motor2.SetSampleTime(pidSampleTime);
+  setPoint_motor1 = 0;
+  setPoint_motor2 = 0;
 
-  //initialize serial communication
-  Serial.begin(9600);
+  //initialize i2c communication with slave address 0x04
+  Wire.begin(0x04);
+  Wire.onReceive(receiveData);
 
   //attach interrupts
   attachInterrupt(digitalPinToInterrupt(encoder1chanA), encoder1Event, RISING);
   attachInterrupt(digitalPinToInterrupt(encoder2chanA), encoder2Event, RISING);
+
+  //initialize serial communication and notify of initialization complete
+  Serial.begin(9600);
+  Serial.println("Program initialization complete, beginning control routine.");
+  Serial.println("");
 
 }
 
@@ -83,8 +83,8 @@ void loop()
   PID_Motor2.Compute();
 
   //output new PID control output values to motors
-  motor1.forward(int(output_motor1));
-  motor2.forward(int(output_motor2));
+  motor1.forward(map(int(output_motor1), 0, motor1.getMotor().getMaxRPM(), 0, 255));
+  motor2.forward(map(int(output_motor2), 0, motor2.getMotor().getMaxRPM(), 0, 255));
 
   //output current iteration PID input values to serial
   Serial.print("Motor 1 Input: ");
@@ -110,4 +110,46 @@ void encoder1Event() {
 
 void encoder2Event() {
   motor2.addChannelACount();
+}
+
+//receive and set requested motor RPM setpoints
+void receiveData(int byteCount) {
+
+  //check if data is available and message is of correct size
+  if (Wire.available() && byteCount == 2)
+  {
+
+    //initialize variables
+    int data;
+    int maxRPM;
+    int setPoint;
+
+    for (int i = 0; i < 2; i++)
+    {
+
+      //read data from i2c buffer
+      data = Wire.read();
+
+      //get maximum RPM value of respective motor
+      if (i == 0)
+        maxRPM = motor1.getMotor().getMaxRPM();
+      else
+        maxRPM = motor2.getMotor().getMaxRPM();
+
+      if (data >= 0 && data <= maxRPM)
+        setPoint = data;
+      else if (data < 0)
+        setPoint = 0;
+      else if (data > maxRPM)
+        setPoint = maxRPM;
+
+      if (i == 0)
+        setPoint_motor1 = double(setPoint);
+      else
+        setPoint_motor1 = double(setPoint);
+
+    }
+
+  }
+
 }

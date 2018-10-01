@@ -10,13 +10,25 @@
 //basic functions
 
 //default constructor
-Motor::Motor(int fPin, int rPin, int maxRPM)
+Motor::Motor(int fPin, int rPin, float gearRatio, int maxRPM)
 {
-  pinMode(fPin, OUTPUT);
-  pinMode(rPin, OUTPUT);
+
+  //initialize pins
   setFwdPin(fPin);
-  setMaxRPM(maxRPM);
   setRevPin(rPin);
+  pinMode(_fwdPin, OUTPUT);
+  pinMode(_revPin, OUTPUT);
+
+  //initialize other variables
+  setGearRatio(gearRatio);
+  setMaxRPM(maxRPM);
+
+}
+
+//return gear ratio
+float Motor::getGearRatio()
+{
+  return _gearRatio;
 }
 
 //return forward pin
@@ -41,6 +53,12 @@ int Motor::getRevPin()
 void Motor::setFwdPin(int pin)
 {
   _fwdPin = pin;
+}
+
+//set gear ratio
+void Motor::setGearRatio(float value)
+{
+  _gearRatio = value;
 }
 
 //set max RPM of motor

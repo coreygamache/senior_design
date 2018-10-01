@@ -8,10 +8,10 @@
 #include "EncoderMotor.h"
 
 //default constructor
-EncoderMotor::EncoderMotor(int fPin, int rPin, int maxRPM, int channelA, int channelB, int countableEventsPerRev)
+EncoderMotor::EncoderMotor(int fPin, int rPin, float gearRatio, int maxRPM, int channelA, int channelB, int countableEventsPerRev)
 {
   _encoder = Encoder(channelA, channelB, countableEventsPerRev);
-  _motor = Motor(fPin, rPin, maxRPM);
+  _motor = Motor(fPin, rPin, gearRatio, maxRPM);
 }
 
 //basic function
@@ -39,17 +39,6 @@ void EncoderMotor::setMotor(Motor motor)
 //advanced functions
 
 //encoder functions
-
-//return motor speed in radians per second
-double EncoderMotor::getRadPerSec(){
-  return _encoder.getRadPerSec();
-}
-
-//return motor speed in revolutions per minute
-double EncoderMotor::getRPM()
-{
-  return _encoder.getRPM();
-}
 
 //increment encoder channel A count
 void EncoderMotor::addChannelACount()
@@ -94,4 +83,23 @@ void EncoderMotor::reverse(int pwmValue)
 void EncoderMotor::stop()
 {
   _motor.stop();
+}
+
+//encoder motor functions
+
+//return motor output shaft speed in radians per second
+//this value is calculated taking into account any reduction gearing
+double EncoderMotor::getRadPerSec(){
+  double radPerSec_motor = _encoder.getRadPerSec();
+  double radPerSec_output = radPerSec_motor / double(_motor.getGearRatio());
+  return radPerSec_output;
+}
+
+//return motor output shaft speed in revolutions per minute
+//this value is calculated taking into account any reduction gearing
+double EncoderMotor::getRPM()
+{
+  double RPM_motor = _encoder.getRPM();
+  double RPM_output = RPM_motor / double(_motor.getGearRatio());
+  return RPM_output;
 }
