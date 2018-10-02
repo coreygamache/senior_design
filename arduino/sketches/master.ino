@@ -29,7 +29,6 @@ const int pidSampleTime = 200; //ms
 
 //other constants
 const int msPerCycle = 200; //ms
-const int serialPrintInterval = 5000; //ms
 
 //EncoderMotor objects int (fPin, int rPin, int maxRPM, int channelA, int channelB, int countableEventsPerRev)
 EncoderMotor motor1(motor1fwd, motor1rev, motor1gearRatio, motor1maxRPM, encoder1chanA, encoder1chanB, encoder1countsPerRev);
