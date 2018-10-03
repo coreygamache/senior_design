@@ -7,10 +7,10 @@ int main(int argc, char **argv)
 {
 
   //send notification that node is launching
-  ROS_INFO("[NODE LAUNCH]: starting drive_motor_node");
+  ROS_INFO("[NODE LAUNCH]: starting i2c_comm_test_node");
 
   //initialize node and create node handler
-  ros::init(argc, argv, "drive_motor_node");
+  ros::init(argc, argv, "i2c_comm_test_node");
   ros::NodeHandle node_private("~");
 
   //set loop rate in Hz
