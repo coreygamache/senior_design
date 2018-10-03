@@ -16,11 +16,12 @@ int main(int argc, char **argv)
   //set loop rate in Hz
   ros::Rate loop_rate(50);
 
+  //initialize i2c communication and data values
   int fd;
   int result;
   unsigned char data[2] = {0, 0};
 
-  //initialize i2c protocol
+  //initialize i2c protocol and verify connection
   fd = wiringPiI2CSetup(0x04);
   ROS_INFO("i2c connection result: %d", fd);
 
@@ -31,30 +32,32 @@ int main(int argc, char **argv)
     for (int i = 0; i < 2; i++)
     {
 
-       if (i == 0)
-       {
-       	 data[i]++;
-       }
-       else
-       {
-	 data[i]--;
-       }
+      //iterate data values
+      if (i == 0)
+      {
+        data[i]++;
+      }
+      else
+      {
+        data[i]--;
+      }
 
-       if (data[i] > 255)
-       {
-	 data[i] = 0;
-       }
-       else if (data[i] < 0)
-       {
-         data[i] = 255;
-       }
+      //verify data values are within PWM limits
+      if (data[i] > 255)
+      {
+        data[i] = 0;
+      }
+      else if (data[i] < 0)
+      {
+        data[i] = 255;
+      }
+
     }
 
     //notify of message to be sent
     ROS_INFO("sending message: %d %d", data[0], data[1]);
 
-    //output motor one PWM value  via i2c protocol
-    //result = wiringPiI2cWrite(fd, data);
+    //output motor PWM values via i2c protocol
     result = write(fd, data, 2);
 
     //output notification message if error occurs
