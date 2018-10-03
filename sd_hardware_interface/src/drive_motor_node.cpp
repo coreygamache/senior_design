@@ -1,12 +1,3 @@
-/** blink_leds.cpp
-  *
-  * this program is a way to test ROS to ROS communication
-  * publishes messages from ground station to robot
-  * robot receives messages, then blinks LEDs on arduino in accordance
-  * comm path: ground station ROS -> robot ROS -> arduino via serial
-  *
-**/
-
 #include <errno.h>
 #include <ros/ros.h>
 #include <sstream>
