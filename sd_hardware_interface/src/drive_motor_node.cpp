@@ -22,11 +22,12 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "drive_motor_node");
   ros::NodeHandle node_private("~");
 
-  ros::Rate loop_rate(1);
+  //set loop rate in Hz
+  ros::Rate loop_rate(50);
 
   int fd;
   int result;
-  int message = 5;
+  unsigned char data[2] = {0, 0};
 
   //initialize i2c protocol
   fd = wiringPiI2CSetup(0x04);
@@ -35,11 +36,35 @@ int main(int argc, char **argv)
   while (ros::ok())
   {
 
-    //notify of message to be sent
-    ROS_INFO("sending message: %d", message);
+    //update data values then check if they are above PWM limit
+    for (int i = 0; i < 2; i++)
+    {
 
-    //output message via i2c protocol
-    result = wiringPiI2CWrite(fd, message);
+       if (i == 0)
+       {
+       	 data[i]++;
+       }
+       else
+       {
+	 data[i]--;
+       }
+
+       if (data[i] > 255)
+       {
+	 data[i] = 0;
+       }
+       else if (data[i] < 0)
+       {
+         data[i] = 255;
+       }
+    }
+
+    //notify of message to be sent
+    ROS_INFO("sending message: %d %d", data[0], data[1]);
+
+    //output motor one PWM value  via i2c protocol
+    //result = wiringPiI2cWrite(fd, data);
+    result = write(fd, data, 2);
 
     //output notification message if error occurs
     if (result == -1)
