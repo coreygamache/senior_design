@@ -10,31 +10,31 @@
 #include "Arduino.h"
 
 //create Motor class
-class Motor
+abstract class Motor
 {
 
   //private properties
   private:
     float _gearRatio;   //ratio of motor shaft rotations to output shaft rotations
-    int _fwdPin;
     int _maxRPM;        //maximum output shaft RPM
-    int _revPin;
+    int _PWMPin;        //pin for outputting PWM signal
+    int _sleepPin;      //pin for outputting sleep signal
 
   public:
-    Motor(int fPin, int rPin, float gearRatio, int maxRPM);
+    virtual Motor();
     float getGearRatio();
-    int getFwdPin();
     int getMaxRPM();
-    int getRevPin();
-    void setFwdPin(int pin);
+    int getPWMPin();
+    int getSleepPin();
     void setGearRatio(float value);
     void setMaxRPM(int value);
-    void setRevPin(int pin);
-    void forward();
-    void forward(int pwmValue);
-    void reverse();
-    void reverse(int pwmValue);
-    void stop();
+    void setSleepPin(int pin);
+    void setPWMPin(int pin);
+    virtual void forward();
+    virtual void forward(int pwmValue);
+    virtual void reverse();
+    virtual void reverse(int pwmValue);
+    virtual void stop();
 
 };
 

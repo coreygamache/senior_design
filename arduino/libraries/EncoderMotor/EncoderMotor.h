@@ -17,8 +17,8 @@ class EncoderMotor
 
   //private properties
   private:
-    Encoder _encoder = Encoder(-1, -1, 0);
-    Motor _motor = Motor(-1, -1, 0, 0);
+    Encoder _encoder = Encoder();
+    Motor _motor = Motor();
 
   public:
 
