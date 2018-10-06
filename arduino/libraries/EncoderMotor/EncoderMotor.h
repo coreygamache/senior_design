@@ -8,33 +8,41 @@
 
 //includes
 #include "Arduino.h"
+#include "ComponentMotor.h"
+#include "DriveMotor.h"
 #include "Encoder.h"
-#include "Motor.h"
 
-//create EncoderMotor class
-class EncoderMotor
+//create EncoderMotor class inheriting Encoder class
+class EncoderMotor : public Encoder
 {
 
   //private properties
   private:
-    Encoder _encoder = Encoder();
-    Motor _motor = Motor();
+    bool _isDriveMotor;
+    ComponentMotor _componentMotor = ComponentMotor();
+    DriveMotor _driveMotor = DriveMotor();
 
   public:
 
+    //default constructor
+    EncoderMotor();
+
+    //component motor constructor
+    EncoderMotor(int inputA, int inputB, int pwm, int sleep, float gearRatio, int maxRPM, int channelA, int channelB, float countableEventsPerRev);
+    EncoderMotor(ComponentMotor cMotor, Encoder encoder);
+
+    //drive motor constructor
+    EncoderMotor(int dir, int pwm, int sleep, float gearRatio, int maxRPM, int channelA, int channelB, float countableEventsPerRev);
+    EncoderMotor(DriveMotor dMotor, Encoder encoder);
+
     //basic functions
-    EncoderMotor(int fPin, int rPin, float gearRatio, int maxRPM, int channelA, int channelB, int countableEventsPerRev);
+    ComponentMotor getComponentMotor();
+    DriveMotor getDriveMotor();
     Encoder getEncoder();
-    Motor getMotor();
     void setEncoder(Encoder encoder);
-    void setMotor(Motor motor);
-
-    //advanced functions
-
-    //encoder functions
-    void addChannelACount();
-    void addChannelBCount();
-    void preventOverflow();
+    void setIsDriveMotor(bool driveMotor);
+    void setMotor(ComponentMotor motor);
+    void setMotor(DriveMotor motor);
 
     //motor functions
     void forward();

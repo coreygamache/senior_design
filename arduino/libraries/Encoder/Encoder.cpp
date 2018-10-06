@@ -3,84 +3,106 @@
   associated .cpp file for the Encoder example class
 */
 
-#include "Arduino.h"
 #include "Encoder.h"
 
 //default constructor
-Encoder::Encoder(int channelA, int channelB, int countableEventsPerRev)
+Encoder::Encoder()
 {
 
   //initialize pins
-  setChannelAPin(channelA);
-  setChannelBPin(channelB);
-  pinMode(_channelAPin, INPUT);
-  pinMode(_channelBPin, INPUT);
+  this->setChannelAPin(-1);
+  this->setChannelBPin(-1);
 
-  //activate pull-up resistors
-  digitalWrite(_channelAPin, HIGH);
-  digitalWrite(_channelBPin, HIGH);
-
-  //initialize other variables
-  setCountableEventsPerRev(countableEventsPerRev);
+  //initalize other variables
+  this->setCountableEventsPerRev(0);
 
   //initialize counts
-  resetCounts();
+  this->resetCounts();
+
+}
+
+//overloaded constructor
+Encoder::Encoder(int channelA, int channelB, float countableEventsPerRev)
+{
+
+  //initialize pins
+  this->setChannelAPin(channelA);
+  this->setChannelBPin(channelB);
+
+  //set pin modes
+  pinMode(this->_channelAPin, INPUT);
+  pinMode(this->_channelBPin, INPUT);
+
+  //activate pull-up resistors
+  digitalWrite(this->_channelAPin, HIGH);
+  digitalWrite(this->_channelBPin, HIGH);
+
+  //initialize other variables
+  this->setCountableEventsPerRev(countableEventsPerRev);
+
+  //initialize counts
+  this->resetCounts();
 
   //initialize timer
-  _timer.restart();
+  this->_timer.restart();
 
 }
 
 //basic functions
+float Encoder::getCountableEventsPerRev()
+{
+  return this->_countableEventsPerRev;
+}
+
 int Encoder::getChannelAPin()
 {
-  return _channelAPin;
+  return this->_channelAPin;
 }
 
 int Encoder::getChannelBPin()
 {
-  return _channelBPin;
+  return this->_channelBPin;
 }
 
 long Encoder::getChannelACount()
 {
-  return _countChannelA;
+  return this->_countChannelA;
 }
 
 long Encoder::getChannelBCount()
 {
-  return _countChannelB;
+  return this->_countChannelB;
 }
 
 void Encoder::resetChannelACount()
 {
-  _countChannelA = 0L;
+  this->_countChannelA = 0L;
 }
 
 void Encoder::resetChannelBCount()
 {
-  _countChannelB = 0L;
+  this->_countChannelB = 0L;
 }
 
 void Encoder::resetCounts()
 {
-  resetChannelACount();
-  resetChannelBCount();
+  this->resetChannelACount();
+  this->resetChannelBCount();
 }
 
 void Encoder::setChannelAPin(int pin)
 {
-  _channelAPin = pin;
+  this->_channelAPin = pin;
 }
 
 void Encoder::setChannelBPin(int pin)
 {
-  _channelBPin = pin;
+  this->_channelBPin = pin;
 }
 
-void Encoder::setCountableEventsPerRev(int value)
+void Encoder::setCountableEventsPerRev(float value)
 {
-  _countableEventsPerRev = value;
+  this->_countableEventsPerRev = value;
 }
 
 //advanced functions
@@ -90,15 +112,15 @@ double Encoder::getRadPerSec()
 {
 
   //get elapsed time since last time restart, then restart timer
-  double secondsElapsed = _timer.elapsed() / 1000;
-  _timer.restart();
+  double secondsElapsed = this->_timer.elapsed() / 1000;
+  this->_timer.restart();
 
   //get channel A counts since last count restart, then restart counts
-  long counts = getChannelACount();
-  resetCounts();
+  long counts = this->getChannelACount();
+  this->resetCounts();
 
   //calculate and return motor speed in radians per second as double
-  double radians = (counts / _countableEventsPerRev) * 2 * PI;
+  double radians = (counts / this->_countableEventsPerRev) * 2 * PI;
   return double(radians / secondsElapsed);
 
 }
@@ -108,15 +130,15 @@ double Encoder::getRPM()
 {
 
     //get elapsed time since last time restart, then restart timer
-    double minutesElapsed = _timer.elapsed() / 60000;
-    _timer.restart();
+    double minutesElapsed = this->_timer.elapsed() / 60000;
+    this->_timer.restart();
 
     //get channel A counts since last count restart, then restart counts
-    long counts = getChannelACount();
-    resetCounts();
+    long counts = this->getChannelACount();
+    this->resetCounts();
 
     //calculate and return motor speed in radians per second as double
-    double revs = (counts / _countableEventsPerRev);
+    double revs = (counts / this->_countableEventsPerRev);
     return double(revs / minutesElapsed);
 
 }
@@ -124,18 +146,18 @@ double Encoder::getRPM()
 //increment encoder channel A count
 void Encoder::addChannelACount()
 {
-  _countChannelA++;
+  this->_countChannelA++;
 }
 
 //increment encoder channel B count
 void Encoder::addChannelBCount()
 {
-  _countChannelB++;
+  this->_countChannelB++;
 }
 
 //reset channel counts and timer to prevent overflow errors/crashes
 void Encoder::preventOverflow()
 {
-  resetCounts();
-  _timer.restart();
+  this->resetCounts();
+  this->_timer.restart();
 }

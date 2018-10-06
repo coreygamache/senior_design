@@ -4,106 +4,105 @@
 */
 
 //includes
-#include "Arduino.h"
 #include "ComponentMotor.h"
 
-//basic functions
+//default constructors
 
-//default constructorS
-
-Motor::Motor()
+ComponentMotor::ComponentMotor()
 {
-  setInputAPin(-1);
-  setInputBPin(-1);
-  setPWMPin(-1);
-  setSleepPin(-1);
-  setGearRatio(0);
-  setMaxRPM(0);
+  this->setInputAPin(-1);
+  this->setInputBPin(-1);
+  this->setPWMPin(-1);
+  this->setSleepPin(-1);
+  this->setGearRatio(0);
+  this->setMaxRPM(0);
 }
 
-Motor::Motor(int inputA, int inputB, int pwm, int sleep, float gearRatio, int maxRPM)
+ComponentMotor::ComponentMotor(int inputA, int inputB, int pwm, int sleep, float gearRatio, int maxRPM)
 {
 
   //initialize pins
-  setInputAPin(inputA);
-  setInputBPin(inputB);
-  setPWMPin(pwm);
-  setSleepPin(sleep);
+  this->setInputAPin(inputA);
+  this->setInputBPin(inputB);
+  this->setPWMPin(pwm);
+  this->setSleepPin(sleep);
 
   //set pin modes
-  pinMode(_inputAPin, OUTPUT);
-  pinMode(_inputBPin, OUTPUT);
-  pinMode(_PWMPin, OUTPUT);
-  pinMode(_sleepPin, OUTPUT);
+  pinMode(this->_inputAPin, OUTPUT);
+  pinMode(this->_inputBPin, OUTPUT);
+  pinMode(this->_PWMPin, OUTPUT);
+  pinMode(this->_sleepPin, OUTPUT);
 
   //initialize other variables
-  setGearRatio(gearRatio);
-  setMaxRPM(maxRPM);
+  this->setGearRatio(gearRatio);
+  this->setMaxRPM(maxRPM);
 
 }
 
+//basic functions
+
 //return forward pin
-int Motor::getInputAPin()
+int ComponentMotor::getInputAPin()
 {
-  return _inputAPin;
+  return this->_inputAPin;
 }
 
 //return reverse pin
-int Motor::getInputBPin()
+int ComponentMotor::getInputBPin()
 {
-  return _inputBPin;
+  return this->_inputBPin;
 }
 
 //set forward pin
-void Motor::setInputAPin(int pin)
+void ComponentMotor::setInputAPin(int pin)
 {
-  _inputAPin = pin;
+  this->_inputAPin = pin;
 }
 
 //set reverse pin
-void Motor::setInputBPin(int pin)
+void ComponentMotor::setInputBPin(int pin)
 {
-  _inputBPin = pin;
+  this->_inputBPin = pin;
 }
 
 //advanced functions
 
 //set motor to rotate forward at maximum speed indefinitely
-void Motor::forward()
+void ComponentMotor::forward()
 {
-  digitalWrite(_inputAPin, LOW);
-  digitalWrite(_inputBPin, HIGH);
-  digitalWrite(_PWMPin, HIGH);
+  digitalWrite(this->_inputAPin, LOW);
+  digitalWrite(this->_inputBPin, HIGH);
+  digitalWrite(this->_PWMPin, HIGH);
 }
 
 //overloaded forward() function: set motor to rotate forward at speed specified by PWM value
-void Motor::forward(int pwmValue)
+void ComponentMotor::forward(int pwmValue)
 {
-  digitalWrite(_inputAPin, LOW);
-  digitalWrite(_inputBPin, HIGH);
-  analogWrite(_PWMPin, pwmValue);
+  digitalWrite(this->_inputAPin, LOW);
+  digitalWrite(this->_inputBPin, HIGH);
+  analogWrite(this->_PWMPin, pwmValue);
 }
 
 //set motor to rotate in reverse at maximum speed indefinitely
-void Motor::reverse()
+void ComponentMotor::reverse()
 {
-  digitalWrite(_inputBPin, LOW);
-  digitalWrite(_inputAPin, HIGH);
-  digitalWrite(_PWMPin, HIGH);
+  digitalWrite(this->_inputBPin, LOW);
+  digitalWrite(this->_inputAPin, HIGH);
+  digitalWrite(this->_PWMPin, HIGH);
 }
 
 //overloaded reverse() function: set motor to rotate in reverse at speed specified by PWM value
-void Motor::reverse(int pwmValue)
+void ComponentMotor::reverse(int pwmValue)
 {
-  digitalWrite(_inputBPin, LOW);
-  digitalWrite(_inputAPin, HIGH);
-  analogWrite(_PWMPin, pwmValue);
+  digitalWrite(this->_inputBPin, LOW);
+  digitalWrite(this->_inputAPin, HIGH);
+  analogWrite(this->_PWMPin, pwmValue);
 }
 
 //stop the motor
-void Motor::stop()
+void ComponentMotor::stop()
 {
-  digitalWrite(_inputAPin, LOW);
-  digitalWrite(_inputBPin, LOW);
-  digitalWrite(_PWMPin, LOW);
+  digitalWrite(this->_inputAPin, LOW);
+  digitalWrite(this->_inputBPin, LOW);
+  digitalWrite(this->_PWMPin, LOW);
 }

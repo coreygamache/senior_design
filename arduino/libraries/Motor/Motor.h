@@ -10,11 +10,11 @@
 #include "Arduino.h"
 
 //create Motor class
-abstract class Motor
+class Motor
 {
 
-  //private properties
-  private:
+  //protected properties
+  protected:
     float _gearRatio;   //ratio of motor shaft rotations to output shaft rotations
     int _maxRPM;        //maximum output shaft RPM
     int _PWMPin;        //pin for outputting PWM signal

@@ -4,87 +4,84 @@
 */
 
 //includes
-#include "Arduino.h"
 #include "DriveMotor.h"
-
-//basic functions
 
 //default constructorS
 
-Motor::Motor()
+DriveMotor::DriveMotor()
 {
-  setDirectionPin(-1);
-  setPWMPin(-1);
-  setSleepPin(-1);
-  setGearRatio(0);
-  setMaxRPM(0);
+  this->setDirectionPin(-1);
+  this->setPWMPin(-1);
+  this->setSleepPin(-1);
+  this->setGearRatio(0);
+  this->setMaxRPM(0);
 }
 
-Motor::Motor(int dir, int pwm, int sleep, float gearRatio, int maxRPM)
+DriveMotor::DriveMotor(int dir, int pwm, int sleep, float gearRatio, int maxRPM)
 {
 
   //initialize pins
-  setDirectionPin(dir);
-  setPWMPin(pwm);
-  setSleepPin(sleep);
+  this->setDirectionPin(dir);
+  this->setPWMPin(pwm);
+  this->setSleepPin(sleep);
 
   //set pin modes
-  pinMode(_directionPin, OUTPUT);
-  pinMode(_PWMPin, OUTPUT);
-  pinMode(_sleepPin, OUTPUT);
+  pinMode(this->_directionPin, OUTPUT);
+  pinMode(this->_PWMPin, OUTPUT);
+  pinMode(this->_sleepPin, OUTPUT);
 
   //initialize other variables
-  setGearRatio(gearRatio);
-  setMaxRPM(maxRPM);
+  this->setGearRatio(gearRatio);
+  this->setMaxRPM(maxRPM);
 
 }
 
+//basic functions
+
 //return forward pin
-int Motor::getDirectionPin()
+int DriveMotor::getDirectionPin()
 {
-  return _directionPin;
+  return this->_directionPin;
 }
 
 //set forward pin
-void Motor::setDirectionPin(int pin)
+void DriveMotor::setDirectionPin(int pin)
 {
-  _directionPin = pin;
+  this->_directionPin = pin;
 }
 
 //advanced functions
 
 //set motor to rotate forward at maximum speed indefinitely
-void Motor::forward()
+void DriveMotor::forward()
 {
-  digitalWrite(_directionPin, LOW);
-  digitalWrite(_PWMPin, HIGH);
+  digitalWrite(this->_directionPin, LOW);
+  digitalWrite(this->_PWMPin, HIGH);
 }
 
 //overloaded forward() function: set motor to rotate forward at speed specified by PWM value
-void Motor::forward(int pwmValue)
+void DriveMotor::forward(int pwmValue)
 {
-  digitalWrite(_directionPin, LOW);
-  analogWrite(_PWMPin, pwmValue);
+  digitalWrite(this->_directionPin, LOW);
+  analogWrite(this->_PWMPin, pwmValue);
 }
 
 //set motor to rotate in reverse at maximum speed indefinitely
-void Motor::reverse()
+void DriveMotor::reverse()
 {
-  digitalWrite(_directionPin, HIGH);
-  digitalWrite(_PWMPin, HIGH);
+  digitalWrite(this->_directionPin, HIGH);
+  digitalWrite(this->_PWMPin, HIGH);
 }
 
 //overloaded reverse() function: set motor to rotate in reverse at speed specified by PWM value
-void Motor::reverse(int pwmValue)
+void DriveMotor::reverse(int pwmValue)
 {
-  digitalWrite(_inputAPin, HIGH);
-  analogWrite(_PWMPin, pwmValue);
+  digitalWrite(this->_directionPin, HIGH);
+  analogWrite(this->_PWMPin, pwmValue);
 }
 
 //stop the motor
-void Motor::stop()
+void DriveMotor::stop()
 {
-  digitalWrite(_inputAPin, LOW);
-  digitalWrite(_inputBPin, LOW);
-  digitalWrite(_PWMPin, LOW);
+  digitalWrite(this->_PWMPin, LOW);
 }

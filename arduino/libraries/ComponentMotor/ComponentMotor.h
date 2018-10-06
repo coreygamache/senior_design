@@ -10,8 +10,8 @@
 #include "Arduino.h"
 #include "Motor.h"
 
-//create ComponentMotor class
-class ComponentMotor
+//create ComponentMotor class inheriting motor class
+class ComponentMotor : public Motor
 {
 
   //private properties
@@ -21,12 +21,18 @@ class ComponentMotor
 
   //public properties
   public:
-    Motor();
-    Motor(int inputA, int inputB, int pwm, int sleep, float gearRatio, int maxRPM);
+
+    //constructors
+    ComponentMotor();
+    ComponentMotor(int inputA, int inputB, int pwm, int sleep, float gearRatio, int maxRPM);
+
+    //basic functions
     int getInputAPin();
     int getInputBPin();
     void setInputAPin(int pin);
     void setInputBPin(int pin);
+
+    //advanced functions
     void forward();
     void forward(int pwmValue);
     void reverse();

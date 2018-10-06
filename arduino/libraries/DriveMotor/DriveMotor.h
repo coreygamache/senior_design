@@ -10,20 +10,26 @@
 #include "Arduino.h"
 #include "Motor.h"
 
-//create DriveMotor class
-class DriveMotor
+//create DriveMotor class inheriting Motor class
+class DriveMotor : public Motor
 {
 
   //private properties
   private:
-    int _directionPin;        //when LOW current flows A to B and vice versa
+    int _directionPin;        //LOW for forward direction, HIGH for reverse direction
 
   //public properties
   public:
-    Motor();
-    Motor(int dir, int pwm, int sleep, float gearRatio, int maxRPM);
+
+    //constructors
+    DriveMotor();
+    DriveMotor(int dir, int pwm, int sleep, float gearRatio, int maxRPM);
+
+    //basic functions
     int getDirectionPin();
     void setDirectionPin(int pin);
+
+    //advanced functions
     void forward();
     void forward(int pwmValue);
     void reverse();

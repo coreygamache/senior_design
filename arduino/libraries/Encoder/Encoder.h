@@ -14,12 +14,12 @@
 class Encoder
 {
 
-  //private properties
-  private:
+  //protected properties
+  protected:
     Chrono _timer;                //counts elapsed time in ms
+    float _countableEventsPerRev;
     int _channelAPin;
     int _channelBPin;
-    int _countableEventsPerRev;
     long _countChannelA;
     long _countChannelB;
 
@@ -27,8 +27,12 @@ class Encoder
   //public properties
   public:
 
+    //constructors
+    Encoder();
+    Encoder(int channelA, int channelB, float countableEventsPerRev);
+
     //basic functions
-    Encoder(int channelA, int channelB, int countableEventsPerRev);
+    float getCountableEventsPerRev();
     int getChannelAPin();
     int getChannelBPin();
     long getChannelACount();
@@ -38,7 +42,7 @@ class Encoder
     void resetCounts();
     void setChannelAPin(int pin);
     void setChannelBPin(int pin);
-    void setCountableEventsPerRev(int value);
+    void setCountableEventsPerRev(float value);
 
     //advanced functions
     double getRadPerSec();
