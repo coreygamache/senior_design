@@ -4,10 +4,12 @@
 #include <Wire.h>
 
 //define pin constants
-const int motor1fwd = 5;
-const int motor1rev = 6;
-const int motor2fwd = 9;
-const int motor2rev = 10;
+const int motor1dir = 5;
+const int motor1pwm = 6;
+const int motor1sleep = 7
+const int motor2dir = 9;
+const int motor2pwm = 10;
+const int motor2sleep = 8;
 const int encoder1chanA = 2;
 const int encoder1chanB = 11;
 const int encoder2chanA = 3;
@@ -31,8 +33,8 @@ const int pidSampleTime = 200; //ms
 const int msPerCycle = 200; //ms
 
 //EncoderMotor objects int (fPin, int rPin, int maxRPM, int channelA, int channelB, int countableEventsPerRev)
-EncoderMotor motor1(motor1fwd, motor1rev, motor1gearRatio, motor1maxRPM, encoder1chanA, encoder1chanB, encoder1countsPerRev);
-EncoderMotor motor2(motor2fwd, motor2rev, motor2gearRatio, motor2maxRPM, encoder2chanA, encoder2chanB, encoder2countsPerRev);
+EncoderMotor motor1(motor1dir, motor1pwm, motor1sleep, motor1gearRatio, motor1maxRPM, encoder1chanA, encoder1chanB, encoder1countsPerRev);
+EncoderMotor motor2(motor2dir, motor2pwm, motor2sleep, motor2gearRatio, motor2maxRPM, encoder2chanA, encoder2chanB, encoder2countsPerRev);
 
 //PID variables
 double setPoint_motor1, input_motor1, output_motor1;

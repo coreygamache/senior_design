@@ -22,6 +22,7 @@ class EncoderMotor : public Encoder
     ComponentMotor _componentMotor = ComponentMotor();
     DriveMotor _driveMotor = DriveMotor();
 
+  //public properties
   public:
 
     //default constructor
