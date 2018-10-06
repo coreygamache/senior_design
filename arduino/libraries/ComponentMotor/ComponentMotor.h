@@ -37,7 +37,9 @@ class ComponentMotor : public Motor
     void forward(int pwmValue);
     void reverse();
     void reverse(int pwmValue);
+    void sleep();
     void stop();
+    void wakeUp();
 
 };
 

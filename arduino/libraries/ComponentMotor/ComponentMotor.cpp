@@ -33,6 +33,9 @@ ComponentMotor::ComponentMotor(int inputA, int inputB, int pwm, int sleep, float
   pinMode(this->_PWMPin, OUTPUT);
   pinMode(this->_sleepPin, OUTPUT);
 
+  //turn off sleep mode by default
+  digitalWrite(this->_sleepPin, HIGH);
+
   //initialize other variables
   this->setGearRatio(gearRatio);
   this->setMaxRPM(maxRPM);
@@ -99,10 +102,23 @@ void ComponentMotor::reverse(int pwmValue)
   analogWrite(this->_PWMPin, pwmValue);
 }
 
+//put motor controller into sleep mode
+void ComponentMotor::sleep()
+{
+  digitalWrite(this->_sleepPin, LOW);
+}
+
 //stop the motor
 void ComponentMotor::stop()
 {
   digitalWrite(this->_inputAPin, LOW);
   digitalWrite(this->_inputBPin, LOW);
   digitalWrite(this->_PWMPin, LOW);
+}
+
+
+//take motor controller out of sleep mode
+void ComponentMotor::wakeUp()
+{
+  digitalWrite(this->_sleepPin, LOW);
 }

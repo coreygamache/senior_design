@@ -30,6 +30,9 @@ DriveMotor::DriveMotor(int dir, int pwm, int sleep, float gearRatio, int maxRPM)
   pinMode(this->_PWMPin, OUTPUT);
   pinMode(this->_sleepPin, OUTPUT);
 
+  //turn off sleep mode by default
+  digitalWrite(this->_sleepPin, HIGH);
+
   //initialize other variables
   this->setGearRatio(gearRatio);
   this->setMaxRPM(maxRPM);
@@ -80,8 +83,20 @@ void DriveMotor::reverse(int pwmValue)
   analogWrite(this->_PWMPin, pwmValue);
 }
 
+//put motor controller into sleep mode
+void DriveMotor::sleep()
+{
+  digitalWrite(this->_sleepPin, LOW);
+}
+
 //stop the motor
 void DriveMotor::stop()
 {
   digitalWrite(this->_PWMPin, LOW);
+}
+
+//take motor controller out of sleep mode
+void DriveMotor::wakeUp()
+{
+  digitalWrite(this->_sleepPin, LOW);
 }
