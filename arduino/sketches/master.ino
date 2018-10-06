@@ -6,7 +6,7 @@
 //define pin constants
 const int motor1dir = 5;
 const int motor1pwm = 6;
-const int motor1sleep = 7
+const int motor1sleep = 7;
 const int motor2dir = 9;
 const int motor2pwm = 10;
 const int motor2sleep = 8;
@@ -84,8 +84,8 @@ void loop()
   PID_Motor2.Compute();
 
   //output new PID control output values to motors
-  motor1.forward(map(int(output_motor1), 0, motor1.getMotor().getMaxRPM(), 0, 255));
-  motor2.forward(map(int(output_motor2), 0, motor2.getMotor().getMaxRPM(), 0, 255));
+  motor1.forward(map(int(output_motor1), 0, motor1.getDriveMotor().getMaxRPM(), 0, 255));
+  motor2.forward(map(int(output_motor2), 0, motor2.getDriveMotor().getMaxRPM(), 0, 255));
 
   //output current iteration PID input values to serial
   Serial.print("Motor 1 Input: ");
@@ -133,9 +133,9 @@ void receiveData(int byteCount) {
 
       //get maximum RPM value of respective motor
       if (i == 0)
-        maxRPM = motor1.getMotor().getMaxRPM();
+        maxRPM = motor1.getDriveMotor().getMaxRPM();
       else
-        maxRPM = motor2.getMotor().getMaxRPM();
+        maxRPM = motor2.getDriveMotor().getMaxRPM();
 
       if (data >= 0 && data <= maxRPM)
         setPoint = data;
