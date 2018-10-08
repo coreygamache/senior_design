@@ -93,11 +93,13 @@ void Encoder::resetCounts()
 void Encoder::setChannelAPin(int pin)
 {
   this->_channelAPin = pin;
+  attachInterrupt(digitalPinToInterrupt(this->_channelAPin));
 }
 
 void Encoder::setChannelBPin(int pin)
 {
-  this->_channelBPin = pin;
+  //this->_channelBPin = pin;
+  //attachInterrupt(digitalPinToInterrupt(this->_channelBPin));
 }
 
 void Encoder::setCountableEventsPerRev(float value)
