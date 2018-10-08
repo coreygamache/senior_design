@@ -108,7 +108,7 @@ void Encoder::setCountableEventsPerRev(float value)
 //advanced functions
 
 //returns current motor speed in radians per second
-double Encoder::getRadPerSec()
+double Encoder::getMotorRadPerSec()
 {
 
   //get elapsed time since last time restart, then restart timer
@@ -126,7 +126,7 @@ double Encoder::getRadPerSec()
 }
 
 //returns current motor speed in revolutions per minute
-double Encoder::getRPM()
+double Encoder::getMotorRPM()
 {
 
     //get elapsed time since last time restart, then restart timer

@@ -45,8 +45,8 @@ class Encoder
     void setCountableEventsPerRev(float value);
 
     //advanced functions
-    double getRadPerSec();
-    double getRPM();
+    double getMotorRadPerSec();
+    double getMotorRPM();
     void addChannelACount();
     void addChannelBCount();
     void preventOverflow();

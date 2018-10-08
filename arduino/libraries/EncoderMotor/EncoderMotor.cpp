@@ -228,10 +228,10 @@ void EncoderMotor::stop()
 
 //return motor output shaft speed in radians per second
 //this value is calculated taking into account any reduction gearing
-double EncoderMotor::getRadPerSec(){
+double EncoderMotor::getOutputRadPerSec(){
 
   //get angular velocity read by encoder (bare motor output)
-  double radPerSec_motor = this->getRadPerSec();
+  double radPerSec_motor = this->getMotorRadPerSec();
 
   //get angular velocity of output shaft (post-gearbox output) for appropriate motor type
   double radPerSec_output;
@@ -246,11 +246,11 @@ double EncoderMotor::getRadPerSec(){
 
 //return motor output shaft speed in revolutions per minute
 //this value is calculated taking into account any reduction gearing
-double EncoderMotor::getRPM()
+double EncoderMotor::getOutputRPM()
 {
 
   //get angular velocity read by encoder (bare motor output)
-  double RPM_motor = this->getRPM();
+  double RPM_motor = this->getMotorRPM();
 
   //get angular velocity of output shaft (post-gearbox output) for appropriate motor type
   double RPM_output;;

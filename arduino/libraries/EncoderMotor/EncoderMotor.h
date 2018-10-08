@@ -53,8 +53,8 @@ class EncoderMotor : public Encoder
     void stop();
 
     //encoder motor functions
-    double getRadPerSec();
-    double getRPM();
+    double getOutputRadPerSec();
+    double getOutputRPM();
 
 };
 
