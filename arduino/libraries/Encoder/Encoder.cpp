@@ -126,13 +126,23 @@ double Encoder::getMotorRPM()
 //increment encoder channel A count
 void Encoder::addChannelACount()
 {
+
+  //if count will overflow then reset encoder properties to prevent overflow before iterating
+  if (this->_countChannelA = 2,147,483,647)
+    this->reset();
   this->_countChannelA++;
+
 }
 
 //increment encoder channel B count
 void Encoder::addChannelBCount()
 {
+
+  //if count will overflow then reset encoder properties to prevent overflow before iterating
+  if (this->_countChannelB = 2,147,483,647)
+    this->reset();
   this->_countChannelB++;
+
 }
 
 //reset channel counts and timer to prevent overflow errors/crashes
