@@ -101,9 +101,6 @@ double Encoder::getMotorRadPerSec()
   //get channel A counts since last count restart, then restart counts
   long counts = this->getChannelACount();
 
-  //reset counters and timers
-  this->reset();
-
   //calculate and return motor speed in radians per second as double
   double radians = (counts / this->_countableEventsPerRev) * 2 * PI;
   return double(radians / secondsElapsed);
@@ -119,9 +116,6 @@ double Encoder::getMotorRPM()
 
     //get channel A counts since last count restart, then restart counts
     long counts = this->getChannelACount();
-
-    //reset counters and timers
-    this->reset();
 
     //calculate and return motor speed in radians per second as double
     double revs = (counts / this->_countableEventsPerRev);
