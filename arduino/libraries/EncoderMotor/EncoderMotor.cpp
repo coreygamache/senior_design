@@ -49,9 +49,6 @@ EncoderMotor::EncoderMotor(int inputA, int inputB, int pwm, int sleep, float gea
   //initialize counts
   this->resetCounts();
 
-  //initialize timer
-  this->_timer.restart();
-
 }
 
 //component motor constructor via objects
@@ -79,9 +76,6 @@ EncoderMotor::EncoderMotor(ComponentMotor cMotor, Encoder encoder)
 
   //initialize counts
   this->resetCounts();
-
-  //initialize timer
-  this->_timer.restart();
 
 }
 
@@ -111,9 +105,6 @@ EncoderMotor::EncoderMotor(int dir, int pwm, int sleep, float gearRatio, int max
   //initialize counts
   this->resetCounts();
 
-  //initialize timer
-  this->_timer.restart();
-
 }
 
 //component motor constructor via objects
@@ -141,9 +132,6 @@ EncoderMotor::EncoderMotor(DriveMotor dMotor, Encoder encoder)
 
   //initialize counts
   this->resetCounts();
-
-  //initialize timer
-  this->_timer.restart();
 
 }
 
@@ -186,42 +174,72 @@ void EncoderMotor::setMotor(DriveMotor motor)
 
 void EncoderMotor::forward()
 {
+
+  //call forward() function of appropriate motor object
   if (this->_isDriveMotor)
     this->_driveMotor.forward();
   else
     this->_componentMotor.forward();
+
+  //reset encoder timer and counts
+  this->reset();
+
 }
 
 void EncoderMotor::forward(int pwmValue)
 {
+
+  //call forward(int) function of appropriate motor object
   if (this->_isDriveMotor)
     this->_driveMotor.forward(pwmValue);
   else
     this->_componentMotor.forward(pwmValue);
+
+  //reset encoder timer and counts
+  this->reset();
+
 }
 
 void EncoderMotor::reverse()
 {
+
+  //call reverse() function of appropriate motor object
   if (this->_isDriveMotor)
     this->_driveMotor.reverse();
   else
     this->_componentMotor.reverse();
+
+  //reset encoder timer and counts
+  this->reset();
+
 }
 
 void EncoderMotor::reverse(int pwmValue)
 {
+
+  //call reverse(int) function of appropriate motor object
   if (this->_isDriveMotor)
     this->_driveMotor.reverse(pwmValue);
   else
     this->_componentMotor.reverse(pwmValue);
+
+  //reset encoder timer and counts
+  this->reset();
+
 }
 
 void EncoderMotor::stop()
 {
+  //call stop() function of appropriate motor object
   if (this->_isDriveMotor)
     this->_driveMotor.stop();
   else
     this->_componentMotor.stop();
+
+  //reset encoder counts and stop timer
+  this->resetCounts();
+  this->_timer.stop();
+
 }
 
 //encoder motor functions
