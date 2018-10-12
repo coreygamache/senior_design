@@ -74,22 +74,6 @@ long Encoder::getChannelBCount()
   return this->_countChannelB;
 }
 
-void Encoder::resetChannelACount()
-{
-  this->_countChannelA = 0L;
-}
-
-void Encoder::resetChannelBCount()
-{
-  this->_countChannelB = 0L;
-}
-
-void Encoder::resetCounts()
-{
-  this->resetChannelACount();
-  this->resetChannelBCount();
-}
-
 void Encoder::setChannelAPin(int pin)
 {
   this->_channelAPin = pin;
@@ -113,11 +97,12 @@ double Encoder::getMotorRadPerSec()
 
   //get elapsed time since last time restart, then restart timer
   double secondsElapsed = this->_timer.elapsed() / 1000;
-  this->_timer.restart();
 
   //get channel A counts since last count restart, then restart counts
   long counts = this->getChannelACount();
-  this->resetCounts();
+
+  //reset counters and timers
+  this->reset();
 
   //calculate and return motor speed in radians per second as double
   double radians = (counts / this->_countableEventsPerRev) * 2 * PI;
@@ -131,11 +116,12 @@ double Encoder::getMotorRPM()
 
     //get elapsed time since last time restart, then restart timer
     double minutesElapsed = this->_timer.elapsed() / 60000;
-    this->_timer.restart();
 
     //get channel A counts since last count restart, then restart counts
     long counts = this->getChannelACount();
-    this->resetCounts();
+
+    //reset counters and timers
+    this->reset();
 
     //calculate and return motor speed in radians per second as double
     double revs = (counts / this->_countableEventsPerRev);
@@ -156,8 +142,24 @@ void Encoder::addChannelBCount()
 }
 
 //reset channel counts and timer to prevent overflow errors/crashes
-void Encoder::preventOverflow()
+void Encoder::reset()
 {
   this->resetCounts();
   this->_timer.restart();
+}
+
+void Encoder::resetChannelACount()
+{
+  this->_countChannelA = 0L;
+}
+
+void Encoder::resetChannelBCount()
+{
+  this->_countChannelB = 0L;
+}
+
+void Encoder::resetCounts()
+{
+  this->resetChannelACount();
+  this->resetChannelBCount();
 }

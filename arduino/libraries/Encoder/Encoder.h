@@ -37,9 +37,6 @@ class Encoder
     int getChannelBPin();
     long getChannelACount();
     long getChannelBCount();
-    void resetChannelACount();
-    void resetChannelBCount();
-    void resetCounts();
     void setChannelAPin(int pin);
     void setChannelBPin(int pin);
     void setCountableEventsPerRev(float value);
@@ -49,7 +46,10 @@ class Encoder
     double getMotorRPM();
     void addChannelACount();
     void addChannelBCount();
-    void preventOverflow();
+    void reset();
+    void resetChannelACount();
+    void resetChannelBCount();
+    void resetCounts();
 
 };
 
