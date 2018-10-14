@@ -21,7 +21,6 @@ class Motor
     int _sleepPin;      //pin for outputting sleep signal
 
   public:
-    virtual Motor();
     float getGearRatio();
     int getMaxRPM();
     int getPWMPin();

@@ -6,9 +6,6 @@
 //includes
 #include "Motor.h"
 
-//constructor
-Motor::Motor() {}
-
 //basic functions
 
 //return gear ratio
