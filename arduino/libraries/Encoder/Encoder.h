@@ -20,8 +20,8 @@ class Encoder
     float _countableEventsPerRev;
     int _channelAPin;
     int _channelBPin;
-    long _countChannelA;
-    long _countChannelB;
+    volatile long _countChannelA;
+    volatile long _countChannelB;
 
 
   //public properties
