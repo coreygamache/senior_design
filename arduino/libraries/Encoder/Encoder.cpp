@@ -128,7 +128,7 @@ void Encoder::addChannelACount()
 {
 
   //if count will overflow then reset encoder properties to prevent overflow before iterating
-  if (this->_countChannelA = 2,147,483,647)
+  if (this->_countChannelA == 2147483647)
     this->reset();
   this->_countChannelA++;
 
@@ -139,7 +139,7 @@ void Encoder::addChannelBCount()
 {
 
   //if count will overflow then reset encoder properties to prevent overflow before iterating
-  if (this->_countChannelB = 2,147,483,647)
+  if (this->_countChannelB == 2147483647)
     this->reset();
   this->_countChannelB++;
 
