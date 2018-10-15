@@ -43,9 +43,6 @@ Encoder::Encoder(int channelA, int channelB, float countableEventsPerRev)
   //initialize counts
   this->resetCounts();
 
-  //initialize timer
-  this->_timer.restart();
-
 }
 
 //basic functions
@@ -107,10 +104,10 @@ void Encoder::setCountableEventsPerRev(float value)
 double Encoder::getMotorRadPerSec()
 {
 
-  //get elapsed time since last time restart, then restart timer
+  //get elapsed time since last time restart
   double secondsElapsed = double(this->_timer.elapsed()) / 1000;
 
-  //get channel A counts since last count restart, then restart counts
+  //get channel A counts since last count restart
   long counts = this->getChannelACount();
 
   //calculate and return motor speed in radians per second as double
@@ -123,10 +120,10 @@ double Encoder::getMotorRadPerSec()
 double Encoder::getMotorRPM()
 {
 
-    //get elapsed time since last time restart, then restart timer
+    //get elapsed time since last time restart
     double secondsElapsed = double(this->_timer.elapsed()) / 1000;
 
-    //get channel A counts since last count restart, then restart counts
+    //get channel A counts since last count restart
     long counts = this->getChannelACount();
 
     //calculate and return motor speed in radians per second as double
