@@ -271,7 +271,7 @@ double EncoderMotor::getOutputRPM()
   double RPM_motor = this->getMotorRPM();
 
   //get angular velocity of output shaft (post-gearbox output) for appropriate motor type
-  double RPM_output;;
+  double RPM_output;
   if (this->_isDriveMotor)
     RPM_output = RPM_motor / double(this->_driveMotor.getGearRatio());
   else

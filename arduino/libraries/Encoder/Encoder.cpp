@@ -96,14 +96,14 @@ double Encoder::getMotorRadPerSec()
 {
 
   //get elapsed time since last time restart, then restart timer
-  double secondsElapsed = this->_timer.elapsed() / 1000;
+  double secondsElapsed = double(this->_timer.elapsed()) / 1000;
 
   //get channel A counts since last count restart, then restart counts
   long counts = this->getChannelACount();
 
   //calculate and return motor speed in radians per second as double
-  double radians = (counts / this->_countableEventsPerRev) * 2 * PI;
-  return double(radians / secondsElapsed);
+  double radians = (counts / this->getCountableEventsPerRev()) * 2 * PI;
+  return (radians / secondsElapsed);
 
 }
 
@@ -112,14 +112,14 @@ double Encoder::getMotorRPM()
 {
 
     //get elapsed time since last time restart, then restart timer
-    double minutesElapsed = this->_timer.elapsed() / 60000;
+    double secondsElapsed = double(this->_timer.elapsed()) / 1000;
 
     //get channel A counts since last count restart, then restart counts
     long counts = this->getChannelACount();
 
     //calculate and return motor speed in radians per second as double
-    double revs = (counts / this->_countableEventsPerRev);
-    return double(revs / minutesElapsed);
+    double revs = (counts / this->getCountableEventsPerRev());
+    return ((revs / secondsElapsed) * 60);
 
 }
 
