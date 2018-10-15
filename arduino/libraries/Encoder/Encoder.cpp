@@ -84,6 +84,18 @@ void Encoder::setChannelBPin(int pin)
   this->_channelBPin = pin;
 }
 
+void Encoder::setChannelACount(long count)
+{
+  if ((count >= 0) && (count < 2147483647))
+    this->_countChannelA = count;
+}
+
+void Encoder::setChannelBCount(long count)
+{
+  if ((count >= 0) && (count < 2147483647))
+    this->_countChannelB = count;
+}
+
 void Encoder::setCountableEventsPerRev(float value)
 {
   this->_countableEventsPerRev = value;

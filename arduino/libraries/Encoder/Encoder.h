@@ -39,6 +39,8 @@ class Encoder
     long getChannelBCount();
     void setChannelAPin(int pin);
     void setChannelBPin(int pin);
+    void setChannelACount(long count);
+    void setChannelBCount(long count);
     void setCountableEventsPerRev(float value);
 
     //advanced functions
