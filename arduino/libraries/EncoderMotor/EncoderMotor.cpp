@@ -236,9 +236,8 @@ void EncoderMotor::stop()
   else
     this->_componentMotor.stop();
 
-  //reset encoder counts and stop timer
-  this->resetCounts();
-  this->_timer.stop();
+  //reset encoder timer and counts
+  this->reset();
 
 }
 

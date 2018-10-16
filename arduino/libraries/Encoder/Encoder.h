@@ -8,7 +8,6 @@
 
 //includes
 #include "Arduino.h"
-#include "Chrono.h"
 
 //create Encoder class
 class Encoder
@@ -16,10 +15,10 @@ class Encoder
 
   //protected properties
   protected:
-    Chrono _timer;                //counts elapsed time in ms
     float _countableEventsPerRev;
     int _channelAPin;
     int _channelBPin;
+    unsigned long _lastStartTime;
     volatile long _countChannelA;
     volatile long _countChannelB;
 
@@ -37,6 +36,7 @@ class Encoder
     int getChannelBPin();
     long getChannelACount();
     long getChannelBCount();
+    unsigned long getElapsedTime();
     void setChannelAPin(int pin);
     void setChannelBPin(int pin);
     void setChannelACount(long count);
@@ -52,6 +52,7 @@ class Encoder
     void resetChannelACount();
     void resetChannelBCount();
     void resetCounts();
+    void resetTimer();
 
 };
 
