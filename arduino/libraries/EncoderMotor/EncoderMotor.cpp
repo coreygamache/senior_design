@@ -189,6 +189,12 @@ void EncoderMotor::forward()
 void EncoderMotor::forward(int pwmValue)
 {
 
+  //make sure PWM value is valid
+  if (pwmValue > 255)
+    pwmValue = 255;
+  else if (pwmValue < 0)
+    pwmValue = 0;
+
   //call forward(int) function of appropriate motor object
   if (this->_isDriveMotor)
     this->_driveMotor.forward(pwmValue);
@@ -216,6 +222,12 @@ void EncoderMotor::reverse()
 
 void EncoderMotor::reverse(int pwmValue)
 {
+
+  //make sure PWM value is valid
+  if (pwmValue > 255)
+    pwmValue = 255;
+  else if (pwmValue < 0)
+    pwmValue = 0;
 
   //call reverse(int) function of appropriate motor object
   if (this->_isDriveMotor)
