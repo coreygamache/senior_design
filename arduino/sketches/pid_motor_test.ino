@@ -1,16 +1,11 @@
 #include <EncoderMotor.h>
 #include <PID_v1.h>
 
-//define pin constants
-const int motor1inputA = 4;
-const int motor1inputB = 6;
-const int motor1pwm = 5;
-const int motor1sleep = 12;
-const float motor1gearRatio = 21.3;
+//define motor pins and constants
+const int encoder1chanA = 2, encoder1chanB = 7;
+const int motor1inputA = 4, motor1inputB = 6, motor1pwm = 5, motor1sleep = 12;
 const int motor1maxRPM = 201;
-const int encoder1chanA = 2;
-const int encoder1chanB = 7;
-const float encoder1countsPerRev = 64.0;
+const float encoder1countsPerRev = 64.0, motor1gearRatio = 21.3;
 
 //PID setting constants
 const double pidKP = 0.5; //proportional value; default 2; wiki: 0.5
@@ -24,7 +19,6 @@ const int displayStatusFrequency = 1000; //ms
 
 //PID variables and objects
 double setPoint_motor1, input_motor1, output_motor1;
-int lastPWMValue;
 PID PID_Motor1(&input_motor1, &output_motor1, &setPoint_motor1, pidKP, pidKI, pidKD, DIRECT);
 
 //motor objects
@@ -44,14 +38,14 @@ void setup() {
   Serial.begin(9600);
   Serial.println("starting program");
   Serial.println("");
-  
+
   //attach interrupt function to handle encoder input events
   attachInterrupt(digitalPinToInterrupt(encoder1chanA), motor1inputAevent, CHANGE);
 
   setPoint_motor1 = 100.0;
   cEncMotor.forward(cMotorRPMtoPWM(setPoint_motor1));
   //input_motor1 = cEncMotor.getOutputRPM();
-  
+
   //enable PID and adjust settings
   PID_Motor1.SetMode(AUTOMATIC);
   PID_Motor1.SetSampleTime(pidSampleTime);
@@ -65,32 +59,32 @@ void loop() {
   //set current iteration PID input value and calculate new output value
   input_motor1 = cEncMotor.getOutputRPM();
   bool newOutput = PID_Motor1.Compute();
-  
+
   //increment display counter and display information if required
   displayStatusCount++;
   if ((displayStatusCount * msPerCycle) >= displayStatusFrequency) {
-    
+
     /* DISPLAY PID CONTROLLER TESTING DATA */
     Serial.print("output rpm: ");
     Serial.println(cEncMotor.getOutputRPM());
-    
+
     /*Serial.print("motor rpm: ");
     Serial.println(cEncMotor.getMotorRPM());
-    
+
     Serial.print("gear ratio: ");
     Serial.println(cEncMotor.getComponentMotor().getGearRatio());
-    
+
     unsigned long elapsedTime = cEncMotor.getElapsedTime();
     Serial.print("motor elapsed time: ");
     Serial.println(elapsedTime);
-    
+
     elapsedTime = millis();
     Serial.print("test elapsed time: ");
     Serial.println(elapsedTime);
     */
     Serial.print("PID input (rpm): ");
     Serial.println(input_motor1);
-  
+
     Serial.print("PID output (rpm): ");
     Serial.println(output_motor1);
 
@@ -102,7 +96,7 @@ void loop() {
 
     Serial.println("");
     /* END DISPLAY PID CONTROLLER TESTING DATA */
-   
+
   }
 
   //output new PID control output values to motors
@@ -124,4 +118,3 @@ int cMotorRPMtoPWM(double RPM) {
     pwmValue = 255;
   return pwmValue;
 }
-
