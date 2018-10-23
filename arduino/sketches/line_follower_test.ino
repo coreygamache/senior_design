@@ -6,34 +6,35 @@
 const int qtrCalibrationTime = 200;
 const unsigned char qtrEmitterPin = 255;
 const unsigned char qtrNumSamplesPerSensor = 4;
-const unsigned char qtrNumSensors = 6;
+const unsigned char qtrNumSensors = 5; //6;
 
 //other pin definitions
-const int buttonPin = 14;
-
-//QTR line sensor object and variables
-const int qtrCenterPosition = ((qtrNumSensors - 1) * 1000) / 2;
-unsigned int qtrSensorValues[qtrNumSensors] = {0};
-QTRDimmableAnalog qtrSensors((unsigned char[]) {0, 1, 2, 3, 4, 5}, qtrNumSensors, qtrNumSamplesPerSensor, qtrEmitterPin);
+const int buttonPin = 12;
 
 //PID setting constants
-const double lineFollow_pidKP = 0.5; //proportional value; default 2; wiki: 0.5
-const double lineFollow_pidKI = 1.0; //integral value; default 5
-const double lineFollow_pidKD = 0.02; //derivative value; default 1
+const double lineFollow_pidKP = 0.005; //proportional value; default 2; wiki: 0.5
+const double lineFollow_pidKI = 0.01; //integral value; default 5
+const double lineFollow_pidKD = 0.005; //derivative value; default 1
 const int lineFollow_pidSampleTime = 200; //ms
+
+//QTR line sensor object and variables
+const int qtrCenterPosition = 2000; //((qtrNumSensors - 1) * 1000) / 2;
+unsigned int qtrSensorValues[qtrNumSensors] = {0};
+QTRDimmableAnalog qtrSensors((unsigned char[]) {0, 1, 2, 3, 4}, qtrNumSensors, qtrNumSamplesPerSensor, qtrEmitterPin); //one analog pin removed for testing
+
+//motor objects and variables
+const double baseMotorSpeed = 75;
+const double maxMotorSpeed = 130;
+//int inputA, int inputB, int pwm, int sleep, float gearRatio, int maxRPM, int channelA, int channelB, float countableEventsPerRev
+EncoderMotor motor_right(4, 6, 5, 255, 250.0, maxMotorSpeed, 2, 255, 12.0);
+EncoderMotor motor_left(7, 8, 9, 255, 250.0, maxMotorSpeed, 3, 255, 12.0);
 
 //PID variables and objects
 double input_lineFollow, output_lineFollow, setPoint_lineFollow = qtrCenterPosition;
 PID PID_lineFollow(&input_lineFollow, &output_lineFollow, &setPoint_lineFollow, lineFollow_pidKP, lineFollow_pidKI, lineFollow_pidKD, DIRECT);
 
-//motor variables and objects
-const int baseMotorSpeed = 100;
-//int dir, int pwm, int sleep, float gearRatio, int maxRPM, int channelA, int channelB, float countableEventsPerRev
-EncoderMotor leftEncMotor(255, 255, 255, 1.0, 1, 255, 255, 1.0); //drive motor constructor
-EncoderMotor rightEncMotor(255, 255, 255, 1.0, 1, 255, 255, 1.0); //drive motor constructor
-
-
 //other variables
+int displayCounter = 0;
 bool lineFollowComplete = false;
 
 void setup() {
@@ -41,9 +42,11 @@ void setup() {
   //set pin modes
   pinMode(buttonPin, INPUT);
 
-  //initialize PID control
+  //initialize PID control and set initial set point
   PID_lineFollow.SetMode(AUTOMATIC);
   PID_lineFollow.SetSampleTime(lineFollow_pidSampleTime);
+  PID_lineFollow.SetOutputLimits(-1 * maxMotorSpeed, maxMotorSpeed);
+  setPoint_lineFollow = 0;
 
   //initialize serial communication and notify of calibration start
   Serial.flush();
@@ -53,20 +56,24 @@ void setup() {
 
   //wait for user button input before proceeding with calibration
   while (!digitalRead(buttonPin)) {}
+  Serial.print("calibrating reflectance sensors");
 
   for (int i = 0; i < qtrCalibrationTime; i++) {
     //-->incrementally rotate robot by some amount
     qtrSensors.calibrate();
+    Serial.print(".");
   }
 
   //-->return robot to 'forward' facing position
 
   //notify of calibration completion and line following start
+  Serial.println();
   Serial.println("calibration complete");
   Serial.println("press button to begin line following");
 
   //wait for user button input before proceeding with line following
   while (!digitalRead(buttonPin)) {}
+  Serial.println("starting line following program");
 
 }
 
@@ -83,6 +90,8 @@ void loop() {
       //-->output message to raspberry pi
     }
 
+    //delay(50);
+
   }
 
   //if line follow is complete then wait indefinitely
@@ -97,31 +106,66 @@ void loop() {
 bool lineFollow() {
 
   //get current position of line relative to robot
-  input_lineFollow = qtrSensors.readLine(qtrSensorValues);
+  input_lineFollow = qtrSensors.readLine(qtrSensorValues) - qtrCenterPosition;
 
   //if all sensors see black then finish line has been reached; return true
-  if ((qtrSensorValues[0] > 750) && (qtrSensorValues[1] > 750) && (qtrSensorValues[2] > 750) && (qtrSensorValues[3] > 750) && (qtrSensorValues[4] > 750) && (qtrSensorValues[5] > 750)) {
+  /*if ((qtrSensorValues[0] > 750) && (qtrSensorValues[1] > 750) && (qtrSensorValues[2] > 750) && (qtrSensorValues[3] > 750) && (qtrSensorValues[4] > 750) && (qtrSensorValues[5] > 750)) {
 
     //stop drive motors
-    leftEncMotor.stop();
-    rightEncMotor.stop()
+    motor_right.stop();
+    motor_left.stop();
 
     //-->return robot to 'forward' facing position if necessary
 
     //return true to indicate line following is complete
     return true;
-  }
+  }*/
 
   //update PID controller
   bool newOutput = PID_lineFollow.Compute();
 
   //motor output signals have changed; write to motors
   if (newOutput) {
-    int speedModifier = output_lineFollow - qtrCenterPosition;
 
+    //calculate new speeds from error: difference in PID output and center position
+    double rightMotorSpeed = baseMotorSpeed + output_lineFollow;
+    double leftMotorSpeed = baseMotorSpeed - output_lineFollow;
 
+    //verify new right motor speed is valid and output to motor
+    if (rightMotorSpeed > motor_right.getComponentMotor().getMaxRPM())
+      motor_right.forward();
+    else if (rightMotorSpeed < 0)
+      motor_right.stop();
+    else
+      motor_right.forward(rightMotorSpeed);
 
-    //ensure value is valid
+    //verify new left motor speed is valid and output to motor
+    if (leftMotorSpeed > motor_left.getComponentMotor().getMaxRPM())
+      motor_left.forward();
+    else if (leftMotorSpeed < 0)
+      motor_left.stop();
+    else
+      motor_left.forward(leftMotorSpeed);
+
+    if (displayCounter = 49) {
+      Serial.print("PID input: ");
+      Serial.println(input_lineFollow);
+      Serial.print("PID output: ");
+      Serial.println(output_lineFollow);
+      Serial.print("motor speeds (left, right): ");
+      Serial.print(leftMotorSpeed);
+      Serial.print(", ");
+      Serial.println(rightMotorSpeed);
+      Serial.println();
+      displayCounter = 0;
+    }
+    else {
+      displayCounter++;
+    }
+
   }
+
+  //return false to indicate line following is not yet complete
+  return false;
 
 }
