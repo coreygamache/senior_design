@@ -12,10 +12,10 @@ const unsigned char qtrNumSensors = 5; //6;
 const int buttonPin = 12;
 
 //PID setting constants
-const double lineFollow_pidKP = 0.005; //proportional value; default 2; wiki: 0.5
-const double lineFollow_pidKI = 0.01; //integral value; default 5
-const double lineFollow_pidKD = 0.005; //derivative value; default 1
-const int lineFollow_pidSampleTime = 200; //ms
+const double lineFollow_pidKP = 0.025; //proportional value; default 2; wiki: 0.5
+const double lineFollow_pidKI = 0.000; //integral value; default 5
+const double lineFollow_pidKD = 0.025; //derivative value; default 1
+const int lineFollow_pidSampleTime = 100; //ms
 
 //QTR line sensor object and variables
 const int qtrCenterPosition = 2000; //((qtrNumSensors - 1) * 1000) / 2;
@@ -23,8 +23,9 @@ unsigned int qtrSensorValues[qtrNumSensors] = {0};
 QTRDimmableAnalog qtrSensors((unsigned char[]) {0, 1, 2, 3, 4}, qtrNumSensors, qtrNumSamplesPerSensor, qtrEmitterPin); //one analog pin removed for testing
 
 //motor objects and variables
-const double baseMotorSpeed = 75;
-const double maxMotorSpeed = 130;
+const int baseMotorSpeed = 150;
+const int maxMotorSpeed = 255;
+const int speedLowerLimit = 0;
 //int inputA, int inputB, int pwm, int sleep, float gearRatio, int maxRPM, int channelA, int channelB, float countableEventsPerRev
 EncoderMotor motor_right(4, 6, 5, 255, 250.0, maxMotorSpeed, 2, 255, 12.0);
 EncoderMotor motor_left(7, 8, 9, 255, 250.0, maxMotorSpeed, 3, 255, 12.0);
@@ -45,8 +46,8 @@ void setup() {
   //initialize PID control and set initial set point
   PID_lineFollow.SetMode(AUTOMATIC);
   PID_lineFollow.SetSampleTime(lineFollow_pidSampleTime);
-  PID_lineFollow.SetOutputLimits(-1 * maxMotorSpeed, maxMotorSpeed);
-  setPoint_lineFollow = 0;
+  PID_lineFollow.SetOutputLimits(-255, 255);
+  setPoint_lineFollow = -1000;
 
   //initialize serial communication and notify of calibration start
   Serial.flush();
@@ -128,22 +129,22 @@ bool lineFollow() {
   if (newOutput) {
 
     //calculate new speeds from error: difference in PID output and center position
-    double rightMotorSpeed = baseMotorSpeed + output_lineFollow;
-    double leftMotorSpeed = baseMotorSpeed - output_lineFollow;
+    int rightMotorSpeed = baseMotorSpeed + output_lineFollow;
+    int leftMotorSpeed = baseMotorSpeed - output_lineFollow;
 
     //verify new right motor speed is valid and output to motor
-    if (rightMotorSpeed > motor_right.getComponentMotor().getMaxRPM())
+    if (rightMotorSpeed > 255)
       motor_right.forward();
-    else if (rightMotorSpeed < 0)
-      motor_right.stop();
+    else if (rightMotorSpeed < speedLowerLimit)
+      motor_right.forward(speedLowerLimit);
     else
       motor_right.forward(rightMotorSpeed);
 
     //verify new left motor speed is valid and output to motor
-    if (leftMotorSpeed > motor_left.getComponentMotor().getMaxRPM())
+    if (leftMotorSpeed > 255)
       motor_left.forward();
-    else if (leftMotorSpeed < 0)
-      motor_left.stop();
+    else if (leftMotorSpeed < speedLowerLimit)
+      motor_left.forward(speedLowerLimit);
     else
       motor_left.forward(leftMotorSpeed);
 
