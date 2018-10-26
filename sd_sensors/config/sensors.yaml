@@ -1,0 +1,11 @@
+# sensor parameters
+# all refresh rates are given in hertz
+
+# ball sensor parameters
+ball_sensor:
+  output_pin: 4 # (using wiringPi numbering scheme)
+  refresh_rate: 10.0
+
+ball_count_sensor:
+  output_pin: 5 # (using wiringPi numbering scheme)
+  refresh_rate: 10.0
