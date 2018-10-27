@@ -4,27 +4,27 @@
 #include <wiringPi.h>
 
 //default constructor
-BallSensor(int output)
+BallSensor::BallSensor(int output)
 {
 
   //run wiringPi setup function
   wiringPiSetup();
 
   //set output pin
-  setOutputPin(echo);
+  setOutputPin(output);
 
 }
 
 //basic functions
 
 //return output pin
-int getOutputPin()
+int BallSensor::getOutputPin()
 {
   return this->_outputPin;
 }
 
 //set output pin to given value
-void setOutputPin(int output)
+void BallSensor::setOutputPin(int output)
 {
   this->_outputPin = output;
 }
@@ -32,7 +32,7 @@ void setOutputPin(int output)
 //advanced functions
 
 //returns true if a ball is detected, and false otherwise
-bool ballDetected()
+bool BallSensor::ballDetected()
 {
 
   //if sensor output is high then ball is detected, else return false

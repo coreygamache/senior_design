@@ -54,13 +54,13 @@ int main(int argc, char **argv)
   {
 
     //set time of current distance reading
-    ball.header.stamp = ros::Time::now();
+    ball_msg.header.stamp = ros::Time::now();
 
     //get distance to nearest object from proximity sensor with 25ms timeout
-    ball.ball_detected = sensor.ballDetected();
+    ball_msg.ball_detected = sensor.ballDetected();
 
     //publish proximity sensor range message
-    ball_sensor_pub.publish(proximity_msg);
+    ball_sensor_pub.publish(ball_msg);
 
     //spin once because ROS
     ros::spinOnce();

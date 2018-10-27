@@ -48,6 +48,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## Generate messages in the 'msg' folder
 add_message_files(
+  DIRECTORY msg
 	FILES
 	Ball.msg
  )
@@ -70,7 +71,6 @@ add_message_files(
 generate_messages(
 	DEPENDENCIES
 	std_msgs
-	Ball.msg
 )
 
 ################################################
@@ -116,7 +116,7 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+  include/sd_sensors
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -152,4 +152,4 @@ add_executable(ball_sensor_node src/ball_sensor_node.cpp)
 #   ${catkin_LIBRARIES}
 # )
 target_link_libraries(ball_sensor ${catkin_LIBRARIES} wiringPi)
-target_link_libraries(ball_sensor_node ${catkin_LIBRARIES ball_sensor})
+target_link_libraries(ball_sensor_node ${catkin_LIBRARIES} ball_sensor)
