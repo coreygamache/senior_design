@@ -100,6 +100,7 @@ add_library(ball_sensor src/ball_sensor.cpp)
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/sd_sensors_node.cpp)
 add_executable(ball_sensor_node src/ball_sensor_node.cpp)
+add_executable(balls_collected_sensor_node src/balls_collected_sensor_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -117,3 +118,4 @@ add_executable(ball_sensor_node src/ball_sensor_node.cpp)
 # )
 target_link_libraries(ball_sensor ${catkin_LIBRARIES} wiringPi)
 target_link_libraries(ball_sensor_node ${catkin_LIBRARIES} ball_sensor)
+target_link_libraries(balls_collected_sensor_node ${catkin_LIBRARIES} ball_sensor)
