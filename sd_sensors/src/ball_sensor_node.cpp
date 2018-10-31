@@ -14,7 +14,7 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "ball_sensor_node");
   ros::NodeHandle node_private("~");
 
-  //get echo pin from parameters
+  //get output pin from parameter server
   int output_pin;
   if (!node_private.getParam("ball_sensor/output_pin", output_pin))
   {
@@ -22,24 +22,21 @@ int main(int argc, char **argv)
     ROS_BREAK();
   }
 
-  //create Sensor type object using defined echo and trigger pin parameters
+  //create BallSensor type object using defined outpin pin from parameter server
   BallSensor sensor(output_pin);
 
-  //create sensor_msgs/Range type message to publish proximity sensor data
+  //create sd_msgs/Ball type message to publish ball (proximity) sensor data
   sd_msgs::Ball ball_msg;
 
-  //static message values for HC-SR04 ultrasonic range sensor
-  //----------------------------------------------------------
-
-  //set sensor frame id
+  //set ball sensor frame id
   ball_msg.header.frame_id = "ball_sensor_link";
 
   //----------------------------------------------------------
 
-  //create publisher to publish proximity sensor message with buffer size 10, and latch set to false
+  //create publisher to publish ball sensor message with buffer size 10, and latch set to false
   ros::Publisher ball_sensor_pub = node_private.advertise<sd_msgs::Ball>("ball_sensor", 10, false);
 
-  //get refresh rate of sensor in hertz
+  //get refresh rate of sensor in hertz from parameter server
   float refresh_rate;
   if (!node_private.getParam("ball_sensor/refresh_rate", refresh_rate))
   {
@@ -47,19 +44,19 @@ int main(int argc, char **argv)
     ROS_BREAK();
   }
 
-  //set refresh rate of ROS loop to defined refresh rate of sensor parameter
+  //set refresh rate of ROS loop to defined refresh rate from parameter server
   ros::Rate loop_rate(refresh_rate);
 
   while (ros::ok())
   {
 
-    //set time of current distance reading
+    //set time of current ball sensor reading
     ball_msg.header.stamp = ros::Time::now();
 
-    //get distance to nearest object from proximity sensor with 25ms timeout
+    //check whether a ball is currently detected by sensor and set message data
     ball_msg.ball_detected = sensor.ballDetected();
 
-    //publish proximity sensor range message
+    //publish ball sensor message
     ball_sensor_pub.publish(ball_msg);
 
     //spin once because ROS
