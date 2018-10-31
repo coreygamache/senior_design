@@ -1,7 +1,7 @@
 //ball (infrared) sensor feedback node
 #include <ball_sensor.hpp>
 #include <ros/ros.h>
-#include <sd_sensors/Ball.h>
+#include <sd_msgs/Ball.h>
 
 
 int main(int argc, char **argv)
@@ -26,7 +26,7 @@ int main(int argc, char **argv)
   BallSensor sensor(output_pin);
 
   //create sensor_msgs/Range type message to publish proximity sensor data
-  sd_sensors::Ball ball_msg;
+  sd_msgs::Ball ball_msg;
 
   //static message values for HC-SR04 ultrasonic range sensor
   //----------------------------------------------------------
@@ -37,7 +37,7 @@ int main(int argc, char **argv)
   //----------------------------------------------------------
 
   //create publisher to publish proximity sensor message with buffer size 10, and latch set to false
-  ros::Publisher ball_sensor_pub = node_private.advertise<sd_sensors::Ball>("ball_sensor", 10, false);
+  ros::Publisher ball_sensor_pub = node_private.advertise<sd_msgs::Ball>("ball_sensor", 10, false);
 
   //get refresh rate of sensor in hertz
   float refresh_rate;

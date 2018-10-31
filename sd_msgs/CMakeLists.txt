@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(sd_sensors)
+project(sd_msgs)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -10,7 +10,7 @@ project(sd_sensors)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
-	sd_msgs
+  message_generation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -27,10 +27,12 @@ find_package(catkin REQUIRED COMPONENTS
 ################################################
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#  DIRECTORY msg
-#	 FILES
-# )
+add_message_files(
+ DIRECTORY msg
+ FILES
+ Ball.msg
+#   Message2.msg
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -47,10 +49,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-# 	DEPENDENCIES
-# 	std_msgs
-# )
+generate_messages(
+ DEPENDENCIES
+ std_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -67,9 +69,9 @@ find_package(catkin REQUIRED COMPONENTS
 ###################################
 
 catkin_package(
-	INCLUDE_DIRS include
-	LIBRARIES ball_sensor
-	CATKIN_DEPENDS roscpp std_msgs message_runtime sd_msgs
+# INCLUDE_DIRS include
+# LIBRARIES sd_msgs
+ CATKIN_DEPENDS roscpp std_msgs message_runtime
 #  DEPENDS system_lib
 )
 
@@ -80,15 +82,14 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-  include/sd_sensors
+  include/sd_msgs
   ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/sd_sensors.cpp
+#   src/${PROJECT_NAME}/sd_msgs.cpp
 # )
-add_library(ball_sensor src/ball_sensor.cpp)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -98,8 +99,7 @@ add_library(ball_sensor src/ball_sensor.cpp)
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/sd_sensors_node.cpp)
-add_executable(ball_sensor_node src/ball_sensor_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/sd_msgs_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -115,5 +115,51 @@ add_executable(ball_sensor_node src/ball_sensor_node.cpp)
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
-target_link_libraries(ball_sensor ${catkin_LIBRARIES} wiringPi)
-target_link_libraries(ball_sensor_node ${catkin_LIBRARIES} ball_sensor)
+
+#############
+## Install ##
+#############
+
+# all install targets should use catkin DESTINATION variables
+# See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
+
+## Mark executable scripts (Python etc.) for installation
+## in contrast to setup.py, you can choose the destination
+# install(PROGRAMS
+#   scripts/my_python_script
+#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+# )
+
+## Mark executables and/or libraries for installation
+# install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_node
+#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+# )
+
+## Mark cpp header files for installation
+# install(DIRECTORY include/${PROJECT_NAME}/
+#   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+#   FILES_MATCHING PATTERN "*.h"
+#   PATTERN ".svn" EXCLUDE
+# )
+
+## Mark other files for installation (e.g. launch and bag files, etc.)
+# install(FILES
+#   # myfile1
+#   # myfile2
+#   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+# )
+
+#############
+## Testing ##
+#############
+
+## Add gtest based cpp test target and link libraries
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_sd_msgs.cpp)
+# if(TARGET ${PROJECT_NAME}-test)
+#   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
+# endif()
+
+## Add folders to be run by python nosetests
+# catkin_add_nosetests(test)
