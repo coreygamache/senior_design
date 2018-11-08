@@ -1,0 +1,2 @@
+arduino:
+  i2c_address: 0x04 # i2c protocol address

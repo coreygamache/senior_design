@@ -1,9 +1,6 @@
 # sensor parameters
 # all refresh rates are given in hertz
 
-arduino:
-  i2c_address: 0x04 # i2c protocol address
-
 # ball sensor parameters
 ball_sensor:
   output_pin: 4 # (using wiringPi numbering scheme)
