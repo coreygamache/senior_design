@@ -32,6 +32,7 @@ add_message_files(
   FILES
   Ball.msg
   BallsCollected.msg
+  Control.msg
   DriveMotors.msg
   LineFollowing.msg
 )
