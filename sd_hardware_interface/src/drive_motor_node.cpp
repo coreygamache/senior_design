@@ -6,7 +6,7 @@
 //global variables
 unsigned char pwmValues[2] = {0, 0}; //variable for holding motor pwm output values, {left PWM value, right PWM value}
 
-//callback function called to process messages on motor_(num) topic
+//callback function called to process messages on drive_motors topic
 void driveMotorsCallback(const sd_msgs::DriveMotors::ConstPtr& msg)
 {
 
