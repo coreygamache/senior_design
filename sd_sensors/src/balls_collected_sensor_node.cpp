@@ -14,11 +14,19 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "balls_collected_sensor_node");
   ros::NodeHandle node_private("~");
 
-  //get ball sensor output pin from parameter server
+  //retrieve ball sensor output pin from parameter server
   int output_pin;
-  if (!node_private.getParam("balls_collected_sensor/output_pin", output_pin))
+  if (!node_private.getParam("/sensor/balls_collected_sensor/output_pin", output_pin))
   {
     ROS_ERROR("balls collected sensor output pin not defined in config file: sd_sensors/config/sensors.yaml");
+    ROS_BREAK();
+  }
+
+  //retrieve refresh rate of ball sensor in hertz from parameter server
+  float refresh_rate;
+  if (!node_private.getParam("/sensor/balls_collected_sensor/refresh_rate", refresh_rate))
+  {
+    ROS_ERROR("balls collected sensor refresh rate not defined in config file: sd_sensors/config/sensors.yaml");
     ROS_BREAK();
   }
 
@@ -31,18 +39,8 @@ int main(int argc, char **argv)
   //set message frame id to 0 to indicate there is no frame
   balls_collected_msg.header.frame_id = "0";
 
-  //----------------------------------------------------------
-
   //create publisher to publish number of balls collected message with buffer size 10, and latch set to false
   ros::Publisher balls_collected_sensor_pub = node_private.advertise<sd_msgs::BallsCollected>("balls_collected", 10, false);
-
-  //get refresh rate of ball sensor in hertz from parameter server
-  float refresh_rate;
-  if (!node_private.getParam("balls_collected_sensor/refresh_rate", refresh_rate))
-  {
-    ROS_ERROR("balls collected sensor refresh rate not defined in config file: sd_sensors/config/sensors.yaml");
-    ROS_BREAK();
-  }
 
   //set refresh rate of ROS loop to defined refresh rate of sensor parameter from parameter server
   ros::Rate loop_rate(refresh_rate);
@@ -75,7 +73,7 @@ int main(int argc, char **argv)
     //set last_reading variable to match current reading
     last_reading = ball_detected;
 
-    //spin once because ROS
+    //process callback function calls
     ros::spinOnce();
 
     //sleep until next sensor reading
