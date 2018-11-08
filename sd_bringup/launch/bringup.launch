@@ -2,16 +2,26 @@
 
 <!-- set arguments -->
 <arg name="hardware_enabled" value="false" />
+<arg name="navigation_enabled" value="true" />
 <arg name="sensors_enabled" value="false" />
 
-<!-- if sensors are enabled then include sensor launch file  -->
+<!-- load global parameters to parameter server -->
+<rosparam command="load" file="$(find sd_bringup)/config/global.yaml" ns="/" />
+
+<!-- if sensors are enabled then include sensor launch file -->
 <group if="$(arg hardware_enabled)">
   <include file="$(find sd_bringup)/launch/hardware_interface.launch" />
 </group>
 
-<!-- if sensors are enabled then include sensor launch file  -->
+<!-- if sensors are enabled then include sensor launch file -->
 <group if="$(arg sensors_enabled)">
   <include file="$(find sd_bringup)/launch/sensors.launch" />
+</group>
+
+<!-- if navigation is enabled then load navigation parameters to parameter server and launch navigation node -->
+<group if="$(arg navigation_enabled)">
+  <rosparam command="load" file="$(find sd_navigation)/config/navigation.yaml" ns="navigation" />
+  <node name="line_follower_node" pkg="sd_navigation" type="line_follower_node" ns="navigation" output="screen" />
 </group>
 
 </launch>
