@@ -1,0 +1,26 @@
+<launch>
+
+  <!-- set arguments -->
+  <arg name="sensors_ball_enable" value="true" />
+  <arg name="sensors_ball_count_enable" value="true" />
+  <arg name="sensors_line_enable" value="false" />
+
+  <!-- load sensor parameters to parameter server -->
+  <rosparam command="load" file="$(find sd_sensors)/config/sensors.yaml" ns="sensor" />
+
+
+  <group if="$(arg sensors_ball_enable)">
+    <node name="ball_sensor_node" pkg="sd_sensors" type="ball_sensor_node" ns="sensor" output="screen" />
+  </group>
+
+  <!-- if IMU is enabled, launch IMU publisher node and broadcast transform -->
+  <group if="$(arg sensors_ball_count_enable)">
+    <node name="balls_collected_sensor_node" pkg="sd_sensors" type="balls_collected_sensor_node" ns="sensor" output="screen" />
+  </group>
+
+  <!-- if proximity sensor is enabled, launch proximity sensor publisher node and broadcast transform -->
+  <group if="$(arg sensors_line_enable)">
+    <node name="line_sensor_node" pkg="sd_sensors" type="line_sensor_node" ns="sensor" output="screen" />
+  </group>
+
+</launch>

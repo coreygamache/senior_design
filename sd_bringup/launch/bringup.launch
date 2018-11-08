@@ -1,0 +1,17 @@
+<launch>
+
+<!-- set arguments -->
+<arg name="hardware_enabled" value="false" />
+<arg name="sensors_enabled" value="false" />
+
+<!-- if sensors are enabled then include sensor launch file  -->
+<group if="$(arg hardware_enabled)">
+  <include file="$(find sd_bringup)/launch/hardware_interface.launch" />
+</group>
+
+<!-- if sensors are enabled then include sensor launch file  -->
+<group if="$(arg sensors_enabled)">
+  <include file="$(find sd_bringup)/launch/sensors.launch" />
+</group>
+
+</launch>
