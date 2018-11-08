@@ -1,0 +1,11 @@
+conveyor:
+  refresh_rate: 10
+
+firing_wheel:
+  refresh_rate: 10
+
+gate_solenoid:
+  refresh_rate: 10
+
+roller:
+  refresh_rate: 10
