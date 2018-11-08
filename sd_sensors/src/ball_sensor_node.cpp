@@ -57,7 +57,7 @@ int main(int argc, char **argv)
     //publish ball sensor message
     ball_sensor_pub.publish(ball_msg);
 
-    //spin once because ROS
+    //process callback function calls
     ros::spinOnce();
 
     //sleep until next sensor reading
