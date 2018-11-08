@@ -1,6 +1,9 @@
 conveyor:
   refresh_rate: 10
 
+drive_motor:
+  refresh_rate: 10
+
 firing_wheel:
   refresh_rate: 10
 
