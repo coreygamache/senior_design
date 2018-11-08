@@ -33,6 +33,7 @@ add_message_files(
   Ball.msg
   BallsCollected.msg
   DriveMotors.msg
+  LineFollowing.msg
 )
 
 ## Generate services in the 'srv' folder
