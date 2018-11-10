@@ -7,7 +7,25 @@
 
 #include <errno.h>
 #include <ros/ros.h>
+#include <sd_msgs/Control.h>
+#include <sd_msgs/LineFollowing.h>
 #include <wiringPiI2C.h>
+
+//global variables
+bool line_following = false;
+bool line_following_completed = false;
+
+//callback function called to process messages on motor_(num) topic
+void controlCallback(const sd_msgs::Control::ConstPtr& msg)
+{
+
+  //if autonomous_control is enabled then change status of line_following to true, otherwise set to false
+  if (msg->autonomous_control)
+    line_following = true;
+  else
+    line_following = false;
+
+}
 
 int main(int argc, char **argv)
 {
@@ -23,7 +41,7 @@ int main(int argc, char **argv)
   int i2c_address;
   if (!node_private.getParam("/arduino/i2c_address", i2c_address))
   {
-    ROS_ERROR("arduino i2c address not defined in config file: sd_hardware_interface/config/hardware_interface.yaml");
+    ROS_ERROR("arduino i2c address not defined in config file: sd_bringup/config/global.yaml");
     ROS_BREAK();
   }
 
@@ -31,12 +49,12 @@ int main(int argc, char **argv)
   float refresh_rate;
   if (!node_private.getParam("/navigation/line_follower_node/refresh_rate", refresh_rate))
   {
-    ROS_ERROR("line sensor refresh rate not defined in config file: sd_hardware_interface/config/hardware_interface.yaml");
+    ROS_ERROR("line follower node refresh rate not defined in config file: sd_navigation/config/navigation.yaml");
     ROS_BREAK();
   }
 
   //initialize i2c protocol and verify connection
-  int fd = wiringPiI2CSetup(0x04);
+  int fd = wiringPiI2CSetup(i2c_address);
   int result; //variable for holding i2c read/write result
 
   //output notification message and error if one occurs
@@ -44,6 +62,18 @@ int main(int argc, char **argv)
     ROS_INFO("error establishing i2c connection: %d", errno);
   else
     ROS_INFO("i2c connection result: %d", fd);
+
+  //create line following message object and set default parameters
+  sd_msgs::LineFollowing line_following_msg;
+  line_following_msg.header.frame_id = "0";
+  line_following_msg.line_following = line_following;
+  line_following_msg.completed = line_following_completed;
+
+  //create publisher to publish line following message status with buffer size 10, and latch set to false
+  ros::Publisher line_following_pub = node_private.advertise<sd_msgs::LineFollowing>("line_following", 10, false);
+
+  //create sunscriber to subscribe to control messages message topic with queue size set to 1000
+  ros::Subscriber control_sub = node_private.subscribe("control", 1000, controlCallback);
 
   //set loop rate in Hz
   ros::Rate loop_rate(refresh_rate);
@@ -58,18 +88,37 @@ int main(int argc, char **argv)
   while (ros::ok())
   {
 
-    //read current status from arduino to check whether line following is finished
-    result = wiringPiI2CRead(fd);
+    //set time of current iteration
+    line_following_msg.header.stamp = ros::Time::now();
 
-    //output notification message if error occurs
-    if (result == -1)
+    //set line following field of message to current line following status
+    line_following_msg.line_following = line_following;
+
+    //perform the following if line following is enabled and not yet complete (line_following must be set to true by a control message)
+    if (line_following && !line_following_completed)
     {
-      ROS_INFO("error reading from arduino via i2c:: %d", errno);
+
+      //read current status from arduino to check whether line following is finished
+      result = wiringPiI2CRead(fd);
+
+      //check whether line following is finished and output notification message if error occurs
+      if (result == -1)
+      {
+        ROS_INFO("error reading from arduino via i2c:: %d", errno);
+      }
+      else if (result == 1)
+      {
+
+        //indicate line following is complete and change status of message field
+        line_following_completed = true;
+        line_following_msg.completed = true;
+
+      }
+
     }
-    else if (result == 1)
-    {
-      //indicate line following is complete
-    }
+
+    //publish following following status message
+    line_following_pub.publish(line_following_msg);
 
     //process callback function calls
     ros::spinOnce();
