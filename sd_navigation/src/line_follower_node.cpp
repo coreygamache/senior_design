@@ -14,16 +14,41 @@
 //global variables
 bool line_following = false;
 bool line_following_completed = false;
+int fd;
 
 //callback function called to process messages on motor_(num) topic
 void controlCallback(const sd_msgs::Control::ConstPtr& msg)
 {
 
-  //if autonomous_control is enabled then change status of line_following to true, otherwise set to false
-  if (msg->autonomous_control)
+  //handle message differently depending on current line following status and message request
+  if (!line_following && msg->autonomous_control)
+  {
+
+    //line following was disabled, now enable it
     line_following = true;
-  else
+
+    //send message of "1" to arduino to indicate line following should be started
+    int result = wiringPiI2CWrite(fd, 1);
+
+    //output notification message and error if one occurs
+    if (result == -1)
+      ROS_INFO("error writing to arduino via i2c: %d", errno);
+
+  }
+  else if (line_following && !msg->autonomous_control)
+  {
+
+    //line following was enabled, now disable it
     line_following = false;
+
+    //send message of "0" to arduino to indicate line following should be stopped
+    int result = wiringPiI2CWrite(fd, 0);
+
+    //output notification message and error if one occurs
+    if (result == -1)
+      ROS_INFO("error writing to arduino via i2c: %d", errno);
+
+  }
 
 }
 
@@ -54,7 +79,7 @@ int main(int argc, char **argv)
   }
 
   //initialize i2c protocol and verify connection
-  int fd = wiringPiI2CSetup(i2c_address);
+  fd = wiringPiI2CSetup(i2c_address);
   int result; //variable for holding i2c read/write result
 
   //output notification message and error if one occurs
@@ -77,13 +102,6 @@ int main(int argc, char **argv)
 
   //set loop rate in Hz
   ros::Rate loop_rate(refresh_rate);
-
-  //send message of "1" to arduino to indicate line following should be started
-  result = wiringPiI2CWrite(fd, 1);
-
-  //output notification message and error if one occurs
-  if (result == -1)
-    ROS_INFO("error writing to arduino via i2c: %d", errno);
 
   while (ros::ok())
   {
@@ -117,7 +135,7 @@ int main(int argc, char **argv)
 
     }
 
-    //publish following following status message
+    //publish line following status message
     line_following_pub.publish(line_following_msg);
 
     //process callback function calls
