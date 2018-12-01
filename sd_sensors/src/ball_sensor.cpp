@@ -1,7 +1,6 @@
 //includes
 #include <ball_sensor.hpp>
 //#include <ros/ros.h>
-#include <wiringPi.h>
 
 //default constructor
 BallSensor::BallSensor(int output)
