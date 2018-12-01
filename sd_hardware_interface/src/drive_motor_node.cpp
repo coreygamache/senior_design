@@ -38,7 +38,7 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "drive_motor_node");
   ros::NodeHandle node_private("~");
 
-  //retrieve arduino i2c address from parameter server
+  //retrieve arduino i2c address from parameter server (global parameters)
   int i2c_address;
   if (!node_private.getParam("/arduino/i2c_address", i2c_address))
   {
@@ -50,7 +50,7 @@ int main(int argc, char **argv)
   float refresh_rate;
   if (!node_private.getParam("/hardware/drive_motor/refresh_rate", refresh_rate))
   {
-    ROS_ERROR("line sensor refresh rate not defined in config file: sd_hardware_interface/config/hardware_interface.yaml");
+    ROS_ERROR("drive motor node refresh rate not defined in config file: sd_hardware_interface/config/hardware_interface.yaml");
     ROS_BREAK();
   }
 
