@@ -9,7 +9,6 @@ project(sd_hardware_interface)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
-  std_msgs
   sd_msgs
 )
 
@@ -85,7 +84,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES sd_hardware_interface
-  CATKIN_DEPENDS roscpp std_msgs message_runtime sd_msgs
+  CATKIN_DEPENDS roscpp sd_msgs
 #  DEPENDS system_lib
 )
 
@@ -125,6 +124,7 @@ add_executable(drive_motor_node src/drive_motor_node.cpp)
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(drive_motor_node ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node
