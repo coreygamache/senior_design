@@ -1,8 +1,8 @@
 <launch>
 
 <!-- set arguments -->
-<arg name="hardware_enabled" value="false" />
-<arg name="navigation_enabled" value="true" />
+<arg name="hardware_enabled" value="true" />
+<arg name="navigation_enabled" value="false" />
 <arg name="sensors_enabled" value="false" />
 
 <!-- load global parameters to parameter server -->
