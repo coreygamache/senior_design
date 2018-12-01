@@ -2,6 +2,7 @@
 
   <!-- set arguments -->
   <arg name="hardware_conveyor_enable" value="false" />
+  <arg name="hardware_drive_motor_enable" value="true" />
   <arg name="hardware_firing_wheel_enable" value="false" />
   <arg name="hardware_gate_solenoid_enable" value="false" />
   <arg name="hardware_roller_enable" value="false" />
@@ -9,22 +10,27 @@
   <!-- load hardware interface parameters to parameter server -->
   <rosparam command="load" file="$(find sd_hardware_interface)/config/hardware_interface.yaml" ns="hardware" />
 
-  <!-- if ESC is enabled, launch ESC interface node -->
+  <!-- if conveyor is enabled, launch ESC interface node -->
   <group if="$(arg hardware_conveyor_enable)">
     <node name="conveyor_motor_node" pkg="sd_hardware_interface" type="conveyor_motor_node" ns="hardware" output="screen" />
   </group>
 
-  <!-- if servo is enabled, launch servo interface node -->
+  <!-- if drive motors are enabled, launch ESC interface node -->
+  <group if="$(arg hardware_conveyor_enable)">
+    <node name="drive_motor_node" pkg="sd_hardware_interface" type="drive_motor_node" ns="hardware" output="screen" />
+  </group>
+
+  <!-- if firing wheel is enabled, launch servo interface node -->
   <group if="$(arg hardware_firing_wheel_enable)">
     <node name="firing_wheel_motor_node" pkg="sd_hardware_interface" type="firing_wheel_motor_node" ns="hardware" output="screen" />
   </group>
 
-  <!-- if servo is enabled, launch servo interface node -->
+  <!-- if solenoid gate is enabled, launch servo interface node -->
   <group if="$(arg hardware_gate_solenoid_enable)">
     <node name="gate_solenoid_node" pkg="sd_hardware_interface" type="gate_solenoid_node" ns="hardware" output="screen" />
   </group>
 
-  <!-- if servo is enabled, launch servo interface node -->
+  <!-- if roller is enabled, launch servo interface node -->
   <group if="$(arg hardware_roller_enable)">
     <node name="roller_motor_node" pkg="sd_hardware_interface" type="roller_motor_node" ns="hardware" output="screen" />
   </group>
