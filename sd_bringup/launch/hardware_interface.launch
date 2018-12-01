@@ -16,7 +16,7 @@
   </group>
 
   <!-- if drive motors are enabled, launch ESC interface node -->
-  <group if="$(arg hardware_conveyor_enable)">
+  <group if="$(arg hardware_drive_motor_enable)">
     <node name="drive_motor_node" pkg="sd_hardware_interface" type="drive_motor_node" ns="hardware" output="screen" />
   </group>
 
