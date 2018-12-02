@@ -2,7 +2,7 @@
 
   <!-- set arguments -->
   <arg name="sensors_ball_enable" value="true" />
-  <arg name="sensors_ball_count_enable" value="true" />
+  <arg name="sensors_ball_count_enable" value="false" />
   <arg name="sensors_line_enable" value="false" />
 
   <!-- load sensor parameters to parameter server -->
