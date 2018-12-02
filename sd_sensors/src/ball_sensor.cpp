@@ -36,8 +36,8 @@ bool BallSensor::ballDetected()
 
   //if sensor output is high then ball is detected, else return false
   if (digitalRead(this->_outputPin))
-    return true;
-  else
     return false;
+  else
+    return true;
 
 }
