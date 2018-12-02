@@ -1,8 +1,8 @@
 <launch>
 
   <!-- set arguments -->
-  <arg name="sensors_ball_enable" value="true" />
-  <arg name="sensors_ball_count_enable" value="false" />
+  <arg name="sensors_ball_enable" value="false" />
+  <arg name="sensors_balls_collected_enable" value="true" />
   <arg name="sensors_line_enable" value="false" />
 
   <!-- load sensor parameters to parameter server -->
@@ -14,7 +14,7 @@
   </group>
 
   <!-- if IMU is enabled, launch IMU publisher node and broadcast transform -->
-  <group if="$(arg sensors_ball_count_enable)">
+  <group if="$(arg sensors_balls_collected_enable)">
     <node name="balls_collected_sensor_node" pkg="sd_sensors" type="balls_collected_sensor_node" ns="sensor" output="screen" />
   </group>
 
