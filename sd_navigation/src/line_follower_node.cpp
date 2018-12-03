@@ -16,7 +16,7 @@ bool line_following = false; //current line following status
 bool line_following_completed = false; //line following completion status
 int fd; //i2c protocol communication address
 
-//callback function called to process messages on motor_(num) topic
+//callback function called to process messages on control topic
 void controlCallback(const sd_msgs::Control::ConstPtr& msg)
 {
 
