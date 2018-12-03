@@ -9,7 +9,7 @@ bool enable = false;
 unsigned int dirValue = 0; //motor direction value (0 = reverse, 1 = forward)
 unsigned int pwmValue = 0; //motor pwm output value
 
-//callback function called to process messages on drive_motors topic
+//callback function called to process messages on conveyor_motor topic
 void conveyorMotorCallback(const sd_msgs::ComponentMotor::ConstPtr& msg)
 {
 
