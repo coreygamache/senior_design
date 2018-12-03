@@ -45,7 +45,7 @@ void conveyorMotorCallback(const sd_msgs::ComponentMotor::ConstPtr& msg)
 
   }
 
-  //verify left motor PWM value is within PWM limits
+  //verify motor PWM value is within PWM limits
   if (msg->pwm > 255)
     pwmValue = 255;
   else if (msg->pwm < 0)
