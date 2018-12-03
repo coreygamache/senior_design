@@ -105,7 +105,7 @@ int main(int argc, char **argv)
     ROS_BREAK();
   }
 
-  //create sunscriber to subscribe to drive motor messages message topic with queue size set to 1000
+  //create subscriber to subscribe to conveyor motor messages message topic with queue size set to 1000
   ros::Subscriber conveyor_motor_sub = node_private.subscribe("conveyor_motor", 1000, conveyorMotorCallback);
 
   //set loop rate in Hz
