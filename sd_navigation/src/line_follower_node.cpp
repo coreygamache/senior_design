@@ -12,41 +12,43 @@
 #include <wiringPiI2C.h>
 
 //global variables
-bool line_following = false;
-bool line_following_completed = false;
-int fd;
+bool line_following = false; //current line following status
+bool line_following_completed = false; //line following completion status
+int fd; //i2c protocol communication address
 
 //callback function called to process messages on motor_(num) topic
 void controlCallback(const sd_msgs::Control::ConstPtr& msg)
 {
 
   //handle message differently depending on current line following status and message request
+  //line following was disabled, now enable it
   if (!line_following && msg->autonomous_control)
   {
-
-    //line following was disabled, now enable it
-    line_following = true;
 
     //send message of "1" to arduino to indicate line following should be started
     int result = wiringPiI2CWrite(fd, 1);
 
     //output notification message and error if one occurs
+    //otherwise message was sent; set line following to true
     if (result == -1)
       ROS_INFO("error writing to arduino via i2c: %d", errno);
+    else
+      line_following = true;
 
   }
+  //line following was enabled, now disable it
   else if (line_following && !msg->autonomous_control)
   {
-
-    //line following was enabled, now disable it
-    line_following = false;
 
     //send message of "0" to arduino to indicate line following should be stopped
     int result = wiringPiI2CWrite(fd, 0);
 
     //output notification message and error if one occurs
+    //otherwise message was sent; set line following to false
     if (result == -1)
       ROS_INFO("error writing to arduino via i2c: %d", errno);
+    else
+      line_following = false;
 
   }
 
