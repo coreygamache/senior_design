@@ -113,6 +113,7 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/sd_hardware_interface_node.cpp)
+add_executable(conveyor_motor_node src/drive_motor_node.cpp)
 add_executable(drive_motor_node src/drive_motor_node.cpp)
 
 ## Rename C++ executable without prefix
@@ -124,10 +125,12 @@ add_executable(drive_motor_node src/drive_motor_node.cpp)
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(conveyor_motor_node ${catkin_EXPORTED_TARGETS})
 add_dependencies(drive_motor_node ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
+target_link_libraries(conveyor_motor_node ${catkin_LIBRARIES} wiringPi)
 target_link_libraries(drive_motor_node ${catkin_LIBRARIES} wiringPi)
