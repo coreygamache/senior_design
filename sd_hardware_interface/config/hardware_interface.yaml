@@ -1,14 +1,24 @@
 conveyor:
+  dir_a_pin: 28
+  dir_b_pin: 29
+  pwm_pin: 24
   refresh_rate: 10
+  standby_pin: 27
 
 drive_motor:
   refresh_rate: 10
 
 firing_wheel:
+  output_pin: 25
   refresh_rate: 10
 
 gate_solenoid:
+  output_pin: 26
   refresh_rate: 10
 
 roller:
+  dir_a_pin: 4
+  dir_b_pin: 5
+  pwm_pin: 23
   refresh_rate: 10
+  standby_pin: 27
