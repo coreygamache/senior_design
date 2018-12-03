@@ -115,6 +115,7 @@ include_directories(
 # add_executable(${PROJECT_NAME}_node src/sd_hardware_interface_node.cpp)
 add_executable(conveyor_motor_node src/drive_motor_node.cpp)
 add_executable(drive_motor_node src/drive_motor_node.cpp)
+add_executable(roller_motor_node src/drive_motor_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -127,6 +128,7 @@ add_executable(drive_motor_node src/drive_motor_node.cpp)
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(conveyor_motor_node ${catkin_EXPORTED_TARGETS})
 add_dependencies(drive_motor_node ${catkin_EXPORTED_TARGETS})
+add_dependencies(roller_motor_node ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node
@@ -134,3 +136,4 @@ add_dependencies(drive_motor_node ${catkin_EXPORTED_TARGETS})
 # )
 target_link_libraries(conveyor_motor_node ${catkin_LIBRARIES} wiringPi)
 target_link_libraries(drive_motor_node ${catkin_LIBRARIES} wiringPi)
+target_link_libraries(roller_motor_node ${catkin_LIBRARIES} wiringPi)
