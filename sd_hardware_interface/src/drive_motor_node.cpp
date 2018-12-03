@@ -1,14 +1,61 @@
 #include <errno.h>
 #include <ros/ros.h>
+#include <sd_msgs/Control.h>
 #include <sd_msgs/DriveMotors.h>
 #include <wiringPiI2C.h>
 
 //global variables
-unsigned char pwmValues[2] = {0, 0}; //variable for holding motor pwm output values, {left PWM value, right PWM value}
+bool autonomous_control = false;
+unsigned char dirValues[2] = {1, 1}; //motor direction values (0 = forward, 1 = reverse), {left direction, right direction}
+unsigned char pwmValues[2] = {0, 0}; //motor pwm output values, {left PWM value, right PWM value}
+
+//callback function called to process messages on motor_(num) topic
+void controlCallback(const sd_msgs::Control::ConstPtr& msg)
+{
+
+  //if autonomous control is different than received value, set to received value
+  if (autonomous_control != msg->autonomous_control)
+  {
+
+    //set value to received value
+    autonomous_control = msg->autonomous_control;
+
+    //if autonomous control was just enabled then reset direction and pwm values for safety
+    if (autonomous_control)
+    {
+      dirValues[0] = 0;
+      dirValues[1] = 0;
+      pwmValues[0] = 0;
+      pwmValues[1] = 0;
+    }
+
+  }
+
+}
 
 //callback function called to process messages on drive_motors topic
 void driveMotorsCallback(const sd_msgs::DriveMotors::ConstPtr& msg)
 {
+
+  //check left motor direction and change if necessary
+  if (dirValues[0] != msg->left_motor_dir)
+  {
+
+    //if requested left motor direction is a valid value, change direction
+    if ((msg->left_motor_dir == 0) || (msg->left_motor_dir == 1))
+      dirValues[0] = msg->left_motor_dir;
+
+  }
+
+  //check right motor direction and change if necessary
+  if (dirValues[1] != msg->right_motor_dir)
+  {
+
+    //if requested right motor direction is a valid value, change direction
+    if ((msg->right_motor_dir == 0) || (msg->right_motor_dir == 1))
+      dirValues[0] = msg->right_motor_dir;
+
+  }
 
   //verify left motor PWM value is within PWM limits
   if (msg->left_motor_pwm > 255)
@@ -64,8 +111,14 @@ int main(int argc, char **argv)
   else
     ROS_INFO("i2c connection result: %d", fd);
 
+  //create sunscriber to subscribe to control messages message topic with queue size set to 1000
+  ros::Subscriber control_sub = node_private.subscribe("control", 1000, controlCallback);
+
   //create sunscriber to subscribe to drive motor messages message topic with queue size set to 1000
   ros::Subscriber drive_motor_sub = node_private.subscribe("drive_motors", 1000, driveMotorsCallback);
+
+  //create variable for storing output values to send to Arduino
+//  unsigned char outputValues[4] = { 0 };
 
   //set loop rate in Hz
   ros::Rate loop_rate(refresh_rate);
@@ -73,12 +126,21 @@ int main(int argc, char **argv)
   while (ros::ok())
   {
 
-    //output motor PWM values to arduino via i2c protocol
-    result = write(fd, pwmValues, 2);
+    //if autonomous control is disabled then output drive motor manual control values
+    if (!autonomous_control)
+    {
 
-    //output notification message if error occurs
-    if (result == -1)
-      ROS_INFO("error writing to arduino via i2c: %d", errno);
+      //set output values to current direction and pwm values
+      unsigned char outputValues[4] = { dirValues[0], pwmValues[0], dirValues[1], pwmValues[1] };
+
+      //output motor PWM values to arduino via i2c protocol
+      result = write(fd, outputValues, 4);
+
+      //output notification message if error occurs
+      if (result == -1)
+        ROS_INFO("error writing to arduino via i2c: %d", errno);
+
+    }
 
     //process callback function calls
     ros::spinOnce();
