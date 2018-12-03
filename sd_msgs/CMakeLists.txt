@@ -36,6 +36,7 @@ add_message_files(
   DriveMotors.msg
   LineFollowing.msg
   LineSensor.msg
+  Mosfet.msg
 )
 
 ## Generate services in the 'srv' folder
