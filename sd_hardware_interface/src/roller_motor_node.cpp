@@ -18,7 +18,7 @@ void rollerMotorCallback(const sd_msgs::ComponentMotor::ConstPtr& msg)
     enable = msg->enable;
 
   //check motor direction and change if necessary
-  if (dirValues != msg->direction)
+  if (dirValue != msg->direction)
   {
 
     //if requested motor direction is a valid value, change direction
@@ -26,7 +26,7 @@ void rollerMotorCallback(const sd_msgs::ComponentMotor::ConstPtr& msg)
     {
 
       //set local direction value to match receive value
-      dirValues = msg->direction;
+      dirValue = msg->direction;
 
       //change pin output values to achieve requested direction
       if (dirValue == 0)
@@ -47,11 +47,11 @@ void rollerMotorCallback(const sd_msgs::ComponentMotor::ConstPtr& msg)
 
   //verify left motor PWM value is within PWM limits
   if (msg->pwm > 255)
-    pwmValues = 255;
+    pwmValue = 255;
   else if (msg->pwm < 0)
-    pwmValues = 0;
+    pwmValue = 0;
   else
-    pwmValues = msg->pwm;
+    pwmValue = msg->pwm;
 
 }
 
