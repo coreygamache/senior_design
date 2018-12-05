@@ -78,7 +78,7 @@ void driveMotorsCallback(const sd_msgs::DriveMotors::ConstPtr& msg)
 
       //if requested right motor direction is a valid value, change direction
       if ((msg->right_motor_dir == 0) || (msg->right_motor_dir == 1))
-        dirValues[0] = msg->right_motor_dir;
+        dirValues[1] = msg->right_motor_dir;
 
     }
 
