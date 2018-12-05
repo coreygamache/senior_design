@@ -89,7 +89,7 @@ int main(int argc, char **argv)
   int i2c_address;
   if (!node_private.getParam("/arduino/i2c_address", i2c_address))
   {
-    ROS_ERROR("arduino i2c address not defined in config file: sd_bringup/config/global.yaml");
+    ROS_ERROR("[drive_motor_node] arduino i2c address not defined in config file: sd_bringup/config/global.yaml");
     ROS_BREAK();
   }
 
@@ -97,7 +97,7 @@ int main(int argc, char **argv)
   float refresh_rate;
   if (!node_private.getParam("/hardware/drive_motor/refresh_rate", refresh_rate))
   {
-    ROS_ERROR("drive motor node refresh rate not defined in config file: sd_hardware_interface/config/hardware_interface.yaml");
+    ROS_ERROR("[drive_motor_node] drive motor node refresh rate not defined in config file: sd_hardware_interface/config/hardware_interface.yaml");
     ROS_BREAK();
   }
 
@@ -107,9 +107,9 @@ int main(int argc, char **argv)
 
   //output notification message and error if one occurs
   if (fd == -1)
-    ROS_INFO("error establishing i2c connection: %d", errno);
+    ROS_INFO("[drive_motor_node] error establishing i2c connection: %d", errno);
   else
-    ROS_INFO("i2c connection result: %d", fd);
+    ROS_INFO("[drive_motor_node] i2c connection result: %d", fd);
 
   //create sunscriber to subscribe to control messages message topic with queue size set to 1000
   ros::Subscriber control_sub = node_private.subscribe("control", 1000, controlCallback);
@@ -138,7 +138,7 @@ int main(int argc, char **argv)
 
       //output notification message if error occurs
       if (result == -1)
-        ROS_INFO("error writing to arduino via i2c: %d", errno);
+        ROS_INFO("[drive_motor_node] error writing to arduino via i2c: %d", errno);
 
     }
 
