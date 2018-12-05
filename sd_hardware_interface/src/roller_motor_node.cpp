@@ -10,7 +10,7 @@ bool enable = false;
 unsigned int dirValue = 0; //motor direction value (0 = reverse, 1 = forward)
 unsigned int pwmValue = 0; //motor pwm output value
 
-//direction pin variables
+//pin variables
 //must be global so that they can be accessed by callback function
 int dir_a_pin;
 int dir_b_pin;
