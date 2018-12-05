@@ -62,13 +62,19 @@ void conveyorMotorCallback(const sd_msgs::ComponentMotor::ConstPtr& msg)
 
   }
 
-  //verify motor PWM value is within PWM limits
-  if (msg->pwm > 255)
-    pwmValue = 255;
-  else if (msg->pwm < 0)
-    pwmValue = 0;
-  else
-    pwmValue = msg->pwm;
+  //check motor pwm value and change if necessary
+  if (msg->pwm != pwmValue)
+  {
+
+    //verify motor PWM value is within PWM limits
+    if (msg->pwm > 255)
+      pwmValue = 255;
+    else if (msg->pwm < 0)
+      pwmValue = 0;
+    else
+      pwmValue = msg->pwm;
+
+  }
 
 }
 
@@ -125,7 +131,8 @@ int main(int argc, char **argv)
   wiringPiSetup();
   pinMode(dir_a_pin, OUTPUT);
   pinMode(dir_b_pin, OUTPUT);
-  pinMode(pwm_pin, PWM_OUTPUT);
+  //pinMode(pwm_pin, PWM_OUTPUT);
+  pinMode(pwm_pin, OUTPUT);
   pinMode(standby_pin, OUTPUT);
 
   //set loop rate in Hz
