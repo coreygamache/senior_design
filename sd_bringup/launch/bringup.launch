@@ -1,12 +1,17 @@
 <launch>
 
 <!-- set arguments -->
+<arg name="control_enabled" value="true" />
 <arg name="hardware_enabled" value="true" />
 <arg name="navigation_enabled" value="true" />
 <arg name="sensors_enabled" value="true" />
 
 <!-- load global parameters to parameter server -->
 <rosparam command="load" file="$(find sd_bringup)/config/global.yaml" ns="/" />
+
+
+<rosparam command="load" file="$(find sd_co)/config/global.yaml" ns="/" />
+<include file="$(find sd_bringup)/launch/hardware_interface.launch" />
 
 <!-- if sensors are enabled then include sensor launch file -->
 <group if="$(arg hardware_enabled)">
@@ -22,6 +27,12 @@
 <group if="$(arg navigation_enabled)">
   <rosparam command="load" file="$(find sd_navigation)/config/navigation.yaml" ns="navigation" />
   <node name="line_follower_node" pkg="sd_navigation" type="line_follower_node" ns="navigation" output="screen" />
+</group>
+
+<!-- if control is enabled then load control parameters to parameter server and launch master control node -->
+<group if="$(arg control_enabled)">
+  <rosparam command="load" file="$(find sd_collector_cannon)/config/collector_cannon.yaml" ns="collector_cannon" />
+  <node name="master_control_node" pkg="sd_collector_cannon" type="master_control_node" ns="collector_cannon" output="screen" />
 </group>
 
 </launch>
