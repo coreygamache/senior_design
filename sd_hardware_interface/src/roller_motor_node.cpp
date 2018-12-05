@@ -9,6 +9,12 @@ bool enable = false;
 unsigned int dirValue = 0; //motor direction value (0 = reverse, 1 = forward)
 unsigned int pwmValue = 0; //motor pwm output value
 
+//direction pin variables
+//must be global so that they can be accessed by callback function
+int dir_a_pin;
+int dir_b_pin;
+
+
 //callback function called to process messages on roller_motor topic
 void rollerMotorCallback(const sd_msgs::ComponentMotor::ConstPtr& msg)
 {
@@ -66,7 +72,6 @@ int main(int argc, char **argv)
   ros::NodeHandle node_private("~");
 
   //retrieve motor direction A pin from parameter server
-  int dir_a_pin;
   if (!node_private.getParam("/hardware/roller/dir_a_pin", dir_a_pin))
   {
     ROS_ERROR("roller motor direction A pin not defined in config file: sd_hardware_interface/config/hardware_interface.yaml");
@@ -74,7 +79,6 @@ int main(int argc, char **argv)
   }
 
   //retrieve motor direction B pin from parameter server
-  int dir_b_pin;
   if (!node_private.getParam("/hardware/roller/dir_b_pin", dir_b_pin))
   {
     ROS_ERROR("roller motor direction B pin not defined in config file: sd_hardware_interface/config/hardware_interface.yaml");
