@@ -135,6 +135,10 @@ int main(int argc, char **argv)
   pinMode(pwm_pin, OUTPUT);
   pinMode(standby_pin, OUTPUT);
 
+  //take motor driver out of standby mode if it's currently enabled
+  if (!digitalRead(standby_pin))
+    digitalWrite(standby_pin, HIGH);
+
   //set loop rate in Hz
   ros::Rate loop_rate(refresh_rate);
 
