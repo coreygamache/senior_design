@@ -163,15 +163,15 @@ int main(int argc, char **argv)
   //create sunscriber to subscribe to drive motor messages message topic with queue size set to 1000
   ros::Subscriber drive_motor_sub = node_private.subscribe("drive_motors", 1000, driveMotorsCallback);
 
-  //run wiringPi GPIO setup function and set pin modes
-  wiringPiSetup();
-  pinMode(left_motor_led_pin, OUTPUT);
-  pinMode(right_motor_led_pin, OUTPUT);
-
   //initialize i2c protocol and verify connection
   //int fd = wiringPiI2CSetup(i2c_address);
   int fd = wiringPiI2CSetup(0x04);
   int result; //variable for holding i2c read/write result
+
+  //run wiringPi GPIO setup function and set pin modes
+  //wiringPiSetup();
+  pinMode(left_motor_led_pin, OUTPUT);
+  pinMode(right_motor_led_pin, OUTPUT);
 
   //output notification message and error if one occurs
   if (fd == -1)
@@ -191,10 +191,9 @@ int main(int argc, char **argv)
 
       //set output values to current direction and pwm values
       //unsigned char outputValues[4] = { dirValues[0], pwmValues[0], dirValues[1], pwmValues[1] };
-      unsigned char outputValues[2] = { 255, 255 };
-
+      unsigned char outputValue = 255;
       //output motor PWM values to arduino via i2c protocol
-      result = write(fd, outputValues, 2);
+      result = write(fd, outputValue, 1);
 
       //output notification message if error occurs
       if (result == -1)
