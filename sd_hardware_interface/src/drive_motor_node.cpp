@@ -169,8 +169,7 @@ int main(int argc, char **argv)
   pinMode(right_motor_led_pin, OUTPUT);
 
   //initialize i2c protocol and verify connection
-  //int fd = wiringPiI2CSetup(i2c_address);
-  int fd = wiringPiI2CSetup(0x04);
+  int fd = wiringPiI2CSetup(i2c_address);
   int result; //variable for holding i2c read/write result
 
   //output notification message and error if one occurs
@@ -190,10 +189,10 @@ int main(int argc, char **argv)
     {
 
       //set output values to current direction and pwm values
-      //unsigned char outputValues[4] = { dirValues[0], pwmValues[0], dirValues[1], pwmValues[1] };
-      unsigned char outputValues[2] = {0, 0};
+      unsigned char outputValues[4] = { dirValues[0], pwmValues[0], dirValues[1], pwmValues[1] };
+
       //output motor PWM values to arduino via i2c protocol
-      result = write(fd, outputValues, 2);
+      result = write(fd, outputValues, 4);
 
       //output notification message if error occurs
       if (result == -1)
@@ -203,13 +202,16 @@ int main(int argc, char **argv)
       else
       {
 
+        //turn on left motor LED indicator if its PWM value is above 0
         if (pwmValues[0] > 0)
           digitalWrite(left_motor_led_pin, HIGH);
         else
           digitalWrite(left_motor_led_pin, LOW);
 
-        if(pwmValues[1] > 0)
+        //turn on right motor LED indicator if its PWM value is above 0
+        if (pwmValues[1] > 0)
           digitalWrite(right_motor_led_pin, HIGH);
+        else
           digitalWrite(right_motor_led_pin, LOW);
 
       }
