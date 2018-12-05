@@ -157,12 +157,6 @@ int main(int argc, char **argv)
     ROS_BREAK();
   }
 
-  //output notification message and error if one occurs
-  if (fd == -1)
-    ROS_INFO("[drive_motor_node] error establishing i2c connection: %d", errno);
-  else
-    ROS_INFO("[drive_motor_node] i2c connection result: %d", fd);
-
   //create sunscriber to subscribe to control messages message topic with queue size set to 1000
   ros::Subscriber control_sub = node_private.subscribe("control", 1000, controlCallback);
 
@@ -178,6 +172,12 @@ int main(int argc, char **argv)
   //int fd = wiringPiI2CSetup(i2c_address);
   int fd = wiringPiI2CSetup(0x04);
   int result; //variable for holding i2c read/write result
+
+  //output notification message and error if one occurs
+  if (fd == -1)
+    ROS_INFO("[drive_motor_node] error establishing i2c connection: %d", errno);
+  else
+    ROS_INFO("[drive_motor_node] i2c connection result: %d", fd);
 
   //set loop rate in Hz
   ros::Rate loop_rate(refresh_rate);
