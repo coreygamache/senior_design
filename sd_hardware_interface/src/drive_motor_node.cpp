@@ -3,8 +3,8 @@
 #include <sd_msgs/Control.h>
 #include <sd_msgs/DriveMotors.h>
 #include <signal.h>
-#include <wiringPi.h>
 #include <wiringPiI2C.h>
+#include <wiringPi.h>
 
 //global variables
 bool autonomous_control = false;
@@ -191,7 +191,7 @@ int main(int argc, char **argv)
 
       //set output values to current direction and pwm values
       //unsigned char outputValues[4] = { dirValues[0], pwmValues[0], dirValues[1], pwmValues[1] };
-      unsigned char outputValues[2] = { 255, 255 };
+      unsigned char outputValues[2] = {0, 0};
       //output motor PWM values to arduino via i2c protocol
       result = write(fd, outputValues, 2);
 
