@@ -112,8 +112,12 @@ int main(int argc, char **argv)
   //create subscriber to subscribe to conveyor motor messages message topic with queue size set to 1000
   ros::Subscriber conveyor_motor_sub = node_private.subscribe("conveyor_motor", 1000, conveyorMotorCallback);
 
-  //run wiringPi GPIO setup function
+  //run wiringPi GPIO setup function and set pin modes
   wiringPiSetup();
+  pinMode(dir_a_pin, OUTPUT);
+  pinMode(dir_b_pin, OUTPUT);
+  pinMode(pwm_pin, OUTPUT);
+  pinMode(standby_pin, OUTPUT);
 
   //set loop rate in Hz
   ros::Rate loop_rate(refresh_rate);
@@ -123,7 +127,8 @@ int main(int argc, char **argv)
 
     //if motor is enabled, output requested PWM value to motor driver
     if (enable)
-      analogWrite(pwm_pin, pwmValue);
+      digitalWrite(pwm_pin, HIGH);
+      //analogWrite(pwm_pin, pwmValue);
 
     //process callback function calls
     ros::spinOnce();
