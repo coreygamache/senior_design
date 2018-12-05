@@ -33,7 +33,6 @@ void conveyorMotorCallback(const sd_msgs::ComponentMotor::ConstPtr& msg)
 
   }
 
-
   //check motor direction and change if necessary
   if (dirValue != msg->direction)
   {
@@ -56,7 +55,6 @@ void conveyorMotorCallback(const sd_msgs::ComponentMotor::ConstPtr& msg)
         digitalWrite(dir_a_pin, LOW);
         digitalWrite(dir_b_pin, HIGH);
       }
-
 
     }
 
