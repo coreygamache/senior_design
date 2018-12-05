@@ -163,15 +163,15 @@ int main(int argc, char **argv)
   //create sunscriber to subscribe to drive motor messages message topic with queue size set to 1000
   ros::Subscriber drive_motor_sub = node_private.subscribe("drive_motors", 1000, driveMotorsCallback);
 
+  //run wiringPi GPIO setup function and set pin modes
+  wiringPiSetup();
+  pinMode(left_motor_led_pin, OUTPUT);
+  pinMode(right_motor_led_pin, OUTPUT);
+
   //initialize i2c protocol and verify connection
   //int fd = wiringPiI2CSetup(i2c_address);
   int fd = wiringPiI2CSetup(0x04);
   int result; //variable for holding i2c read/write result
-
-  //run wiringPi GPIO setup function and set pin modes
-  //wiringPiSetup();
-  pinMode(left_motor_led_pin, OUTPUT);
-  pinMode(right_motor_led_pin, OUTPUT);
 
   //output notification message and error if one occurs
   if (fd == -1)
