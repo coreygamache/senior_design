@@ -74,14 +74,14 @@ int main(int argc, char **argv)
   //retrieve motor direction A pin from parameter server
   if (!node_private.getParam("/hardware/conveyor/dir_a_pin", dir_a_pin))
   {
-    ROS_ERROR("conveyor motor direction A pin not defined in config file: sd_hardware_interface/config/hardware_interface.yaml");
+    ROS_ERROR("[conveyor_motor_node] conveyor motor direction A pin not defined in config file: sd_hardware_interface/config/hardware_interface.yaml");
     ROS_BREAK();
   }
 
   //retrieve motor direction B pin from parameter server
   if (!node_private.getParam("/hardware/conveyor/dir_b_pin", dir_b_pin))
   {
-    ROS_ERROR("conveyor motor direction B pin not defined in config file: sd_hardware_interface/config/hardware_interface.yaml");
+    ROS_ERROR("[conveyor_motor_node] conveyor motor direction B pin not defined in config file: sd_hardware_interface/config/hardware_interface.yaml");
     ROS_BREAK();
   }
 
@@ -89,7 +89,7 @@ int main(int argc, char **argv)
   int pwm_pin;
   if (!node_private.getParam("/hardware/conveyor/pwm_pin", pwm_pin))
   {
-    ROS_ERROR("conveyor motor PWM pin not defined in config file: sd_hardware_interface/config/hardware_interface.yaml");
+    ROS_ERROR("[conveyor_motor_node] conveyor motor PWM pin not defined in config file: sd_hardware_interface/config/hardware_interface.yaml");
     ROS_BREAK();
   }
 
@@ -97,7 +97,7 @@ int main(int argc, char **argv)
   float refresh_rate;
   if (!node_private.getParam("/hardware/conveyor/refresh_rate", refresh_rate))
   {
-    ROS_ERROR("conveyor motor node refresh rate not defined in config file: sd_hardware_interface/config/hardware_interface.yaml");
+    ROS_ERROR("[conveyor_motor_node] conveyor motor node refresh rate not defined in config file: sd_hardware_interface/config/hardware_interface.yaml");
     ROS_BREAK();
   }
 
@@ -105,12 +105,15 @@ int main(int argc, char **argv)
   int standby_pin;
   if (!node_private.getParam("/hardware/conveyor/standby_pin", standby_pin))
   {
-    ROS_ERROR("conveyor motor standby pin not defined in config file: sd_hardware_interface/config/hardware_interface.yaml");
+    ROS_ERROR("[conveyor_motor_node] conveyor motor standby pin not defined in config file: sd_hardware_interface/config/hardware_interface.yaml");
     ROS_BREAK();
   }
 
   //create subscriber to subscribe to conveyor motor messages message topic with queue size set to 1000
   ros::Subscriber conveyor_motor_sub = node_private.subscribe("conveyor_motor", 1000, conveyorMotorCallback);
+
+  //run wiringPi GPIO setup function
+  wiringPiSetup();
 
   //set loop rate in Hz
   ros::Rate loop_rate(refresh_rate);
