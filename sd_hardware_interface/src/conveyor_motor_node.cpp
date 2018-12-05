@@ -13,15 +13,26 @@ unsigned int pwmValue = 0; //motor pwm output value
 //must be global so that they can be accessed by callback function
 int dir_a_pin;
 int dir_b_pin;
+int pwm_pin;
+int standby_pin;
 
 
 //callback function called to process messages on conveyor_motor topic
 void conveyorMotorCallback(const sd_msgs::ComponentMotor::ConstPtr& msg)
 {
 
-  //set local enable variable to match value received in message
+  //this conditional is changed to physically turn on/off the motor since PWM output is not possible (see main loop)
   if (enable != msg->enable)
+  {
+
+    //set local enable variable to match value received in message
     enable = msg->enable;
+
+    //set pin to specified value of enable
+    digitalWrite(pwm_pin, enable);
+
+  }
+
 
   //check motor direction and change if necessary
   if (dirValue != msg->direction)
@@ -86,7 +97,6 @@ int main(int argc, char **argv)
   }
 
   //retrieve motor PWM pin from parameter server
-  int pwm_pin;
   if (!node_private.getParam("/hardware/conveyor/pwm_pin", pwm_pin))
   {
     ROS_ERROR("[conveyor_motor_node] conveyor motor PWM pin not defined in config file: sd_hardware_interface/config/hardware_interface.yaml");
@@ -102,7 +112,6 @@ int main(int argc, char **argv)
   }
 
   //retrieve motor standy pin from parameter server
-  int standby_pin;
   if (!node_private.getParam("/hardware/conveyor/standby_pin", standby_pin))
   {
     ROS_ERROR("[conveyor_motor_node] conveyor motor standby pin not defined in config file: sd_hardware_interface/config/hardware_interface.yaml");
@@ -125,9 +134,9 @@ int main(int argc, char **argv)
   while (ros::ok())
   {
 
+    //the following is removed because PWM output is not possible without running as sudo using wiringPi
     //if motor is enabled, output requested PWM value to motor driver
-    if (enable)
-      digitalWrite(pwm_pin, HIGH);
+    //if (enable)
       //analogWrite(pwm_pin, pwmValue);
 
     //process callback function calls
