@@ -116,7 +116,7 @@ int main(int argc, char **argv)
   wiringPiSetup();
   pinMode(dir_a_pin, OUTPUT);
   pinMode(dir_b_pin, OUTPUT);
-  pinMode(pwm_pin, OUTPUT);
+  pinMode(pwm_pin, PWM_OUTPUT);
   pinMode(standby_pin, OUTPUT);
 
   //set loop rate in Hz
