@@ -158,7 +158,8 @@ int main(int argc, char **argv)
   }
 
   //initialize i2c protocol and verify connection
-  int fd = wiringPiI2CSetup(i2c_address);
+  //int fd = wiringPiI2CSetup(i2c_address);
+  int fd = wiringPiI2CSetup(0x04);
   int result; //variable for holding i2c read/write result
 
   //output notification message and error if one occurs
