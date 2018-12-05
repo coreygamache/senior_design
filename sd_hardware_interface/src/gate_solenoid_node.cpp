@@ -13,6 +13,7 @@ unsigned int pwmValue = 0; //solenoid pwm output value
 //must be global so that they can be accessed by callback function
 int output_pin;
 
+//callback function called to process SIGINT command
 void sigintHandler(int sig)
 {
 

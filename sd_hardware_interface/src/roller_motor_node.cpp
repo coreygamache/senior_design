@@ -18,6 +18,7 @@ int pwm_pin;
 int standby_pin;
 
 
+//callback function called to process SIGINT command
 void sigintHandler(int sig)
 {
 
