@@ -157,11 +157,6 @@ int main(int argc, char **argv)
     ROS_BREAK();
   }
 
-  //initialize i2c protocol and verify connection
-  //int fd = wiringPiI2CSetup(i2c_address);
-  int fd = wiringPiI2CSetup(0x04);
-  int result; //variable for holding i2c read/write result
-
   //output notification message and error if one occurs
   if (fd == -1)
     ROS_INFO("[drive_motor_node] error establishing i2c connection: %d", errno);
@@ -178,6 +173,11 @@ int main(int argc, char **argv)
   wiringPiSetup();
   pinMode(left_motor_led_pin, OUTPUT);
   pinMode(right_motor_led_pin, OUTPUT);
+
+  //initialize i2c protocol and verify connection
+  //int fd = wiringPiI2CSetup(i2c_address);
+  int fd = wiringPiI2CSetup(0x04);
+  int result; //variable for holding i2c read/write result
 
   //set loop rate in Hz
   ros::Rate loop_rate(refresh_rate);
