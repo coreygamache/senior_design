@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <ros/ros.h>
 #include <sd_msgs/ComponentMotor.h>
+#include <signal.h>
 #include <wiringPi.h>
 
 //global variables
@@ -16,6 +17,19 @@ int dir_b_pin;
 int pwm_pin;
 int standby_pin;
 
+
+void sigintHandler(int sig)
+{
+
+  //set all pins LOW
+  digitalWrite(dir_a_pin, LOW);
+  digitalWrite(dir_b_pin, LOW);
+  digitalWrite(pwm_pin, LOW);
+
+  //call the default shutdown function
+  ros::shutdown();
+
+}
 
 //callback function called to process messages on roller motor topic
 void rollerMotorCallback(const sd_msgs::ComponentMotor::ConstPtr& msg)
@@ -86,6 +100,9 @@ int main(int argc, char **argv)
   //initialize node and create node handler
   ros::init(argc, argv, "roller_motor_node");
   ros::NodeHandle node_private("~");
+
+  //override the default SIGINT handler
+  signal(SIGINT, sigintHandler);
 
   //retrieve motor direction A pin from parameter server
   if (!node_private.getParam("/hardware/roller/dir_a_pin", dir_a_pin))
