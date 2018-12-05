@@ -39,8 +39,8 @@ int main(int argc, char **argv)
   //set message frame id to 0 to indicate there is no frame
   balls_collected_msg.header.frame_id = "0";
 
-  //create publisher to publish number of balls collected message with buffer size 10, and latch set to false
-  ros::Publisher balls_collected_sensor_pub = node_private.advertise<sd_msgs::BallsCollected>("balls_collected", 10, false);
+  //create publisher to publish number of balls collected message with buffer size 10, and latch set to true
+  ros::Publisher balls_collected_sensor_pub = node_private.advertise<sd_msgs::BallsCollected>("balls_collected", 10, true);
 
   //set refresh rate of ROS loop to defined refresh rate of sensor parameter from parameter server
   ros::Rate loop_rate(refresh_rate);
@@ -60,15 +60,20 @@ int main(int argc, char **argv)
     ball_detected = sensor.ballDetected();
 
     //if a ball is detected now, and a ball was not detected in the last reading then a ball was collected
-    //add a ball to total count
+    //add a ball to total count, update message with new value, and publish message to ROS network
     if (ball_detected && !last_reading)
+    {
+
+      //increment number of balls collected
       balls_collected++;
 
-    //set balls collected data in message to number of balls currently collected
-    balls_collected_msg.balls_collected = balls_collected;
+      //set balls collected data in message to number of balls currently collected
+      balls_collected_msg.balls_collected = balls_collected;
 
-    //publish number of balls collected message
-    balls_collected_sensor_pub.publish(balls_collected_msg);
+      //publish number of balls collected message
+      balls_collected_sensor_pub.publish(balls_collected_msg);
+
+    }
 
     //set last_reading variable to match current reading
     last_reading = ball_detected;
