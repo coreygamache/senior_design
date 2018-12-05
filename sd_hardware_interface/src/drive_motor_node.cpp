@@ -82,21 +82,33 @@ void driveMotorsCallback(const sd_msgs::DriveMotors::ConstPtr& msg)
 
     }
 
-    //verify left motor PWM value is within PWM limits
-    if (msg->left_motor_pwm > 255)
-      pwmValues[0] = 255;
-    else if (msg->left_motor_pwm < 0)
-      pwmValues[0] = 0;
-    else
-      pwmValues[0] = msg->left_motor_pwm;
+    //check left motor pwm value and change if necessary
+    if (pwmValues[0] != msg->left_motor_pwm)
+    {
 
-    //verify right motor PWM value is within PWM limits
-    if (msg->right_motor_pwm > 255)
-      pwmValues[1] = 255;
-    else if (msg->right_motor_pwm < 0)
-      pwmValues[1] = 0;
-    else
-      pwmValues[1] = msg->right_motor_pwm;
+      //verify left motor PWM value is within PWM limits
+      if (msg->left_motor_pwm > 255)
+        pwmValues[0] = 255;
+      else if (msg->left_motor_pwm < 0)
+        pwmValues[0] = 0;
+      else
+        pwmValues[0] = msg->left_motor_pwm;
+
+    }
+
+    //check right motor pwm value and change if necessary
+    if (pwmValues[1] != msg->right_motor_pwm)
+    {
+
+      //verify right motor PWM value is within PWM limits
+      if (msg->right_motor_pwm > 255)
+        pwmValues[1] = 255;
+      else if (msg->right_motor_pwm < 0)
+        pwmValues[1] = 0;
+      else
+        pwmValues[1] = msg->right_motor_pwm;
+
+    }
 
   }
 
