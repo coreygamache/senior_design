@@ -120,4 +120,4 @@ add_dependencies(control_mode_node ${catkin_EXPORTED_TARGETS})
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
-target_link_libraries(control_mode_node ${catkin_LIBRARIES})
+target_link_libraries(control_mode_node ${catkin_LIBRARIES} wiringPi)
