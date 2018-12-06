@@ -3,7 +3,6 @@ conveyor:
   dir_b_pin: 29
   pwm_pin: 24
   refresh_rate: 10
-  standby_pin: 27
 
 drive_motor:
   left_motor_led_pin: 22
@@ -23,4 +22,3 @@ roller:
   dir_b_pin: 5
   pwm_pin: 23
   refresh_rate: 10
-  standby_pin: 27
