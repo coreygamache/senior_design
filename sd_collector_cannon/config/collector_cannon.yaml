@@ -1,0 +1,3 @@
+master_control:
+  refresh_rate: 10
+  toggle_button_pin: 2
