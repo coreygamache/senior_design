@@ -31,10 +31,10 @@ add_message_files(
   FILES
   Ball.msg
   BallsCollected.msg
-  BallsRemaining.msg
   ComponentMotor.msg
   Control.msg
   DriveMotors.msg
+  FiringStatus.msg
   LineFollowing.msg
   LineSensor.msg
   Mosfet.msg
