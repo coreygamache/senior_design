@@ -67,6 +67,14 @@ int main(int argc, char **argv)
   //override the default SIGINT handler
   signal(SIGINT, sigintHandler);
 
+  //retrieve gate open time value from parameter server [ms]
+  int gate_open_time;
+  if (!node_private.getParam("/hardware/gate_solenoid/gate_open_time", gate_open_time))
+  {
+    ROS_ERROR("[gate_solenoid_node] gate solenoid open time not defined in config file: sd_hardware_interface/config/hardware_interface.yaml");
+    ROS_BREAK();
+  }
+
   //retrieve mosfet output pin from parameter server
   if (!node_private.getParam("/hardware/gate_solenoid/output_pin", output_pin))
   {
@@ -104,11 +112,11 @@ int main(int argc, char **argv)
       digitalWrite(output_pin, HIGH);
 
       //wait sufficient time for ball to be released to firing wheel
-      delay(500);
+      delay(gate_open_time);
 
       //discharge solenoid until next request
       digitalWrite(output_pin, LOW);
-      
+
     }
 
     //process callback function calls
