@@ -36,9 +36,6 @@ void gateSolenoidCallback(const sd_msgs::Mosfet::ConstPtr& msg)
       //set local enable variable to match value received in message
       enable = msg->enable;
 
-      //set pin to specified value of enable
-      digitalWrite(output_pin, enable);
-
     }
 
     //check motor pwm value and change if necessary
@@ -98,10 +95,21 @@ int main(int argc, char **argv)
   while (ros::ok())
   {
 
-    //the following is removed because PWM output is not possible without running as sudo using wiringPi
-    //if motor is enabled, output requested PWM value to motor driver
-    //if (enable)
-      //analogWrite(output_pin, pwmValue);
+    //if solenoid has been enabled since last iteration then release a ball:
+    //output HIGH to solenoid briefly, then disable again until next request
+    if (enable)
+    {
+
+      //charge solenoid
+      digitalWrite(output_pin, HIGH);
+
+      //wait sufficient time for ball to be released to firing wheel
+      delay(500);
+
+      //discharge solenoid until next request
+      digitalWrite(output_pin, LOW);
+      
+    }
 
     //process callback function calls
     ros::spinOnce();
