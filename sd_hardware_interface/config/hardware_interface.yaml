@@ -14,7 +14,7 @@ firing_wheel:
   refresh_rate: 10
 
 gate_solenoid:
-  gate_open_time: 500 # [ms]
+  gate_open_time: 0.1 # [s]
   output_pin: 26
   refresh_rate: 10
 
