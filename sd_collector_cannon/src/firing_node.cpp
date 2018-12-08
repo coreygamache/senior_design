@@ -63,10 +63,10 @@ int main(int argc, char **argv)
 {
 
   //send notification that node is launching
-  ROS_INFO("[NODE LAUNCH]: starting control_mode_node");
+  ROS_INFO("[NODE LAUNCH]: starting firing_node");
 
   //initialize node and create node handler
-  ros::init(argc, argv, "control_mode_node");
+  ros::init(argc, argv, "firing_node");
   ros::NodeHandle node_private("~");
 
   //override the default SIGINT handler
