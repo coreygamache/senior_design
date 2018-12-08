@@ -136,6 +136,11 @@ int main(int argc, char **argv)
       }
 
     }
+    //if line following is disabled then reset line following completed to false
+    else if (!line_following)
+    {
+      line_following_completed = false;
+    }
 
     //publish line following status message
     line_following_pub.publish(line_following_msg);
