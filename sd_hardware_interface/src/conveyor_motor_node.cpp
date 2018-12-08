@@ -15,7 +15,6 @@ unsigned int pwmValue = 0; //motor pwm output value
 int dir_a_pin;
 int dir_b_pin;
 int pwm_pin;
-int standby_pin;
 
 //callback function called to process SIGINT command
 void sigintHandler(int sig)
@@ -141,11 +140,6 @@ int main(int argc, char **argv)
   pinMode(dir_b_pin, OUTPUT);
   //pinMode(pwm_pin, PWM_OUTPUT);
   pinMode(pwm_pin, OUTPUT);
-  pinMode(standby_pin, OUTPUT);
-
-  //take motor driver out of standby mode if it's currently enabled
-  if (!digitalRead(standby_pin))
-    digitalWrite(standby_pin, HIGH);
 
   //set loop rate in Hz
   ros::Rate loop_rate(refresh_rate);
