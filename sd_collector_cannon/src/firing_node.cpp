@@ -114,7 +114,10 @@ int main(int argc, char **argv)
   ros::Subscriber firing_motor_sub = node_private.subscribe("firing_motor", 1000, firingMotorCallback);
 
   //create variable for counting number of balls remaining
-  int balls_remaining = balls_collected;
+  int balls_fired = 0;
+
+  //create timer to keep tracking of fire delay times
+  ros::Timer timer;
 
   //set loop rate in Hz
   ros::Rate loop_rate(refresh_rate);
@@ -122,20 +125,27 @@ int main(int argc, char **argv)
   while (ros::ok())
   {
 
-    //if line following is completed, fire delay time has elapsed (since last shot if there was one)
-    //line following completed can only be true if control mode is set to autonomous
-    //(see line_follower_node for logic)
-    if (line_following_completed && ready_to_fire && firing_motor_on)
+    //if line following is completed, fire delay time has elapsed (since last shot if there was one),
+    //firing motor is on, at least one ball is remaining, request gate solenoid to open to fire a ball
+    //NOTE: line_following_completed can only be true if control mode is set to autonomous
+    //NOTE: (see line_follower_node for logic)
+    if (line_following_completed && ready_to_fire && firing_motor_on && ((balls_collected - balls_fired) > 0))
     {
 
       //publish gate solenoid message to request gate to be opened
       gate_solenoid_pub.publish(gate_solenoid_msg);
 
+      //increment number of balls fired
+      balls_fired++;
+
       //set ready to fire to false until fire delay time elapses
       ready_to_fire = false;
 
-      //create timer to keep track of fire delay time
-      ros::Timer timer = node_private.createTimer(ros::Duration(fire_delay_time), timerCallback, true);
+      //set timer to keep track of fire delay time
+      timer = node_private.createTimer(ros::Duration(fire_delay_time), timerCallback, true);
+
+      //inform that a ball was fired
+      ROS_INFO("[firing_node] ball fired, balls remaining: %d", balls_collected - balls_fired);
 
     }
     else if (!firing_motor_on)
@@ -143,6 +153,19 @@ int main(int argc, char **argv)
 
       //inform that firing wheel motor is not enabled; do not fire
       ROS_INFO("[firing_node] firing wheel motor not enabled; waiting to fire");
+
+    }
+
+    //if number of balls fired or remaining has changed then publish new message
+    if ((balls_fired != firing_status_msg.balls_fired) || ((balls_collected - balls_fired) != firing_status_msg.balls_remaining))
+    {
+
+      //update message values
+      firing_status_msg.balls_fired = balls_fired;
+      firing_status_msg.balls_remaining = balls_collected - balls_fired;
+
+      //publish new message
+      firing_status_pub.publish(firing_status_msg);
 
     }
 
