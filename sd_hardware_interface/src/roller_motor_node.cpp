@@ -43,6 +43,12 @@ void rollerMotorCallback(const sd_msgs::ComponentMotor::ConstPtr& msg)
     //set local enable variable to match value received in message
     enable = msg->enable;
 
+    //inform of enable status change
+    if (enable)
+      ROS_INFO("[roller_motor_node] roller motor enabled");
+    else
+      ROS_INFO("[roller_motor_node] roller motor disabled");
+
     //set pin to specified value of enable
     digitalWrite(pwm_pin, enable);
 
@@ -63,13 +69,25 @@ void rollerMotorCallback(const sd_msgs::ComponentMotor::ConstPtr& msg)
       //change pin output values to achieve requested direction
       if (dirValue == 0)
       {
+
+        //inform of direction status change
+        ROS_INFO("[roller_motor_node] roller motor direction changed to forward");
+
+        //output to pins
         digitalWrite(dir_b_pin, LOW);
         digitalWrite(dir_a_pin, HIGH);
+
       }
       else
       {
+
+        //inform of direction change status
+        ROS_INFO("[roller_motor_node] roller motor direction changed to reverse");
+
+        //output to pins
         digitalWrite(dir_a_pin, LOW);
         digitalWrite(dir_b_pin, HIGH);
+
       }
 
     }
@@ -88,6 +106,9 @@ void rollerMotorCallback(const sd_msgs::ComponentMotor::ConstPtr& msg)
     else
       pwmValue = msg->pwm;
 
+    //inform of new value
+    ROS_INFO("[roller_motor_node] roller motor pwm output changed to %d", pwmValue);
+
   }
 
 }
@@ -101,6 +122,7 @@ int main(int argc, char **argv)
   //initialize node and create node handler
   ros::init(argc, argv, "roller_motor_node");
   ros::NodeHandle node_private("~");
+  ros::NodeHandle node_public;
 
   //override the default SIGINT handler
   signal(SIGINT, sigintHandler);
@@ -135,7 +157,7 @@ int main(int argc, char **argv)
   }
 
   //create subscriber to subscribe to roller motor messages message topic with queue size set to 1000
-  ros::Subscriber roller_motor_sub = node_private.subscribe("roller_motor", 1000, rollerMotorCallback);
+  ros::Subscriber roller_motor_sub = node_public.subscribe("roller_motor", 1000, rollerMotorCallback);
 
   //run wiringPi GPIO setup function and set pin modes
   wiringPiSetup();
