@@ -132,13 +132,6 @@ int main(int argc, char **argv)
     ROS_BREAK();
   }
 
-  //retrieve motor standy pin from parameter server
-  if (!node_private.getParam("/hardware/conveyor/standby_pin", standby_pin))
-  {
-    ROS_ERROR("[conveyor_motor_node] conveyor motor standby pin not defined in config file: sd_hardware_interface/config/hardware_interface.yaml");
-    ROS_BREAK();
-  }
-
   //create subscriber to subscribe to conveyor motor messages message topic with queue size set to 1000
   ros::Subscriber conveyor_motor_sub = node_private.subscribe("conveyor_motor", 1000, conveyorMotorCallback);
 

@@ -134,13 +134,6 @@ int main(int argc, char **argv)
     ROS_BREAK();
   }
 
-  //retrieve motor standy pin from parameter server
-  if (!node_private.getParam("/hardware/roller/standby_pin", standby_pin))
-  {
-    ROS_ERROR("[roller_motor_node] roller motor standby pin not defined in config file: sd_hardware_interface/config/hardware_interface.yaml");
-    ROS_BREAK();
-  }
-
   //create subscriber to subscribe to roller motor messages message topic with queue size set to 1000
   ros::Subscriber roller_motor_sub = node_private.subscribe("roller_motor", 1000, rollerMotorCallback);
 
