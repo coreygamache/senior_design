@@ -32,8 +32,8 @@ void controlCallback(const sd_msgs::Control::ConstPtr& msg)
 {
 
   //handle message differently depending on current line following status and message request
-  //line following was disabled, now enable it
-  if (!line_following && msg->autonomous_control)
+  //line following was disabled, now enable it if in navigation stage
+  if (!line_following && msg->autonomous_control && msg->navigation_stage)
   {
 
     //send message of "1" to arduino to indicate line following should be started
