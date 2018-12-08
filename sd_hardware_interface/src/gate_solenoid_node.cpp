@@ -125,6 +125,9 @@ int main(int argc, char **argv)
       //discharge solenoid until next request
       digitalWrite(output_pin, LOW);
 
+      //set enable to false until next gate open request is received
+      enable = false;
+
     }
 
     //process callback function calls
