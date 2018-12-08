@@ -1,4 +1,5 @@
 //gate solenoid control node
+//TO DO: change gate open delay to use ros::Timer instead of delay()
 #include <errno.h>
 #include <ros/ros.h>
 #include <sd_msgs/Mosfet.h>
@@ -63,6 +64,7 @@ int main(int argc, char **argv)
   //initialize node and create node handler
   ros::init(argc, argv, "gate_solenoid_node");
   ros::NodeHandle node_private("~");
+  ros::NodeHandle node_public;
 
   //override the default SIGINT handler
   signal(SIGINT, sigintHandler);
@@ -91,7 +93,7 @@ int main(int argc, char **argv)
   }
 
   //create subscriber to subscribe to gate solenoid messages message topic with queue size set to 1000
-  ros::Subscriber gate_solenoid_sub = node_private.subscribe("gate_solenoid", 1000, gateSolenoidCallback);
+  ros::Subscriber gate_solenoid_sub = node_public.subscribe("gate_solenoid", 1000, gateSolenoidCallback);
 
   //run wiringPi GPIO setup function and set pin modes
   wiringPiSetup();
@@ -108,11 +110,17 @@ int main(int argc, char **argv)
     if (enable)
     {
 
+      //inform of gate open request
+      ROS_INFO("[gate_solenoid_node] gate open request received; charging gate solenoid");
+
       //charge solenoid
       digitalWrite(output_pin, HIGH);
 
       //wait sufficient time for ball to be released to firing wheel
       delay(gate_open_time);
+
+      //inform of gate closure
+      ROS_INFO("[gate_solenoid_node] gate open time elapsed; discharging gate solenoid");
 
       //discharge solenoid until next request
       digitalWrite(output_pin, LOW);
