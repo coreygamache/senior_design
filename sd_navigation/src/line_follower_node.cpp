@@ -42,9 +42,22 @@ void controlCallback(const sd_msgs::Control::ConstPtr& msg)
     //output notification message and error if one occurs
     //otherwise message was sent; set line following to true
     if (result == -1)
+    {
+
+      //inform that i2c protocol communication failed
       ROS_INFO("[line_follower_node] error writing to arduino via i2c: %d", errno);
+
+    }
     else
+    {
+
+      //enable line following
       line_following = true;
+
+      //set line following complete to false to force status check from arduino
+      line_following_completed = false;
+
+    }
 
   }
   //line following was enabled, now disable it
@@ -129,8 +142,9 @@ int main(int argc, char **argv)
     //set line following field of message to current line following status
     line_following_msg.line_following = line_following;
 
-    //perform the following if line following is enabled and not yet complete (line_following must be set to true by a control message)
-    if (line_following && !line_following_completed)
+    //check arduino line following status if line following is enabled until complete
+    //NOTE: line following is enabled/disabled by control message callback
+    if (line_following)
     {
 
       //read current status from arduino to check whether line following is finished
@@ -144,18 +158,17 @@ int main(int argc, char **argv)
       else if (result == 1)
       {
 
-        //indicate line following is complete and change status of message field
+        //line following complete: change local variables to reflect this
+        line_following = false;
         line_following_completed = true;
-        line_following_msg.completed = true;
 
       }
 
     }
-    //if line following is disabled then reset line following completed to false
-    else if (!line_following)
-    {
-      line_following_completed = false;
-    }
+
+    //set current line following message values to match local values
+    line_following_msg.line_following = line_following;
+    line_following_msg.completed = line_following_completed;
 
     //publish line following status message
     line_following_pub.publish(line_following_msg);
