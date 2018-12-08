@@ -104,6 +104,7 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/sd_collector_cannon_node.cpp)
 add_executable(control_mode_node src/control_mode_node.cpp)
+add_executable(firing_node src/firing_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -115,9 +116,11 @@ add_executable(control_mode_node src/control_mode_node.cpp)
 ## same as for the library above
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(control_mode_node ${catkin_EXPORTED_TARGETS})
+add_dependencies(firing_node ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
 target_link_libraries(control_mode_node ${catkin_LIBRARIES} wiringPi)
+target_link_libraries(firing_node ${catkin_LIBRARIES})
