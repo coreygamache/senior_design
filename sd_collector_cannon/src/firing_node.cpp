@@ -1,14 +1,14 @@
 //ball firing logic node
 #include <ros/ros.h>
 #include <sd_msgs/BallsCollected.h>
+#include <sd_msgs/Control.h>
 #include <sd_msgs/FiringStatus.h>
-#include <sd_msgs/LineFollowing.h>
 #include <sd_msgs/Mosfet.h>
 #include <signal.h>
 
 //global variables
 bool firing_motor_on = false;
-bool line_following_completed = false;
+bool firing_stage = false;
 bool ready_to_fire = true;
 int balls_collected = 0;
 
@@ -32,21 +32,21 @@ void ballsCollectedCallback(const sd_msgs::BallsCollected::ConstPtr& msg)
 
 }
 
+//callback function called to process messages on control topic
+void controlCallback(const sd_msgs::Control::ConstPtr& msg)
+{
+
+  //set local value to match message value
+  firing_stage = msg->firing_stage;
+
+}
+
 //callback function called to process messages on firing motor topic
 void firingMotorCallback(const sd_msgs::Mosfet::ConstPtr& msg)
 {
 
   //set local value to match message value
   firing_motor_on = msg->enable;
-
-}
-
-//callback function called to process messages on line following topic
-void lineFollowingCallback(const sd_msgs::LineFollowing::ConstPtr& msg)
-{
-
-    //set local value to match message value
-    line_following_completed = msg->completed;
 
 }
 
@@ -111,6 +111,9 @@ int main(int argc, char **argv)
   //create subscriber to subscribe to balls collected messages message topic with queue size set to 1000
   ros::Subscriber balls_collected_sub = node_public.subscribe("/sensor/balls_collected", 1000, ballsCollectedCallback);
 
+  //create subscriber to subscribe to control messages message topic with queue size set to 1000
+  ros::Subscriber control_sub = node_public.subscribe("control", 1000, controlCallback);
+
   //create subscriber to subscribe to firing motor messages message topic with queue size set to 1000
   ros::Subscriber firing_motor_sub = node_public.subscribe("/hardware/firing_motor", 1000, firingMotorCallback);
 
@@ -130,7 +133,7 @@ int main(int argc, char **argv)
     //firing motor is on, at least one ball is remaining, request gate solenoid to open to fire a ball
     //NOTE: line_following_completed can only be true if control mode is set to autonomous
     //NOTE: (see line_follower_node for logic)
-    if (line_following_completed && ready_to_fire && firing_motor_on && ((balls_collected - balls_fired) > 0))
+    if (firing_stage && ready_to_fire && firing_motor_on && ((balls_collected - balls_fired) > 0))
     {
 
       //publish gate solenoid message to request gate to be opened
@@ -150,7 +153,7 @@ int main(int argc, char **argv)
 
     }
     //if all of above conditions are met except the firing motor isn't on then inform of status without firing
-    else if (line_following_completed && ready_to_fire && !firing_motor_on && ((balls_collected - balls_fired) > 0))
+    else if (firing_stage && ready_to_fire && !firing_motor_on && ((balls_collected - balls_fired) > 0))
     {
 
       //inform that firing wheel motor is not enabled; do not fire
