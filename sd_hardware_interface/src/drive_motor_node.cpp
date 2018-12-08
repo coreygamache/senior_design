@@ -13,8 +13,8 @@ unsigned char pwmValues[2] = {0, 0}; //motor pwm output values, {left PWM value,
 
 //pin variables
 //must be global so that they can be accessed by callback function
-int left_motor_led_pin;
-int right_motor_led_pin;
+int left_motor_sleep_pin;
+int right_motor_sleep_pin;
 
 
 //callback function called to process SIGINT command
@@ -22,15 +22,15 @@ void sigintHandler(int sig)
 {
 
   //set all pins LOW
-  digitalWrite(left_motor_led_pin, LOW);
-  digitalWrite(right_motor_led_pin, LOW);
+  digitalWrite(left_motor_sleep_pin, LOW);
+  digitalWrite(right_motor_sleep_pin, LOW);
 
   //call the default shutdown function
   ros::shutdown();
 
 }
 
-//callback function called to process messages on motor_(num) topic
+//callback function called to process messages on control topic
 void controlCallback(const sd_msgs::Control::ConstPtr& msg)
 {
 
@@ -123,6 +123,7 @@ int main(int argc, char **argv)
   //initialize node and create node handler
   ros::init(argc, argv, "drive_motor_node");
   ros::NodeHandle node_private("~");
+  ros::NodeHandle node_public;
 
   //override the default SIGINT handler
   signal(SIGINT, sigintHandler);
@@ -135,17 +136,17 @@ int main(int argc, char **argv)
     ROS_BREAK();
   }
 
-  //retrieve left motor LED pin from parameter server
-  if (!node_private.getParam("/hardware/drive_motor/left_motor_led_pin", left_motor_led_pin))
+  //retrieve left motor sleep pin from parameter server
+  if (!node_private.getParam("/hardware/drive_motor/left_motor_sleep_pin", left_motor_sleep_pin))
   {
-    ROS_ERROR("[drive_motor_node] left drive motor LED pin not defined in config file: sd_hardware_interface/config/hardware_interface.yaml");
+    ROS_ERROR("[drive_motor_node] left drive motor sleep pin not defined in config file: sd_hardware_interface/config/hardware_interface.yaml");
     ROS_BREAK();
   }
 
-  //retrieve right motor LED pin from parameter server
-  if (!node_private.getParam("/hardware/drive_motor/right_motor_led_pin", right_motor_led_pin))
+  //retrieve right motor sleep pin from parameter server
+  if (!node_private.getParam("/hardware/drive_motor/right_motor_sleep_pin", right_motor_sleep_pin))
   {
-    ROS_ERROR("[drive_motor_node] right drive motor LED pin not defined in config file: sd_hardware_interface/config/hardware_interface.yaml");
+    ROS_ERROR("[drive_motor_node] right drive motor sleep pin not defined in config file: sd_hardware_interface/config/hardware_interface.yaml");
     ROS_BREAK();
   }
 
@@ -158,15 +159,19 @@ int main(int argc, char **argv)
   }
 
   //create subscriber to subscribe to control messages message topic with queue size set to 1000
-  ros::Subscriber control_sub = node_private.subscribe("control", 1000, controlCallback);
+  ros::Subscriber control_sub = node_public.subscribe("/control/control", 1000, controlCallback);
 
   //create subscriber to subscribe to drive motor messages message topic with queue size set to 1000
-  ros::Subscriber drive_motor_sub = node_private.subscribe("drive_motors", 1000, driveMotorsCallback);
+  ros::Subscriber drive_motor_sub = node_public.subscribe("drive_motors", 1000, driveMotorsCallback);
 
   //run wiringPi GPIO setup function and set pin modes
   wiringPiSetup();
-  pinMode(left_motor_led_pin, OUTPUT);
-  pinMode(right_motor_led_pin, OUTPUT);
+  pinMode(left_motor_sleep_pin, OUTPUT);
+  pinMode(right_motor_sleep_pin, OUTPUT);
+
+  //disable motor sleep modes on motor driver
+  digitalWrite(left_motor_sleep_pin, HIGH);
+  digitalWrite(right_motor_sleep_pin, HIGH);
 
   //initialize i2c protocol and verify connection
   int fd = wiringPiI2CSetup(i2c_address);
@@ -198,22 +203,6 @@ int main(int argc, char **argv)
       if (result == -1)
       {
         ROS_INFO("[drive_motor_node] error writing to arduino via i2c: %d", errno);
-      }
-      else
-      {
-
-        //turn on left motor LED indicator if its PWM value is above 0
-        if (pwmValues[0] > 0)
-          digitalWrite(left_motor_led_pin, HIGH);
-        else
-          digitalWrite(left_motor_led_pin, LOW);
-
-        //turn on right motor LED indicator if its PWM value is above 0
-        if (pwmValues[1] > 0)
-          digitalWrite(right_motor_led_pin, HIGH);
-        else
-          digitalWrite(right_motor_led_pin, LOW);
-
       }
 
     }
