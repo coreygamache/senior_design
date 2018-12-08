@@ -131,6 +131,7 @@ int main(int argc, char **argv)
 
   //run wiringPi GPIO setup function and set pin modes
   wiringPiSetup();
+  pinMode(component_motor_standby_pin, OUTPUT);
   pinMode(toggle_button_pin, INPUT);
 
   //create variable for status of autonomous control
