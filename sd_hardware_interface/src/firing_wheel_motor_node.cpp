@@ -36,6 +36,12 @@ void firingMotorCallback(const sd_msgs::Mosfet::ConstPtr& msg)
     //set local enable variable to match value received in message
     enable = msg->enable;
 
+    //inform of enable status change
+    if (enable)
+      ROS_INFO("[firing_wheel_motor_node] firing wheel motor enabled");
+    else
+      ROS_INFO("[firing_wheel_motor_node] firing wheel motor disabled");
+
     //set pin to specified value of enable
     digitalWrite(output_pin, enable);
 
