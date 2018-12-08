@@ -42,7 +42,7 @@ void controlCallback(const sd_msgs::Control::ConstPtr& msg)
     //output notification message and error if one occurs
     //otherwise message was sent; set line following to true
     if (result == -1)
-      ROS_INFO("error writing to arduino via i2c: %d", errno);
+      ROS_INFO("[line_follower_node] error writing to arduino via i2c: %d", errno);
     else
       line_following = true;
 
@@ -57,7 +57,7 @@ void controlCallback(const sd_msgs::Control::ConstPtr& msg)
     //output notification message and error if one occurs
     //otherwise message was sent; set line following to false
     if (result == -1)
-      ROS_INFO("error writing to arduino via i2c: %d", errno);
+      ROS_INFO("[line_follower_node] error writing to arduino via i2c: %d", errno);
     else
       line_following = false;
 
@@ -83,15 +83,15 @@ int main(int argc, char **argv)
   int i2c_address;
   if (!node_private.getParam("/arduino/i2c_address", i2c_address))
   {
-    ROS_ERROR("arduino i2c address not defined in config file: sd_bringup/config/global.yaml");
+    ROS_ERROR("[line_follower_node] arduino i2c address not defined in config file: sd_bringup/config/global.yaml");
     ROS_BREAK();
   }
 
-  //retrieve refresh rate of sensor in hertz from parameter server
+  //retrieve refresh rate of line follower node in hertz from parameter server
   float refresh_rate;
   if (!node_private.getParam("/navigation/line_follower_node/refresh_rate", refresh_rate))
   {
-    ROS_ERROR("line follower node refresh rate not defined in config file: sd_navigation/config/navigation.yaml");
+    ROS_ERROR("[line_follower_node] line follower node refresh rate not defined in config file: sd_navigation/config/navigation.yaml");
     ROS_BREAK();
   }
 
@@ -101,9 +101,9 @@ int main(int argc, char **argv)
 
   //output notification message and error if one occurs
   if (fd == -1)
-    ROS_INFO("error establishing i2c connection: %d", errno);
+    ROS_INFO("[line_follower_node] error establishing i2c connection: %d", errno);
   else
-    ROS_INFO("i2c connection result: %d", fd);
+    ROS_INFO("[line_follower_node] i2c connection result: %d", fd);
 
   //create line following message object and set default parameters
   sd_msgs::LineFollowing line_following_msg;
@@ -139,7 +139,7 @@ int main(int argc, char **argv)
       //check whether line following is finished and output notification message if error occurs
       if (result == -1)
       {
-        ROS_INFO("error reading from arduino via i2c:: %d", errno);
+        ROS_INFO("[line_follower_node] error reading from arduino via i2c:: %d", errno);
       }
       else if (result == 1)
       {
