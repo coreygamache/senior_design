@@ -41,6 +41,12 @@ void conveyorMotorCallback(const sd_msgs::ComponentMotor::ConstPtr& msg)
     //set local enable variable to match value received in message
     enable = msg->enable;
 
+    //inform of enable status change
+    if (enable)
+      ROS_INFO("[conveyor_motor_node] conveyor motor enabled");
+    else
+      ROS_INFO("[conveyor_motor_node] conveyor motor disabled");
+
     //set pin to specified value of enable
     digitalWrite(pwm_pin, enable);
 
@@ -56,6 +62,12 @@ void conveyorMotorCallback(const sd_msgs::ComponentMotor::ConstPtr& msg)
 
       //set local direction value to match receive value
       dirValue = msg->direction;
+
+      //inform of direction status change
+      if (dirValue == 0)
+        ROS_INFO("[conveyor_motor_node] conveyor motor direction changed to forward");
+      else
+        ROS_INFO("[conveyor_motor_node] conveyor motor direction changed to reverse");
 
       //change pin output values to achieve requested direction
       if (dirValue == 0)
@@ -84,6 +96,9 @@ void conveyorMotorCallback(const sd_msgs::ComponentMotor::ConstPtr& msg)
       pwmValue = 0;
     else
       pwmValue = msg->pwm;
+
+    //inform of new value
+    ROS_INFO("[conveyor_motor_node] conveyor motor pwm output changed to %d", pwmValue);
 
   }
 
