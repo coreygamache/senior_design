@@ -68,6 +68,7 @@ int main(int argc, char **argv)
   //initialize node and create node handler
   ros::init(argc, argv, "firing_node");
   ros::NodeHandle node_private("~");
+  ros::NodeHandle node_public;
 
   //override the default SIGINT handler
   signal(SIGINT, sigintHandler);
@@ -102,16 +103,16 @@ int main(int argc, char **argv)
   gate_solenoid_msg.pwm = 0;
 
   //create publisher to publish control message status with buffer size 10, and latch set to true
-  ros::Publisher firing_status_pub = node_private.advertise<sd_msgs::FiringStatus>("firing_status", 10, true);
+  ros::Publisher firing_status_pub = node_public.advertise<sd_msgs::FiringStatus>("firing_status", 10, true);
 
   //create publisher to publish control message status with buffer size 10, and latch set to true
-  ros::Publisher gate_solenoid_pub = node_private.advertise<sd_msgs::Mosfet>("gate_solenoid", 10, false);
+  ros::Publisher gate_solenoid_pub = node_public.advertise<sd_msgs::Mosfet>("gate_solenoid", 10, false);
 
   //create subscriber to subscribe to balls collected messages message topic with queue size set to 1000
-  ros::Subscriber balls_collected_sub = node_private.subscribe("balls_collected", 1000, ballsCollectedCallback);
+  ros::Subscriber balls_collected_sub = node_public.subscribe("balls_collected", 1000, ballsCollectedCallback);
 
   //create subscriber to subscribe to firing motor messages message topic with queue size set to 1000
-  ros::Subscriber firing_motor_sub = node_private.subscribe("firing_motor", 1000, firingMotorCallback);
+  ros::Subscriber firing_motor_sub = node_public.subscribe("firing_motor", 1000, firingMotorCallback);
 
   //create variable for counting number of balls remaining
   int balls_fired = 0;
@@ -148,7 +149,8 @@ int main(int argc, char **argv)
       ROS_INFO("[firing_node] ball fired, balls remaining: %d", balls_collected - balls_fired);
 
     }
-    else if (!firing_motor_on)
+    //if all of above conditions are met except the firing motor isn't on then inform of status without firing
+    else if (line_following_completed && ready_to_fire && !firing_motor_on && ((balls_collected - balls_fired) > 0))
     {
 
       //inform that firing wheel motor is not enabled; do not fire

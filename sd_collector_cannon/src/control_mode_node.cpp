@@ -59,6 +59,7 @@ int main(int argc, char **argv)
   //initialize node and create node handler
   ros::init(argc, argv, "control_mode_node");
   ros::NodeHandle node_private("~");
+  ros::NodeHandle node_public;
 
   //override the default SIGINT handler
   signal(SIGINT, sigintHandler);
@@ -111,22 +112,22 @@ int main(int argc, char **argv)
   roller_msg.pwm = 0;
 
   //create publisher to publish control message status with buffer size 10, and latch set to true
-  ros::Publisher control_pub = node_private.advertise<sd_msgs::Control>("control", 10, true);
+  ros::Publisher control_pub = node_public.advertise<sd_msgs::Control>("control", 10, true);
 
   //create publisher to publish conveyor motor message with buffer size 10, and latch set to true
-  ros::Publisher conveyor_pub = node_private.advertise<sd_msgs::ComponentMotor>("conveyor_motor", 10, true);
+  ros::Publisher conveyor_pub = node_public.advertise<sd_msgs::ComponentMotor>("conveyor_motor", 10, true);
 
   //create publisher to publish firing wheel motor message with buffer size 10, and latch set to true
-  ros::Publisher firing_motor_pub = node_private.advertise<sd_msgs::Mosfet>("firing_motor", 10, true);
+  ros::Publisher firing_motor_pub = node_public.advertise<sd_msgs::Mosfet>("firing_motor", 10, true);
 
   //create publisher to publish roller motor message with buffer size 10, and latch set to true
-  ros::Publisher roller_pub = node_private.advertise<sd_msgs::ComponentMotor>("roller_motor", 10, true);
+  ros::Publisher roller_pub = node_public.advertise<sd_msgs::ComponentMotor>("roller_motor", 10, true);
 
   //create subscriber to subscribe to firing status messages message topic with queue size set to 1000
-  ros::Subscriber firing_status_sub = node_private.subscribe("firing_status", 1000, firingStatusCallback);
+  ros::Subscriber firing_status_sub = node_public.subscribe("firing_status", 1000, firingStatusCallback);
 
   //create subscriber to subscribe to line following messages message topic with queue size set to 1000
-  ros::Subscriber line_following_sub = node_private.subscribe("line_following", 1000, lineFollowingCallback);
+  ros::Subscriber line_following_sub = node_public.subscribe("line_following", 1000, lineFollowingCallback);
 
   //run wiringPi GPIO setup function and set pin modes
   wiringPiSetup();
@@ -154,41 +155,49 @@ int main(int argc, char **argv)
       //switch control modes
       autonomous_control = toggle_button_status;
 
+      //set time and parameters of control message
+      control_msg.header.stamp = ros::Time::now();
+      control_msg.autonomous_control = autonomous_control;
+
+      //publish control message
+      control_pub.publish(control_msg);
+
       //disable component motor driver standby mode
       digitalWrite(component_motor_standby_pin, HIGH);
 
-      //set time and parameters of control message
-      control_msg.header.stamp = ros::Time::now();
-      control_msg.autonomous_control = toggle_button_status;
-
-      //set time and parameters of conveyor message
-      conveyor_msg.header.stamp = ros::Time::now();
-      conveyor_msg.enable = toggle_button_status;
-
-      //set time and parameters of firing motor message
-      firing_motor_msg.header.stamp = ros::Time::now();
-      firing_motor_msg.enable = toggle_button_status;
-
-      //set time and parameters of roller message
-      roller_msg.header.stamp = ros::Time::now();
-      roller_msg.enable = toggle_button_status;
-
-      //publish messages
-      control_pub.publish(control_msg);
-      conveyor_pub.publish(conveyor_msg);
-      firing_motor_pub.publish(firing_motor_msg);
-      roller_pub.publish(roller_msg);
-
-      //output ROS_INFO messages to inform of change in control mode and hardware status
+      //if autonomous control is enabled then ensure all hardware is enabled
       if (autonomous_control)
       {
+
+        //set time and parameters of conveyor motor message
+        conveyor_msg.header.stamp = ros::Time::now();
+        conveyor_msg.enable = true;
+
+        //set time and parameters of firing motor message
+        firing_motor_msg.header.stamp = ros::Time::now();
+        firing_motor_msg.enable = true;
+
+        //set time and parameters of roller motor message
+        roller_msg.header.stamp = ros::Time::now();
+        roller_msg.enable = true;
+
+        //publish motor messages
+        conveyor_pub.publish(conveyor_msg);
+        firing_motor_pub.publish(firing_motor_msg);
+        roller_pub.publish(roller_msg);
+
+        //output ROS_INFO messages to inform of autonomous mode enabled
         ROS_INFO("[control_mode_node] control mode changed, autonomous control enabled");
         ROS_INFO("[control_mode_node] conveyor, firing wheel, and roller motors enabled");
+
       }
       else
       {
+
+        //output ROS_INFO messages to inform of autonomous mode disabled
         ROS_INFO("[control_mode_node] control mode changed, autonomous control disabled");
         ROS_INFO("[control_mode_node] conveyor, firing wheel, and roller motors disabled");
+
       }
 
     }
