@@ -66,6 +66,7 @@ int main(int argc, char **argv)
   //initialize node and create node handler
   ros::init(argc, argv, "firing_wheel_motor_node");
   ros::NodeHandle node_private("~");
+  ros::NodeHandle node_public;
 
   //override the default SIGINT handler
   signal(SIGINT, sigintHandler);
@@ -86,7 +87,7 @@ int main(int argc, char **argv)
   }
 
   //create subscriber to subscribe to firing wheel motor messages message topic with queue size set to 1000
-  ros::Subscriber firing_motor_sub = node_private.subscribe("firing_motor", 1000, firingMotorCallback);
+  ros::Subscriber firing_motor_sub = node_public.subscribe("firing_motor", 1000, firingMotorCallback);
 
   //run wiringPi GPIO setup function and set pin modes
   wiringPiSetup();
