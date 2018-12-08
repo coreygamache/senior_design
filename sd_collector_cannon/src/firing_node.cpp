@@ -109,10 +109,10 @@ int main(int argc, char **argv)
   ros::Publisher gate_solenoid_pub = node_public.advertise<sd_msgs::Mosfet>("gate_solenoid", 10, false);
 
   //create subscriber to subscribe to balls collected messages message topic with queue size set to 1000
-  ros::Subscriber balls_collected_sub = node_public.subscribe("balls_collected", 1000, ballsCollectedCallback);
+  ros::Subscriber balls_collected_sub = node_public.subscribe("/sensor/balls_collected", 1000, ballsCollectedCallback);
 
   //create subscriber to subscribe to firing motor messages message topic with queue size set to 1000
-  ros::Subscriber firing_motor_sub = node_public.subscribe("firing_motor", 1000, firingMotorCallback);
+  ros::Subscriber firing_motor_sub = node_public.subscribe("/hardware/firing_motor", 1000, firingMotorCallback);
 
   //create variable for counting number of balls remaining
   int balls_fired = 0;
