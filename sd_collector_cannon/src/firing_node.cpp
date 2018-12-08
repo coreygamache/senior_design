@@ -75,17 +75,17 @@ int main(int argc, char **argv)
 
   //retrieve fire delay time from parameter server [ms]
   float fire_delay_time;
-  if (!node_private.getParam("/collector_cannon/firing_node/fire_delay_time", fire_delay_time))
+  if (!node_private.getParam("/control/firing_node/fire_delay_time", fire_delay_time))
   {
-    ROS_ERROR("[firing_node] fire delay time not defined in config file: sd_collector_cannon/config/collector_cannon.yaml");
+    ROS_ERROR("[firing_node] fire delay time not defined in config file: sd_collector_cannon/config/control.yaml");
     ROS_BREAK();
   }
 
   //retrieve refresh rate of node in hertz from parameter server
   float refresh_rate;
-  if (!node_private.getParam("/collector_cannon/firing_node/refresh_rate", refresh_rate))
+  if (!node_private.getParam("/control/firing_node/refresh_rate", refresh_rate))
   {
-    ROS_ERROR("[firing_node] firing node refresh rate not defined in config file: sd_collector_cannon/config/collector_cannon.yaml");
+    ROS_ERROR("[firing_node] firing node refresh rate not defined in config file: sd_collector_cannon/config/control.yaml");
     ROS_BREAK();
   }
 

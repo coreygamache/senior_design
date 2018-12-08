@@ -73,17 +73,17 @@ int main(int argc, char **argv)
 
   //retrieve refresh rate of node in hertz from parameter server
   float refresh_rate;
-  if (!node_private.getParam("/collector_cannon/control_mode_node/refresh_rate", refresh_rate))
+  if (!node_private.getParam("/control/control_mode_node/refresh_rate", refresh_rate))
   {
-    ROS_ERROR("[control_mode_node] control mode node refresh rate not defined in config file: sd_collector_cannon/config/collector_cannon.yaml");
+    ROS_ERROR("[control_mode_node] control mode node refresh rate not defined in config file: sd_collector_cannon/config/control.yaml");
     ROS_BREAK();
   }
 
   //retrieve toggle button pin from parameter server
   int toggle_button_pin;
-  if (!node_private.getParam("/collector_cannon/control_mode_node/toggle_button_pin", toggle_button_pin))
+  if (!node_private.getParam("/control/control_mode_node/toggle_button_pin", toggle_button_pin))
   {
-    ROS_ERROR("[control_mode_node] toggle button pin not defined in config file: sd_collector_cannon/config/collector_cannon.yaml");
+    ROS_ERROR("[control_mode_node] toggle button pin not defined in config file: sd_collector_cannon/config/control.yaml");
     ROS_BREAK();
   }
 
