@@ -127,7 +127,7 @@ int main(int argc, char **argv)
   ros::Subscriber firing_status_sub = node_public.subscribe("firing_status", 1000, firingStatusCallback);
 
   //create subscriber to subscribe to line following messages message topic with queue size set to 1000
-  ros::Subscriber line_following_sub = node_public.subscribe("line_following", 1000, lineFollowingCallback);
+  ros::Subscriber line_following_sub = node_public.subscribe("/navigation/line_following", 1000, lineFollowingCallback);
 
   //run wiringPi GPIO setup function and set pin modes
   wiringPiSetup();
@@ -156,8 +156,13 @@ int main(int argc, char **argv)
       autonomous_control = toggle_button_status;
 
       //set time and parameters of control message
+      //when autonomous control is activated, robot is invariably returned to navigation mode
+      //this is to ensure robot does not enter firing mode unless navigation has been completed
       control_msg.header.stamp = ros::Time::now();
       control_msg.autonomous_control = autonomous_control;
+      control_msg.completed = false;
+      control_msg.firing_stage = false;
+      control_msg.navigation_stage = true;
 
       //publish control message
       control_pub.publish(control_msg);
@@ -191,6 +196,7 @@ int main(int argc, char **argv)
         ROS_INFO("[control_mode_node] conveyor, firing wheel, and roller motors enabled");
 
       }
+      //if autonomous control is disabled leave hardware status unchanged
       else
       {
 
@@ -203,47 +209,104 @@ int main(int argc, char **argv)
     }
 
     //[AUTONOMOUS MODE] END OF LINE REACHED HANDLING
-    //if autonomous mode is enabled, line following is complete, and either conveyor or roller are enabled:
-    //robot is switching to firing mode; disable conveyor and roller motors
-    if (autonomous_control && line_following_completed && (conveyor_msg.enable || roller_msg.enable))
+    //if autonomous mode is enabled, line following is complete, and robot is still in navigation stage:
+    //line following has just been completed; disable navigation and switch to firing stage
+    //conveyor and roller motors and their driver are disabled in firing stage to conserve power
+    //firing motor must be enabled if it is not already
+    if (autonomous_control && line_following_completed && control_msg.navigation_stage)
     {
 
-      //set time and parameters of conveyor message
-      conveyor_msg.header.stamp = ros::Time::now();
-      conveyor_msg.enable = false;
+    //set time and parameters of control message
+      control_msg.header.stamp = ros::Time::now();
+      control_msg.autonomous_control = autonomous_control;
+      control_msg.completed = false;
+      control_msg.firing_stage = true;
+      control_msg.navigation_stage = false;
 
-      //set time and parameters of roller message
-      roller_msg.header.stamp = ros::Time::now();
-      roller_msg.enable = false;
+      //publish control message
+      control_pub.publish(control_msg);
 
-      //publish messages
-      conveyor_pub.publish(conveyor_msg);
-      roller_pub.publish(roller_msg);
+      //if conveyor is enabled then disable it
+      if (conveyor_msg.enable)
+      {
+
+        //set time and parameters of conveyor message
+        conveyor_msg.header.stamp = ros::Time::now();
+        conveyor_msg.enable = false;
+
+        //publish conveyor motor message
+        conveyor_pub.publish(conveyor_msg);
+      }
+
+      //if roller is enabled then disable it
+      if (roller_msg.enable)
+      {
+
+        //set time and parameters of roller message
+        roller_msg.header.stamp = ros::Time::now();
+        roller_msg.enable = false;
+
+        //publish roller motor message
+        roller_pub.publish(roller_msg);
+
+      }
 
       //enable component motor driver standby mode
       digitalWrite(component_motor_standby_pin, LOW);
 
+      //enable firing motor if not already enabled
+      if (!firing_motor_msg.enable)
+      {
+
+        //set time and parameters of firing motor message
+        firing_motor_msg.header.stamp = ros::Time::now();
+        firing_motor_msg.enable = true;
+
+        //publish firing motor message
+        firing_motor_pub.publish(firing_motor_msg);
+
+      }
+
       //output ROS_INFO message to inform end of line was reached and of hardware status
-      ROS_INFO("[control_mode_node] end of line reached, disabling conveyor and roller motors");
+      ROS_INFO("[control_mode_node] end of line reached, disabling conveyor and roller motors if enabled");
 
     }
 
     //[AUTONOMOUS MODE] END OF FIRING ROUTINE HANDLING
-    //if autonous mode is enabled, line following is complete, firing routine is complete, and
-    //firing motor message enable status is still true then motor has not yet been turned off:
-    //robot has fired all balls; disable shooting wheel if enabled
-    if (autonomous_control && line_following_completed && firing_completed && firing_motor_msg.enable)
+    //if autonomous mode is enabled, firing stage is complete, and robot is still in firing stage:
+    //firing has just been completed; disable firing and switch to completed status
+    //firing motor is disabled to conserve power
+    if (autonomous_control && firing_completed && control_msg.firing_stage)
     {
 
-      //set time and parameters of firing motor message
-      firing_motor_msg.header.stamp = ros::Time::now();
-      firing_motor_msg.enable = false;
+      //set time and parameters of control message
+      control_msg.header.stamp = ros::Time::now();
+      control_msg.autonomous_control = autonomous_control;
+      control_msg.completed = false;
+      control_msg.firing_stage = true;
+      control_msg.navigation_stage = false;
 
-      //publish message
-      firing_motor_pub.publish(firing_motor_msg);
+      //publish control message
+      control_pub.publish(control_msg);
+
+      //disable firing wheel motor if enabled
+      if (firing_motor_msg.enable)
+      {
+
+        //set time and parameters of firing motor message
+        firing_motor_msg.header.stamp = ros::Time::now();
+        firing_motor_msg.enable = false;
+
+        //publish message
+        firing_motor_pub.publish(firing_motor_msg);
+
+      }
 
       //output ROS_INFO message to inform end firing is complete and of hardware status
       ROS_INFO("[control_mode_node] firing routine complete, disabling firing wheel motor");
+
+      //output ROS_INFO message to inform run routine is complete
+      ROS_INFO("[control_mode_node] normal operation routine finished; standing by");
 
     }
 
