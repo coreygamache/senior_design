@@ -63,22 +63,28 @@ void conveyorMotorCallback(const sd_msgs::ComponentMotor::ConstPtr& msg)
       //set local direction value to match receive value
       dirValue = msg->direction;
 
-      //inform of direction status change
-      if (dirValue == 0)
-        ROS_INFO("[conveyor_motor_node] conveyor motor direction changed to forward");
-      else
-        ROS_INFO("[conveyor_motor_node] conveyor motor direction changed to reverse");
-
       //change pin output values to achieve requested direction
       if (dirValue == 0)
       {
+
+        //inform of direction status change
+        ROS_INFO("[conveyor_motor_node] conveyor motor direction changed to forward");
+
+        //output to pins
         digitalWrite(dir_b_pin, LOW);
         digitalWrite(dir_a_pin, HIGH);
+
       }
       else
       {
+
+        //inform of direction change status
+        ROS_INFO("[conveyor_motor_node] conveyor motor direction changed to reverse");
+
+        //output to pins
         digitalWrite(dir_a_pin, LOW);
         digitalWrite(dir_b_pin, HIGH);
+
       }
 
     }
