@@ -117,6 +117,9 @@ int main(int argc, char **argv)
   //create subscriber to subscribe to firing motor messages message topic with queue size set to 1000
   ros::Subscriber firing_motor_sub = node_public.subscribe("/hardware/firing_motor", 1000, firingMotorCallback);
 
+  //create variable for tracking whether firing is completed
+  bool firing_completed = false;
+
   //create variable for counting number of balls remaining
   int balls_fired = 0;
 
@@ -161,13 +164,20 @@ int main(int argc, char **argv)
 
     }
 
-    //if number of balls fired or remaining has changed then publish new message
-    if ((balls_fired != firing_status_msg.balls_fired) || ((balls_collected - balls_fired) != firing_status_msg.balls_remaining))
+    //if currently in firing stage and no balls remain then firing is complete; set message value
+    if (firing_stage && ((balls_collected - balls_fired) == 0))
+      firing_completed = true;
+    else
+      firing_completed = false;
+
+    //else if number of balls fired, balls remaining, or completed status has changed then publish new message
+    if ((balls_fired != firing_status_msg.balls_fired) || ((balls_collected - balls_fired) != firing_status_msg.balls_remaining) || (firing_completed != firing_status_msg.completed))
     {
 
       //update message values
       firing_status_msg.balls_fired = balls_fired;
       firing_status_msg.balls_remaining = balls_collected - balls_fired;
+      firing_status_msg.completed = firing_completed;
 
       //publish new message
       firing_status_pub.publish(firing_status_msg);
