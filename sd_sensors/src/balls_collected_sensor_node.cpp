@@ -2,7 +2,17 @@
 #include <ball_sensor.hpp>
 #include <ros/ros.h>
 #include <sd_msgs/BallsCollected.h>
+#include <signal.h>
 
+
+//callback function called to process SIGINT command
+void sigintHandler(int sig)
+{
+
+  //call the default shutdown function
+  ros::shutdown();
+
+}
 
 int main(int argc, char **argv)
 {
@@ -13,12 +23,16 @@ int main(int argc, char **argv)
   //initialize node and create node handler
   ros::init(argc, argv, "balls_collected_sensor_node");
   ros::NodeHandle node_private("~");
+  ros::NodeHandle node_public;
+
+  //override the default SIGINT handler
+  signal(SIGINT, sigintHandler);
 
   //retrieve ball sensor output pin from parameter server
   int output_pin;
   if (!node_private.getParam("/sensor/balls_collected_sensor/output_pin", output_pin))
   {
-    ROS_ERROR("balls collected sensor output pin not defined in config file: sd_sensors/config/sensors.yaml");
+    ROS_ERROR("[balls_collected_sensor_node] balls collected sensor output pin not defined in config file: sd_sensors/config/sensors.yaml");
     ROS_BREAK();
   }
 
@@ -26,7 +40,7 @@ int main(int argc, char **argv)
   float refresh_rate;
   if (!node_private.getParam("/sensor/balls_collected_sensor/refresh_rate", refresh_rate))
   {
-    ROS_ERROR("balls collected sensor refresh rate not defined in config file: sd_sensors/config/sensors.yaml");
+    ROS_ERROR("[balls_collected_sensor_node] balls collected sensor refresh rate not defined in config file: sd_sensors/config/sensors.yaml");
     ROS_BREAK();
   }
 
@@ -40,7 +54,7 @@ int main(int argc, char **argv)
   balls_collected_msg.header.frame_id = "0";
 
   //create publisher to publish number of balls collected message with buffer size 10, and latch set to true
-  ros::Publisher balls_collected_sensor_pub = node_private.advertise<sd_msgs::BallsCollected>("balls_collected", 10, true);
+  ros::Publisher balls_collected_sensor_pub = node_public.advertise<sd_msgs::BallsCollected>("balls_collected", 10, true);
 
   //set refresh rate of ROS loop to defined refresh rate of sensor parameter from parameter server
   ros::Rate loop_rate(refresh_rate);
@@ -72,6 +86,9 @@ int main(int argc, char **argv)
 
       //publish number of balls collected message
       balls_collected_sensor_pub.publish(balls_collected_msg);
+
+      //inform of ball collected
+      ROS_INFO("[balls_collected_sensor_node] ball collected, total balls: %d", balls_collected);
 
     }
 
