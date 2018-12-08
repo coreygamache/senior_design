@@ -50,6 +50,7 @@ void firingMotorCallback(const sd_msgs::Mosfet::ConstPtr& msg)
 
 }
 
+//callback function to process timer firing event
 void timerCallback(const ros::TimerEvent& event)
 {
 
