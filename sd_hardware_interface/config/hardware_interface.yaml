@@ -5,8 +5,8 @@ conveyor:
   refresh_rate: 10
 
 drive_motor:
-  left_motor_led_pin: 22
-  right_motor_led_pin: 21
+  left_motor_sleep_pin: 22
+  right_motor_sleep_pin: 21
   refresh_rate: 1
 
 firing_wheel:
