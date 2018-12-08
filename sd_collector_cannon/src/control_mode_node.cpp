@@ -202,7 +202,6 @@ int main(int argc, char **argv)
 
         //output ROS_INFO messages to inform of autonomous mode disabled
         ROS_INFO("[control_mode_node] control mode changed, autonomous control disabled");
-        ROS_INFO("[control_mode_node] conveyor, firing wheel, and roller motors disabled");
 
       }
 
@@ -282,8 +281,8 @@ int main(int argc, char **argv)
       //set time and parameters of control message
       control_msg.header.stamp = ros::Time::now();
       control_msg.autonomous_control = autonomous_control;
-      control_msg.completed = false;
-      control_msg.firing_stage = true;
+      control_msg.completed = true;
+      control_msg.firing_stage = false;
       control_msg.navigation_stage = false;
 
       //publish control message
