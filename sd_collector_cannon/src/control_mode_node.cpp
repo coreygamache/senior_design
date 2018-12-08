@@ -179,6 +179,18 @@ int main(int argc, char **argv)
       firing_motor_pub.publish(firing_motor_msg);
       roller_pub.publish(roller_msg);
 
+      //output ROS_INFO messages to inform of change in control mode and hardware status
+      if (autonomous_control)
+      {
+        ROS_INFO("[control_mode_node] control mode changed, autonomous control enabled");
+        ROS_INFO("[control_mode_node] conveyor, firing wheel, and roller motors enabled");
+      }
+      else
+      {
+        ROS_INFO("[control_mode_node] control mode changed, autonomous control disabled");
+        ROS_INFO("[control_mode_node] conveyor, firing wheel, and roller motors disabled");
+      }
+
     }
 
     //[AUTONOMOUS MODE] END OF LINE REACHED HANDLING
@@ -202,6 +214,9 @@ int main(int argc, char **argv)
       //enable component motor driver standby mode
       digitalWrite(component_motor_standby_pin, LOW);
 
+      //output ROS_INFO message to inform end of line was reached and of hardware status
+      ROS_INFO("[control_mode_node] end of line reached, disabling conveyor and roller motors");
+
     }
 
     //[AUTONOMOUS MODE] END OF FIRING ROUTINE HANDLING
@@ -217,6 +232,9 @@ int main(int argc, char **argv)
 
       //publish message
       firing_motor_pub.publish(firing_motor_msg);
+
+      //output ROS_INFO message to inform end firing is complete and of hardware status
+      ROS_INFO("[control_mode_node] firing routine complete, disabling firing wheel motor");
 
     }
 
