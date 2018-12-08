@@ -30,30 +30,43 @@ void sigintHandler(int sig)
 void gateSolenoidCallback(const sd_msgs::Mosfet::ConstPtr& msg)
 {
 
-    //this conditional is changed to physically turn on/off the motor since PWM output is not possible (see main loop)
-    if (enable != msg->enable)
-    {
+  //this conditional is changed to physically turn on/off the motor since PWM output is not possible (see main loop)
+  if (enable != msg->enable)
+  {
 
-      //set local enable variable to match value received in message
-      enable = msg->enable;
-
-    }
-
-    //check motor pwm value and change if necessary
-    if (msg->pwm != pwmValue)
-    {
-
-      //verify motor PWM value is within PWM limits
-      if (msg->pwm > 255)
-        pwmValue = 255;
-      else if (msg->pwm < 0)
-        pwmValue = 0;
-      else
-        pwmValue = msg->pwm;
-
-    }
+    //set local enable variable to match value received in message
+    enable = msg->enable;
 
   }
+
+  //check motor pwm value and change if necessary
+  if (msg->pwm != pwmValue)
+  {
+
+    //verify motor PWM value is within PWM limits
+    if (msg->pwm > 255)
+      pwmValue = 255;
+    else if (msg->pwm < 0)
+      pwmValue = 0;
+    else
+      pwmValue = msg->pwm;
+
+  }
+
+}
+
+//callback function to process timer firing event
+//specified time since gate was opened has elapsed; close gate
+void timerCallback(const ros::TimerEvent& event)
+{
+  
+  //inform of gate closure
+  ROS_INFO("[gate_solenoid_node] gate open time elapsed; discharging gate solenoid");
+
+  //discharge solenoid until next request
+  digitalWrite(output_pin, LOW);
+
+}
 
 int main(int argc, char **argv)
 {
@@ -99,6 +112,9 @@ int main(int argc, char **argv)
   wiringPiSetup();
   pinMode(output_pin, OUTPUT);
 
+  //create timer to keep tracking of gate open time
+  ros::Timer timer;
+
   //set loop rate in Hz
   ros::Rate loop_rate(refresh_rate);
 
@@ -116,14 +132,8 @@ int main(int argc, char **argv)
       //charge solenoid
       digitalWrite(output_pin, HIGH);
 
-      //wait sufficient time for ball to be released to firing wheel
-      delay(gate_open_time);
-
-      //inform of gate closure
-      ROS_INFO("[gate_solenoid_node] gate open time elapsed; discharging gate solenoid");
-
-      //discharge solenoid until next request
-      digitalWrite(output_pin, LOW);
+      //set timer to keep track of gate open time
+      timer = node_private.createTimer(ros::Duration(gate_open_time), timerCallback, true);
 
       //set enable to false until next gate open request is received
       enable = false;
