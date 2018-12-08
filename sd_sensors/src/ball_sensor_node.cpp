@@ -2,7 +2,17 @@
 #include <ball_sensor.hpp>
 #include <ros/ros.h>
 #include <sd_msgs/Ball.h>
+#include <signal.h>
 
+
+//callback function called to process SIGINT command
+void sigintHandler(int sig)
+{
+
+  //call the default shutdown function
+  ros::shutdown();
+
+}
 
 int main(int argc, char **argv)
 {
@@ -13,12 +23,16 @@ int main(int argc, char **argv)
   //initialize node and create node handler
   ros::init(argc, argv, "ball_sensor_node");
   ros::NodeHandle node_private("~");
+  ros::NodeHandle node_public;
+
+  //override the default SIGINT handler
+  signal(SIGINT, sigintHandler);
 
   //retrieve output pin from parameter server
   int output_pin;
   if (!node_private.getParam("/sensor/ball_sensor/output_pin", output_pin))
   {
-    ROS_ERROR("ball sensor output pin not defined in config file: sd_sensors/config/sensors.yaml");
+    ROS_ERROR("[ball_sensor_node] ball sensor output pin not defined in config file: sd_sensors/config/sensors.yaml");
     ROS_BREAK();
   }
 
@@ -26,7 +40,7 @@ int main(int argc, char **argv)
   float refresh_rate;
   if (!node_private.getParam("/sensor/ball_sensor/refresh_rate", refresh_rate))
   {
-    ROS_ERROR("ball sensor refresh rate not defined in config file: sd_sensors/config/sensors.yaml");
+    ROS_ERROR("[ball_sensor_node] ball sensor refresh rate not defined in config file: sd_sensors/config/sensors.yaml");
     ROS_BREAK();
   }
 
@@ -40,7 +54,7 @@ int main(int argc, char **argv)
   ball_msg.header.frame_id = "ball_sensor_link";
 
   //create publisher to publish ball sensor message with buffer size 10, and latch set to false
-  ros::Publisher ball_sensor_pub = node_private.advertise<sd_msgs::Ball>("ball_sensor", 10, false);
+  ros::Publisher ball_sensor_pub = node_public.advertise<sd_msgs::Ball>("ball_sensor", 10, false);
 
   //set refresh rate of ROS loop to defined refresh rate from parameter server
   ros::Rate loop_rate(refresh_rate);
