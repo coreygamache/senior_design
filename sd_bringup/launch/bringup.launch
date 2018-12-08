@@ -2,9 +2,9 @@
 
 <!-- set arguments -->
 <arg name="control_enabled" value="true" />
-<arg name="hardware_enabled" value="false" />
-<arg name="navigation_enabled" value="false" />
-<arg name="sensors_enabled" value="false" />
+<arg name="hardware_enabled" value="true" />
+<arg name="navigation_enabled" value="true" />
+<arg name="sensors_enabled" value="true" />
 
 <!-- load global parameters to parameter server -->
 <rosparam command="load" file="$(find sd_bringup)/config/global.yaml" ns="/" />
@@ -31,6 +31,7 @@
   <node name="control_mode_node" pkg="sd_collector_cannon" type="control_mode_node" ns="control" output="screen">
     <remap from="/control/conveyor_motor" to="/hardware/conveyor_motor" />
     <remap from="/control/firing_motor" to="/hardware/firing_motor" />
+    <remap from="/control/line_following" to="/navigation/line_following" />
     <remap from="/control/roller_motor" to="/hardware/roller_motor" />
   </node>
   <node name="firing_node" pkg="sd_collector_cannon" type="firing_node" ns="control" output="screen">
