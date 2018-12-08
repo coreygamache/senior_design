@@ -9,12 +9,23 @@
 #include <ros/ros.h>
 #include <sd_msgs/Control.h>
 #include <sd_msgs/LineFollowing.h>
+#include <signal.h>
 #include <wiringPiI2C.h>
 
 //global variables
 bool line_following = false; //current line following status
 bool line_following_completed = false; //line following completion status
 int fd; //i2c protocol communication address
+
+
+//callback function called to process SIGINT command
+void sigintHandler(int sig)
+{
+
+  //call the default shutdown function
+  ros::shutdown();
+
+}
 
 //callback function called to process messages on control topic
 void controlCallback(const sd_msgs::Control::ConstPtr& msg)
@@ -63,6 +74,10 @@ int main(int argc, char **argv)
   //initialize node and create node handler
   ros::init(argc, argv, "line_follower_node");
   ros::NodeHandle node_private("~");
+  ros::NodeHandle node_public;
+
+  //override the default SIGINT handler
+  signal(SIGINT, sigintHandler);
 
   //retrieve arduino i2c address from parameter server
   int i2c_address;
@@ -97,10 +112,10 @@ int main(int argc, char **argv)
   line_following_msg.completed = line_following_completed;
 
   //create publisher to publish line following message status with buffer size 10, and latch set to false
-  ros::Publisher line_following_pub = node_private.advertise<sd_msgs::LineFollowing>("line_following", 10, false);
+  ros::Publisher line_following_pub = node_public.advertise<sd_msgs::LineFollowing>("line_following", 10, false);
 
   //create sunscriber to subscribe to control messages message topic with queue size set to 1000
-  ros::Subscriber control_sub = node_private.subscribe("control", 1000, controlCallback);
+  ros::Subscriber control_sub = node_public.subscribe("/control/control", 1000, controlCallback);
 
   //set loop rate in Hz
   ros::Rate loop_rate(refresh_rate);
