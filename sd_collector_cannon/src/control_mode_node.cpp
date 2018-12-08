@@ -216,12 +216,15 @@ int main(int argc, char **argv)
     if (autonomous_control && line_following_completed && control_msg.navigation_stage)
     {
 
-    //set time and parameters of control message
+      //set time and parameters of control message
       control_msg.header.stamp = ros::Time::now();
       control_msg.autonomous_control = autonomous_control;
       control_msg.completed = false;
       control_msg.firing_stage = true;
       control_msg.navigation_stage = false;
+
+      //set line following completed to false to ensure rechecking if mode changes
+      line_following_completed = false;
 
       //publish control message
       control_pub.publish(control_msg);
@@ -285,6 +288,9 @@ int main(int argc, char **argv)
       control_msg.completed = true;
       control_msg.firing_stage = false;
       control_msg.navigation_stage = false;
+
+      //set firing completed to false to ensure rechecking if mode changes
+      firing_completed = false;
 
       //publish control message
       control_pub.publish(control_msg);
