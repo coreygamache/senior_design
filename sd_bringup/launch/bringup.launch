@@ -32,7 +32,8 @@
 <!-- if control is enabled then load control parameters to parameter server and launch master control node -->
 <group if="$(arg control_enabled)">
   <rosparam command="load" file="$(find sd_collector_cannon)/config/collector_cannon.yaml" ns="collector_cannon" />
-  <node name="master_control_node" pkg="sd_collector_cannon" type="master_control_node" ns="collector_cannon" output="screen" />
+  <node name="control_mode_node" pkg="sd_collector_cannon" type="control_mode_node" ns="collector_cannon" output="screen" />
+  <node name="firing_node" pkg="sd_collector_cannon" type="firing_node" ns="collector_cannon" output="screen" />
 </group>
 
 </launch>
