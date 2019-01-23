@@ -109,13 +109,13 @@ int main(int argc, char **argv)
   //create publisher to publish control message status with buffer size 10, and latch set to true
   ros::Publisher gate_solenoid_pub = node_public.advertise<sd_msgs::Mosfet>("gate_solenoid", 10, false);
 
-  //create subscriber to subscribe to balls collected messages message topic with queue size set to 1000
+  //create subscriber to subscribe to balls collected messages topic with queue size set to 1000
   ros::Subscriber balls_collected_sub = node_public.subscribe("/sensor/balls_collected", 1000, ballsCollectedCallback);
 
-  //create subscriber to subscribe to control messages message topic with queue size set to 1000
+  //create subscriber to subscribe to control messages topic with queue size set to 1000
   ros::Subscriber control_sub = node_public.subscribe("control", 1000, controlCallback);
 
-  //create subscriber to subscribe to firing motor messages message topic with queue size set to 1000
+  //create subscriber to subscribe to firing motor messages topic with queue size set to 1000
   ros::Subscriber firing_motor_sub = node_public.subscribe("/hardware/firing_motor", 1000, firingMotorCallback);
 
   //create variable for tracking whether firing is completed
