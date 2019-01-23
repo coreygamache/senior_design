@@ -1,5 +1,6 @@
 //manual control node
 //handles Dual Shock 4 controller input to manually control robot
+#include <math.h>
 #include <ros/ros.h>
 #include <sd_msgs/ComponentMotor.h>
 #include <sd_msgs/Control.h>
@@ -145,7 +146,7 @@ int main(int argc, char **argv)
       drive_motors_msg.header.stamp = ros::Time::now();
 
       //set motor directions (0 = forward, 1 = reverse)
-      if (controller_axes[0] >= 0)
+      if (controller_axes[1] >= 0)
         drive_motors_msg.left_motor_dir = 0;
       else
         drive_motors_msg.left_motor_dir = 1;
@@ -156,8 +157,8 @@ int main(int argc, char **argv)
         drive_motors_msg.right_motor_dir = 1;
 
       //set motor PWM values
-      drive_motors_msg.left_motor_pwm = 255 * abs(controller_axes[0]);
-      drive_motors_msg.right_motor_pwm = 255 * abs(controller_axes[4]);
+      drive_motors_msg.left_motor_pwm = 255 * fabs(controller_axes[0]);
+      drive_motors_msg.right_motor_pwm = 255 * fabs(controller_axes[4]);
 
       //publish drive motors message
       drive_motors_pub.publish(drive_motors_msg);
