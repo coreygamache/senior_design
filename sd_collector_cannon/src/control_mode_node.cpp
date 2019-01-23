@@ -134,6 +134,9 @@ int main(int argc, char **argv)
   pinMode(component_motor_standby_pin, OUTPUT);
   pinMode(toggle_button_pin, INPUT);
 
+  //disable component motor driver standby mode on startup
+  digitalWrite(component_motor_standby_pin, HIGH);
+
   //create variable for status of autonomous control
   bool autonomous_control = false;
 
