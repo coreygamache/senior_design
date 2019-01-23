@@ -123,10 +123,10 @@ int main(int argc, char **argv)
   //create publisher to publish roller motor message with buffer size 10, and latch set to true
   ros::Publisher roller_pub = node_public.advertise<sd_msgs::ComponentMotor>("roller_motor", 10, true);
 
-  //create subscriber to subscribe to firing status messages message topic with queue size set to 1000
+  //create subscriber to subscribe to firing status messages topic with queue size set to 1000
   ros::Subscriber firing_status_sub = node_public.subscribe("firing_status", 1000, firingStatusCallback);
 
-  //create subscriber to subscribe to line following messages message topic with queue size set to 1000
+  //create subscriber to subscribe to line following messages topic with queue size set to 1000
   ros::Subscriber line_following_sub = node_public.subscribe("/navigation/line_following", 1000, lineFollowingCallback);
 
   //run wiringPi GPIO setup function and set pin modes
