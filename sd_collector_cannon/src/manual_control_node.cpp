@@ -157,7 +157,7 @@ int main(int argc, char **argv)
         drive_motors_msg.right_motor_dir = 1;
 
       //set motor PWM values
-      drive_motors_msg.left_motor_pwm = 255 * fabs(controller_axes[0]);
+      drive_motors_msg.left_motor_pwm = 255 * fabs(controller_axes[1]);
       drive_motors_msg.right_motor_pwm = 255 * fabs(controller_axes[4]);
 
       //publish drive motors message
