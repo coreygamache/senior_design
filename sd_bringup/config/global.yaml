@@ -3,3 +3,6 @@ arduino:
 
 component_motor_driver:
   standby_pin: 27
+
+joy_node:
+  dev: "/dev/input/js0"
