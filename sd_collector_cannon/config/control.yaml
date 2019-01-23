@@ -5,3 +5,6 @@ firing_node:
 control_mode_node:
   refresh_rate: 10
   toggle_button_pin: 2
+
+manual_control_node:
+  refresh_rate: 10
