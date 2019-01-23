@@ -10,6 +10,8 @@
 
 //global variables
 bool autonomous_control = true;
+
+//global controller variables
 std::vector<float> controller_axes(8, 0);
 std::vector<int> controller_buttons(13, 0);
 
@@ -29,6 +31,11 @@ void controlCallback(const sd_msgs::Control::ConstPtr& msg)
 
   //set local value to match message value
   autonomous_control = msg->autonomous_control;
+
+  if (!autonomous_control)
+  {
+    ROS_INFO("[manual_control_node] entering manual control mode");
+  }
 
 }
 
@@ -125,44 +132,44 @@ int main(int argc, char **argv)
   //set loop rate in Hz
   ros::Rate loop_rate(refresh_rate);
 
-  //create lockout variables to be used to prevent multiple motor enable status toggles on one button press
-  int conveyor_lockout = 0;
-  int firing_motor_lockout = 0;
-  int gate_solenoid_lockout = 0;
-  int roller_lockout = 0;
-
   while (ros::ok())
   {
-
-    //set drive motor message values as requested by controller input and publish message
-
-    //set time of drive motors message
-    drive_motors_msg.header.stamp = ros::Time::now();
-
-    //set motor directions (0 = forward, 1 = reverse)
-    if (controller_axes[0] >= 0)
-      drive_motors_msg.left_motor_dir = 0;
-    else
-      drive_motors_msg.left_motor_dir = 1;
-
-    if (controller_axes[4] >= 0)
-      drive_motors_msg.right_motor_dir = 0;
-    else
-      drive_motors_msg.right_motor_dir = 1;
-
-    //set motor PWM values
-    drive_motors_msg.left_motor_pwm = 255 * abs(controller_axes[0]);
-    drive_motors_msg.right_motor_pwm = 255 * abs(controller_axes[4]);
-
-    //enable/disable other motors as requested by controller input
 
     //if autonomous control is disabled then allow manual control
     if (!autonomous_control)
     {
 
-      //if conveyor button on controller is pressed and lockout isn't active then change enable status and publish message
-      if ((controller_buttons[3] == 1) && (conveyor_lockout == 0))
+      //set drive motor message values as requested by controller input and publish message
+
+      //set time of drive motors message
+      drive_motors_msg.header.stamp = ros::Time::now();
+
+      //set motor directions (0 = forward, 1 = reverse)
+      if (controller_axes[0] >= 0)
+        drive_motors_msg.left_motor_dir = 0;
+      else
+        drive_motors_msg.left_motor_dir = 1;
+
+      if (controller_axes[4] >= 0)
+        drive_motors_msg.right_motor_dir = 0;
+      else
+        drive_motors_msg.right_motor_dir = 1;
+
+      //set motor PWM values
+      drive_motors_msg.left_motor_pwm = 255 * abs(controller_axes[0]);
+      drive_motors_msg.right_motor_pwm = 255 * abs(controller_axes[4]);
+
+      //publish drive motors message
+      drive_motors_pub.publish(drive_motors_msg);
+
+      //enable/disable other motors as requested by controller input
+
+      //if conveyor button on controller is pressed then change enable status and publish message
+      if (controller_buttons[3] == 1)
       {
+
+        //set button status to 0 to prevent consecutive toggles for one button press
+        controller_buttons[3] = 0;
 
         //set time and parameters of conveyor motor message
         conveyor_msg.header.stamp = ros::Time::now();
@@ -174,19 +181,14 @@ int main(int argc, char **argv)
         //output ROS_INFO messages to inform of conveyor enable status change
         ROS_INFO("[manual_control_node] conveyor motor enable status changed: %d", conveyor_msg.enable);
 
-        //set lockout value to prevent multiple toggles on one button press
-        conveyor_lockout = refresh_rate / 2;
-
-      }
-      //otherwise decrement lockout value
-      else
-      {
-        conveyor_lockout--;
       }
 
-      //if fire button on controller is pressed and lockout isn't active then publish fire request message
-      if ((controller_buttons[7] == 1) && (gate_solenoid_lockout == 0))
+      //if fire button on controller is pressed then publish fire request message
+      if (controller_buttons[7] == 1)
       {
+
+        //set button status to 0 to prevent consecutive toggles for one button press
+        controller_buttons[7] = 0;
 
         //set time and parameters of firing motor message
         gate_solenoid_msg.header.stamp = ros::Time::now();
@@ -197,19 +199,14 @@ int main(int argc, char **argv)
         //output ROS_INFO messages to inform of fire ball request
         ROS_INFO("[manual_control_node] fire ball request issued");
 
-        //set lockout value to prevent multiple toggles on one button press
-        gate_solenoid_lockout = refresh_rate / 2;
-
-      }
-      //otherwise decrement lockout value
-      else
-      {
-        gate_solenoid_lockout--;
       }
 
-      //if firing wheel button on controller is pressed and lockout isn't active then change enable status and publish message
-      if ((controller_buttons[0] == 1) && (firing_motor_lockout == 0))
+      //if firing wheel button on controller is pressed then change enable status and publish message
+      if (controller_buttons[0] == 1)
       {
+
+        //set button status to 0 to prevent consecutive toggles for one button press
+        controller_buttons[0] = 0;
 
         //set time and parameters of firing motor message
         firing_motor_msg.header.stamp = ros::Time::now();
@@ -221,19 +218,14 @@ int main(int argc, char **argv)
         //output ROS_INFO messages to inform of firing motor enable status change
         ROS_INFO("[manual_control_node] firing wheel motor enable status changed: %d", firing_motor_msg.enable);
 
-        //set lockout value to prevent multiple toggles on one button press
-        firing_motor_lockout = refresh_rate / 2;
-
-      }
-      //otherwise decrement lockout value
-      else
-      {
-        firing_motor_lockout--;
       }
 
-      //if roller button on controller is pressed and lockout isn't active then change enable status and publish message
-      if ((controller_buttons[1] == 1) && (roller_lockout == 0))
+      //if roller button on controller is pressed then change enable status and publish message
+      if (controller_buttons[1] == 1)
       {
+
+        //set button status to 0 to prevent consecutive toggles for one button press
+        controller_buttons[1] = 0;
 
         //set time and parameters of roller motor message
         roller_msg.header.stamp = ros::Time::now();
@@ -245,14 +237,6 @@ int main(int argc, char **argv)
         //output ROS_INFO messages to inform of roller enable status change
         ROS_INFO("[manual_control_node] roller motor enable status changed: %d", roller_msg.enable);
 
-        //set lockout value to prevent multiple toggles on one button press
-        roller_lockout = refresh_rate / 2;
-
-      }
-      //otherwise decrement lockout value
-      else
-      {
-        roller_lockout--;
       }
 
     }
