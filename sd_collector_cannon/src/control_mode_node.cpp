@@ -6,12 +6,16 @@
 #include <sd_msgs/FiringStatus.h>
 #include <sd_msgs/LineFollowing.h>
 #include <sd_msgs/Mosfet.h>
+#include <sensor_msgs/Joy.h>
 #include <signal.h>
 #include <wiringPi.h>
 
 //global variables
 bool firing_completed = false;
 bool line_following_completed = false;
+
+//global controller variables
+std::vector<int> controller_buttons(13, 0);
 
 //pin variables
 //must be global so that they can be accessed by callback functions
@@ -27,6 +31,15 @@ void sigintHandler(int sig)
 
   //call the default shutdown function
   ros::shutdown();
+
+}
+
+//callback function called to process messages on joy topic
+void controllerCallback(const sensor_msgs::Joy::ConstPtr& msg)
+{
+
+  //set local values to match message values
+  controller_buttons = msg->buttons;
 
 }
 
@@ -126,6 +139,9 @@ int main(int argc, char **argv)
   //create subscriber to subscribe to firing status messages topic with queue size set to 1000
   ros::Subscriber firing_status_sub = node_public.subscribe("firing_status", 1000, firingStatusCallback);
 
+  //create subscriber to subscribe to joy messages topic with queue size set to 1000
+  ros::Subscriber controller_sub = node_public.subscribe("joy", 1000, controllerCallback);
+
   //create subscriber to subscribe to line following messages topic with queue size set to 1000
   ros::Subscriber line_following_sub = node_public.subscribe("/navigation/line_following", 1000, lineFollowingCallback);
 
@@ -156,18 +172,17 @@ int main(int argc, char **argv)
   while (ros::ok())
   {
 
-    //set toggle_button_status to current status of toggle toggle_button_pin
-    //toggle_button_pin HIGH indicates autonomous control is ON
-    //toggle_button_pin LOW indicates autonomous control is OFF (enable manual control)
-    bool toggle_button_status = digitalRead(toggle_button_pin);
-
     //CONTROL MODE CHANGE HANDLING
-    //switch control modes if current mode differs from mode requested by toggle button
-    if (autonomous_control != toggle_button_status)
+    //switch control modes if toggle button is pressed or controller button is pressed
+    if (digitalRead(toggle_button_pin) || (controller_buttons[10] == 1))
     {
 
+      //reset controller button if pressed to prevent mode from toggling twice on one button press
+      if (controller_buttons[10] == 1)
+        controller_buttons[10] = 0;
+
       //switch control modes
-      autonomous_control = toggle_button_status;
+      autonomous_control = !autonomous_control;
 
       //set time and parameters of control message
       //when autonomous control is activated, robot is invariably returned to navigation mode
