@@ -140,6 +140,16 @@ int main(int argc, char **argv)
   //create variable for status of autonomous control
   bool autonomous_control = false;
 
+  //initialize control message to disable autonomous control globally
+  control_msg.header.stamp = ros::Time::now();
+  control_msg.autonomous_control = false;
+  control_msg.completed = false;
+  control_msg.firing_stage = false;
+  control_msg.navigation_stage = false;
+
+  //publish initial control message to disable autonomous control globally
+  control_pub.publish(control_msg);
+
   //set loop rate in Hz
   ros::Rate loop_rate(refresh_rate);
 
