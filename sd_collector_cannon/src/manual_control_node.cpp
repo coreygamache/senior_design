@@ -10,7 +10,7 @@
 #include <signal.h>
 
 //global variables
-bool autonomous_control = true;
+bool autonomous_control = false;
 bool conveyor_enable = false;
 bool firing_motor_enable = false;
 bool roller_enable = false;
