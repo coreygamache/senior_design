@@ -11,6 +11,9 @@
 
 //global variables
 bool autonomous_control = true;
+bool conveyor_enable = false;
+bool firing_motor_enable = false;
+bool roller_enable = false;
 
 //global controller variables
 std::vector<float> controller_axes(8, 0);
@@ -40,6 +43,15 @@ void controlCallback(const sd_msgs::Control::ConstPtr& msg)
 
 }
 
+//callback function called to process messages on conveyor motor topic
+void conveyorCallback(const sd_msgs::ComponentMotor::ConstPtr& msg)
+{
+
+  //set local value to match message value
+  conveyor_enable = msg->enable;
+
+}
+
 //callback function called to process messages on joy topic
 void controllerCallback(const sensor_msgs::Joy::ConstPtr& msg)
 {
@@ -47,6 +59,24 @@ void controllerCallback(const sensor_msgs::Joy::ConstPtr& msg)
   //set local values to match message values
   controller_axes = msg->axes;
   controller_buttons = msg->buttons;
+
+}
+
+//callback function called to process messages on firing wheel motor topic
+void firingMotorCallback(const sd_msgs::Mosfet::ConstPtr& msg)
+{
+
+  //set local value to match message value
+  firing_motor_enable = msg->enable;
+
+}
+
+//callback function called to process messages on roller motor topic
+void rollerCallback(const sd_msgs::ComponentMotor::ConstPtr& msg)
+{
+
+  //set local value to match message value
+  roller_enable = msg->enable;
 
 }
 
@@ -75,7 +105,7 @@ int main(int argc, char **argv)
   //create conveyor message object and set default parameters
   sd_msgs::ComponentMotor conveyor_msg;
   conveyor_msg.header.frame_id = "0";
-  conveyor_msg.enable = false;
+  conveyor_msg.enable = conveyor_enable;
   conveyor_msg.direction = 0;
   conveyor_msg.pwm = 0;
 
@@ -90,7 +120,7 @@ int main(int argc, char **argv)
   //create firing motor message object and set default parameters
   sd_msgs::Mosfet firing_motor_msg;
   firing_motor_msg.header.frame_id = "0";
-  firing_motor_msg.enable = false;
+  firing_motor_msg.enable = firing_motor_enable;
   firing_motor_msg.pwm = 0;
 
   //create gate solenoid message object and set default parameters
@@ -105,7 +135,7 @@ int main(int argc, char **argv)
   //create roller motor message object and set default parameters
   sd_msgs::ComponentMotor roller_msg;
   roller_msg.header.frame_id = "0";
-  roller_msg.enable = false;
+  roller_msg.enable = firing_motor_enable;
   roller_msg.direction = 0;
   roller_msg.pwm = 0;
 
@@ -127,8 +157,17 @@ int main(int argc, char **argv)
   //create subscriber to subscribe to control messages topic with queue size set to 1000
   ros::Subscriber control_sub = node_public.subscribe("control", 1000, controlCallback);
 
+  //create subscriber to subscribe to conveyor motor messages topic with queue size set to 1000
+  ros::Subscriber conveyor_sub = node_public.subscribe("conveyor_motor", 1000, conveyorCallback);
+
   //create subscriber to subscribe to joy messages topic with queue size set to 1000
   ros::Subscriber controller_sub = node_public.subscribe("joy", 1000, controllerCallback);
+
+  //create subscriber to subscribe to firing wheel motor messages topic with queue size set to 1000
+  ros::Subscriber firing_motor_sub = node_public.subscribe("firing_motor", 1000, firingMotorCallback);
+
+  //create subscriber to subscribe to roller motor messages topic with queue size set to 1000
+  ros::Subscriber roller_sub = node_public.subscribe("roller_motor", 1000, rollerCallback);
 
   //set loop rate in Hz
   ros::Rate loop_rate(refresh_rate);
@@ -172,15 +211,18 @@ int main(int argc, char **argv)
         //set button status to 0 to prevent consecutive toggles for one button press
         controller_buttons[3] = 0;
 
+        //change conveyor motor enable status
+        conveyor_enable = !conveyor_enable;
+
         //set time and parameters of conveyor motor message
         conveyor_msg.header.stamp = ros::Time::now();
-        conveyor_msg.enable = !conveyor_msg.enable;
+        conveyor_msg.enable = conveyor_enable;
 
         //publish conveyor motor message
         conveyor_pub.publish(conveyor_msg);
 
         //output ROS_INFO messages to inform of conveyor enable status change
-        ROS_INFO("[manual_control_node] conveyor motor enable status changed: %d", conveyor_msg.enable);
+        ROS_INFO("[manual_control_node] conveyor motor enable status changed: %d", conveyor_enable);
 
       }
 
@@ -209,15 +251,18 @@ int main(int argc, char **argv)
         //set button status to 0 to prevent consecutive toggles for one button press
         controller_buttons[0] = 0;
 
+        //change firing wheel motor enable status
+        firing_motor_enable = !firing_motor_enable;
+
         //set time and parameters of firing motor message
         firing_motor_msg.header.stamp = ros::Time::now();
-        firing_motor_msg.enable = !firing_motor_msg.enable;
+        firing_motor_msg.enable = firing_motor_enable;
 
         //publish firing motor message
         firing_motor_pub.publish(firing_motor_msg);
 
         //output ROS_INFO messages to inform of firing motor enable status change
-        ROS_INFO("[manual_control_node] firing wheel motor enable status changed: %d", firing_motor_msg.enable);
+        ROS_INFO("[manual_control_node] firing wheel motor enable status changed: %d", firing_motor_enable);
 
       }
 
@@ -228,15 +273,18 @@ int main(int argc, char **argv)
         //set button status to 0 to prevent consecutive toggles for one button press
         controller_buttons[1] = 0;
 
+        //change firing wheel motor enable status
+        roller_enable = !roller_enable;
+
         //set time and parameters of roller motor message
         roller_msg.header.stamp = ros::Time::now();
-        roller_msg.enable = !roller_msg.enable;
+        roller_msg.enable = roller_enable;
 
         //publish roller motor message
         roller_pub.publish(roller_msg);
 
         //output ROS_INFO messages to inform of roller enable status change
-        ROS_INFO("[manual_control_node] roller motor enable status changed: %d", roller_msg.enable);
+        ROS_INFO("[manual_control_node] roller motor enable status changed: %d", roller_enable);
 
       }
 
