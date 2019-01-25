@@ -36,6 +36,7 @@ void controlCallback(const sd_msgs::Control::ConstPtr& msg)
   //set local value to match message value
   autonomous_control = msg->autonomous_control;
 
+  //inform of switch to manual control mode
   if (!autonomous_control)
   {
     ROS_INFO("[manual_control_node] entering manual control mode");
