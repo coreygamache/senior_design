@@ -13,6 +13,7 @@
 //global variables
 bool firing_completed = false;
 bool line_following_completed = false;
+bool mode_change_requested = false;
 
 //global controller variables
 std::vector<int> controller_buttons(13, 0);
@@ -40,6 +41,19 @@ void controllerCallback(const sensor_msgs::Joy::ConstPtr& msg)
 
   //set local values to match message values
   controller_buttons = msg->buttons;
+
+  //if mode change controller button is pressed then set change mode request true
+  if (controller_buttons[10] == 1)
+  {
+
+    //set mode change requested to true to indicate request to change modes
+    mode_change_requested = true;
+
+    //reset controller button if pressed to prevent mode from toggling twice on one button press
+    if (controller_buttons[10] == 1)
+      controller_buttons[10] = 0;
+
+  }
 
 }
 
@@ -136,11 +150,11 @@ int main(int argc, char **argv)
   //create publisher to publish roller motor message with buffer size 10, and latch set to true
   ros::Publisher roller_pub = node_public.advertise<sd_msgs::ComponentMotor>("roller_motor", 10, true);
 
-  //create subscriber to subscribe to firing status messages topic with queue size set to 1000
-  ros::Subscriber firing_status_sub = node_public.subscribe("firing_status", 1000, firingStatusCallback);
-
   //create subscriber to subscribe to joy messages topic with queue size set to 1000
   ros::Subscriber controller_sub = node_public.subscribe("joy", 1000, controllerCallback);
+
+  //create subscriber to subscribe to firing status messages topic with queue size set to 1000
+  ros::Subscriber firing_status_sub = node_public.subscribe("firing_status", 1000, firingStatusCallback);
 
   //create subscriber to subscribe to line following messages topic with queue size set to 1000
   ros::Subscriber line_following_sub = node_public.subscribe("/navigation/line_following", 1000, lineFollowingCallback);
@@ -174,12 +188,11 @@ int main(int argc, char **argv)
 
     //CONTROL MODE CHANGE HANDLING
     //switch control modes if toggle button is pressed or controller button is pressed
-    if (digitalRead(toggle_button_pin) || (controller_buttons[10] == 1))
+    if (digitalRead(toggle_button_pin) || mode_change_requested)
     {
 
-      //reset controller button if pressed to prevent mode from toggling twice on one button press
-      if (controller_buttons[10] == 1)
-        controller_buttons[10] = 0;
+      //reset mode change requested to prevent mode from toggling twice on one button press
+      mode_change_requested = false;
 
       //switch control modes
       autonomous_control = !autonomous_control;
