@@ -28,7 +28,7 @@
 <!-- if control is enabled then load control parameters to parameter server and launch control nodes -->
 <group if="$(arg control_enabled)">
   <rosparam command="load" file="$(find sd_collector_cannon)/config/control.yaml" ns="control" />
-  <node name="control_mode_node" pkg="sd_collector_cannon" type="control_mode_node" ns="control" output="screen">
+  <node name="control_node" pkg="sd_collector_cannon" type="control_node" ns="control" output="screen">
     <remap from="/control/conveyor_motor" to="/hardware/conveyor_motor" />
     <remap from="/control/firing_motor" to="/hardware/firing_motor" />
     <remap from="/control/line_following" to="/navigation/line_following" />
