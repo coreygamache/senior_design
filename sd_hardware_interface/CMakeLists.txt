@@ -118,6 +118,7 @@ add_executable(drive_motor_node src/drive_motor_node.cpp)
 add_executable(firing_wheel_motor_node src/firing_wheel_motor_node.cpp)
 add_executable(gate_solenoid_node src/gate_solenoid_node.cpp)
 add_executable(roller_motor_node src/roller_motor_node.cpp)
+add_executable(i2c_comm_test_node src/i2c_comm_test_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -133,6 +134,7 @@ add_dependencies(drive_motor_node ${catkin_EXPORTED_TARGETS})
 add_dependencies(firing_wheel_motor_node ${catkin_EXPORTED_TARGETS})
 add_dependencies(gate_solenoid_node ${catkin_EXPORTED_TARGETS})
 add_dependencies(roller_motor_node ${catkin_EXPORTED_TARGETS})
+add_dependencies(i2c_comm_test_node ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node
@@ -143,3 +145,4 @@ target_link_libraries(drive_motor_node ${catkin_LIBRARIES} wiringPi)
 target_link_libraries(firing_wheel_motor_node ${catkin_LIBRARIES} wiringPi)
 target_link_libraries(gate_solenoid_node ${catkin_LIBRARIES} wiringPi)
 target_link_libraries(roller_motor_node ${catkin_LIBRARIES} wiringPi)
+target_link_libraries(i2c_comm_test_node ${catkin_LIBRARIES} wiringPi)
