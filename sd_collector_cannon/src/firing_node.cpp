@@ -2,11 +2,13 @@
 #include <ros/ros.h>
 #include <sd_msgs/BallsCollected.h>
 #include <sd_msgs/Control.h>
+#include <sd_msgs/DisableFiring.h>
 #include <sd_msgs/FiringStatus.h>
 #include <sd_msgs/Mosfet.h>
 #include <signal.h>
 
 //global variables
+bool autonomous_control = false;
 bool firing_motor_on = false;
 bool firing_stage = false;
 bool ready_to_fire = true;
@@ -36,8 +38,52 @@ void ballsCollectedCallback(const sd_msgs::BallsCollected::ConstPtr& msg)
 void controlCallback(const sd_msgs::Control::ConstPtr& msg)
 {
 
-  //set local value to match message value
-  firing_stage = msg->firing_stage;
+  //verify that local mode matches global mode
+  if (autonomous_control != msg->autonomous_control)
+  {
+
+    //modes do not match; send notification and shut down node
+    ROS_INFO("[firing_node] local control mode does not match global control mode; killing program");
+    ROS_BREAK();
+
+  }
+  else
+  {
+
+    //set local value to match message value
+    firing_stage = msg->firing_stage;
+
+  }
+
+}
+
+//callback function called to process service requests on the disable firing topic
+bool DisableFiringCallback(sd_msgs::DisableFiring::Request& req, sd_msgs::DisableFiring::Response& res)
+{
+
+  //if node isn't currently busy then ready to change modes, otherwise not ready to change
+  res.ready_to_change = true;
+
+  //output ROS INFO message to inform of mode change request and reply status
+  if (req.mode_change_requested && res.ready_to_change)
+  {
+
+    //change modes
+    autonomous_control = !autonomous_control;
+
+    //output notification
+    ROS_INFO("[firing_node] mode change requested; changing control modes");
+
+  }
+  else if (!req.mode_change_requested && res.ready_to_change)
+    ROS_INFO("[firing_node] ready to change modes status requested; indicating ready to change");
+  else if (req.mode_change_requested && !res.ready_to_change)
+    ROS_INFO("[firing_node] mode change requested; indicating node is busy");
+  else
+    ROS_INFO("[firing_node] ready to change modes status requested; indicating node is busy");
+
+  //return true to indicate service processing is complete
+  return true;
 
 }
 
@@ -90,12 +136,12 @@ int main(int argc, char **argv)
     ROS_BREAK();
   }
 
-  //create gate solenoid message object and set default parameters
+  //create firing status message object and set default parameters
   sd_msgs::FiringStatus firing_status_msg;
   firing_status_msg.header.frame_id = "0";
   firing_status_msg.balls_fired = 0;
-  firing_status_msg.balls_remaining = 0;
-  firing_status_msg.completed = false;
+  firing_status_msg.balls_remaining = balls_collected;
+  firing_status_msg.complete = false;
 
   //create gate solenoid message object and set default parameters
   sd_msgs::Mosfet gate_solenoid_msg;
@@ -103,11 +149,14 @@ int main(int argc, char **argv)
   gate_solenoid_msg.enable = true;
   gate_solenoid_msg.pwm = 0;
 
-  //create publisher to publish control message status with buffer size 10, and latch set to true
+  //create publisher to publish firing status message with buffer size 10, and latch set to true
   ros::Publisher firing_status_pub = node_public.advertise<sd_msgs::FiringStatus>("firing_status", 10, true);
 
-  //create publisher to publish control message status with buffer size 10, and latch set to true
+  //create publisher to publish gate solenoid message with buffer size 10, and latch set to true
   ros::Publisher gate_solenoid_pub = node_public.advertise<sd_msgs::Mosfet>("gate_solenoid", 10, false);
+
+  //create service to process service requests on the disable firing topic
+  ros::ServiceServer disable_firing_srv = node_public.advertiseService("disable_firing", DisableFiringCallback);
 
   //create subscriber to subscribe to balls collected messages topic with queue size set to 1000
   ros::Subscriber balls_collected_sub = node_public.subscribe("/sensor/balls_collected", 1000, ballsCollectedCallback);
@@ -118,8 +167,11 @@ int main(int argc, char **argv)
   //create subscriber to subscribe to firing motor messages topic with queue size set to 1000
   ros::Subscriber firing_motor_sub = node_public.subscribe("/hardware/firing_motor", 1000, firingMotorCallback);
 
-  //create variable for tracking whether firing is completed
-  bool firing_completed = false;
+  //publish initial firing status message
+  firing_status_pub.publish(firing_status_msg);
+
+  //create variable for tracking whether firing is complete
+  bool firing_complete = false;
 
   //create variable for counting number of balls remaining
   int balls_fired = 0;
@@ -133,10 +185,9 @@ int main(int argc, char **argv)
   while (ros::ok())
   {
 
-    //if line following is completed, fire delay time has elapsed (since last shot if there was one),
+    //if line following is complete, fire delay time has elapsed (since last shot if there was one),
     //firing motor is on, at least one ball is remaining, request gate solenoid to open to fire a ball
-    //NOTE: line_following_completed can only be true if control mode is set to autonomous
-    //NOTE: (see line_follower_node for logic)
+    //NOTE: line_following_complete can only be true if control mode is set to autonomous
     if (firing_stage && ready_to_fire && firing_motor_on && ((balls_collected - balls_fired) > 0))
     {
 
@@ -167,18 +218,18 @@ int main(int argc, char **argv)
 
     //if currently in firing stage and no balls remain then firing is complete; set message value
     if (firing_stage && ((balls_collected - balls_fired) == 0))
-      firing_completed = true;
+      firing_complete = true;
     else
-      firing_completed = false;
+      firing_complete = false;
 
-    //else if number of balls fired, balls remaining, or completed status has changed then publish new message
-    if ((balls_fired != firing_status_msg.balls_fired) || ((balls_collected - balls_fired) != firing_status_msg.balls_remaining) || (firing_completed != firing_status_msg.completed))
+    //if number of balls fired, balls remaining, or complete status has changed then publish new message
+    if ((balls_fired != firing_status_msg.balls_fired) || ((balls_collected - balls_fired) != firing_status_msg.balls_remaining) || (firing_complete != firing_status_msg.complete))
     {
 
       //update message values
       firing_status_msg.balls_fired = balls_fired;
       firing_status_msg.balls_remaining = balls_collected - balls_fired;
-      firing_status_msg.completed = firing_completed;
+      firing_status_msg.complete = firing_complete;
 
       //publish new message
       firing_status_pub.publish(firing_status_msg);
