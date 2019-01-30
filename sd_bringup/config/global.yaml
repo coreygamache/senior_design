@@ -1,5 +1,7 @@
 arduino:
   i2c_address: 0x04 # i2c protocol address
+  line_following_pin: 254
+  line_following_complete_pin: 255
 
 component_motor_driver:
   standby_pin: 27
