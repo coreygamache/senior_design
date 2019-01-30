@@ -60,15 +60,15 @@ bool DisableLineFollowingCallback(sd_msgs::DisableLineFollowing::Request& req, s
     mode_change_requested = true;
 
     //output notification
-    ROS_INFO("[map_waypoints_node] mode change requested; indicating ready to change");
+    ROS_INFO("[line_follower_node] mode change requested; indicating ready to change");
 
   }
   else if (!req.mode_change_requested && res.ready_to_change)
-    ROS_INFO("[map_waypoints_node] ready to change modes status requested; indicating ready to change");
+    ROS_INFO("[line_follower_node] ready to change modes status requested; indicating ready to change");
   else if (req.mode_change_requested && !res.ready_to_change)
-    ROS_INFO("[map_waypoints_node] mode change requested; indicating node is busy");
+    ROS_INFO("[line_follower_node] mode change requested; indicating node is busy");
   else
-    ROS_INFO("[map_waypoints_node] ready to change modes status requested; indicating node is busy");
+    ROS_INFO("[line_follower_node] ready to change modes status requested; indicating node is busy");
 
   //return true to indicate service processing is complete
   return true;
