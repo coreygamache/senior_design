@@ -48,7 +48,7 @@ void controlCallback(const sd_msgs::Control::ConstPtr& msg)
 bool DisableLineFollowingCallback(sd_msgs::DisableLineFollowing::Request& req, sd_msgs::DisableLineFollowing::Response& res)
 {
 
-    //if node isn't currently mapping then ready to change modes, otherwise not ready to change
+  //if node isn't currently busy then ready to change modes, otherwise not ready to change
   res.ready_to_change = true;
 
   //output ROS INFO message to inform of mode change request and reply status
@@ -60,7 +60,7 @@ bool DisableLineFollowingCallback(sd_msgs::DisableLineFollowing::Request& req, s
     mode_change_requested = true;
 
     //output notification
-    ROS_INFO("[line_follower_node] mode change requested; indicating ready to change");
+    ROS_INFO("[line_follower_node] mode change requested; changing control modes");
 
   }
   else if (!req.mode_change_requested && res.ready_to_change)
@@ -127,7 +127,7 @@ int main(int argc, char **argv)
   //create publisher to publish line following message status with buffer size 10, and latch set to false
   ros::Publisher line_following_pub = node_public.advertise<sd_msgs::LineFollowing>("line_following", 10, true);
 
-  //create service to process service requests on the disable mapping topic
+  //create service to process service requests on the disable line following topic
   ros::ServiceServer disable_line_following_srv = node_public.advertiseService("disable_line_following", DisableLineFollowingCallback);
 
   //create sunscriber to subscribe to control messages message topic with queue size set to 1000
