@@ -2,9 +2,12 @@
 //handles Dual Shock 4 controller input to manually control robot
 #include <math.h>
 #include <ros/ros.h>
+#include <sd_msgs/BallsCollected.h>
 #include <sd_msgs/ComponentMotor.h>
 #include <sd_msgs/Control.h>
+#include <sd_msgs/DisableManualControl.h>
 #include <sd_msgs/DriveMotors.h>
+#include <sd_msgs/FiringStatus.h>
 #include <sd_msgs/Mosfet.h>
 #include <sensor_msgs/Joy.h>
 #include <signal.h>
@@ -13,7 +16,9 @@
 bool autonomous_control = false;
 bool conveyor_enable = false;
 bool firing_motor_enable = false;
+bool ready_to_fire = true;
 bool roller_enable = false;
+int balls_collected = 0;
 
 //global controller variables
 std::vector<float> controller_axes(8, 0);
@@ -29,17 +34,28 @@ void sigintHandler(int sig)
 
 }
 
+//callback function called to process messages on balls collected topic
+void ballsCollectedCallback(const sd_msgs::BallsCollected::ConstPtr& msg)
+{
+
+  //if number of balls collected in message is valid then set local value to match
+  if (msg->balls_collected >= 0)
+    balls_collected = msg->balls_collected;
+
+}
+
 //callback function called to process messages on control topic
 void controlCallback(const sd_msgs::Control::ConstPtr& msg)
 {
 
-  //set local value to match message value
-  autonomous_control = msg->autonomous_control;
-
-  //inform of switch to manual control mode
-  if (!autonomous_control)
+  //verify that local mode matches global mode
+  if (autonomous_control != msg->autonomous_control)
   {
-    ROS_INFO("[manual_control_node] entering manual control mode");
+
+    //modes do not match; send notification and shut down node
+    ROS_INFO("[manual_control_node] local control mode does not match global control mode; killing program");
+    ROS_BREAK();
+
   }
 
 }
@@ -63,6 +79,36 @@ void controllerCallback(const sensor_msgs::Joy::ConstPtr& msg)
 
 }
 
+//callback function called to process service requests on the disable manual control topic
+bool DisableManualControlCallback(sd_msgs::DisableManualControl::Request& req, sd_msgs::DisableManualControl::Response& res)
+{
+
+  //if node isn't currently mapping then ready to change modes, otherwise not ready to change
+  res.ready_to_change = true;
+
+  //output ROS INFO message to inform of mode change request and reply status
+  if (req.mode_change_requested && res.ready_to_change)
+  {
+
+    //change modes
+    autonomous_control = !autonomous_control;
+
+    //output notification
+    ROS_INFO("[manual_control_node] mode change requested; changing control modes");
+
+  }
+  else if (!req.mode_change_requested && res.ready_to_change)
+    ROS_INFO("[manual_control_node] ready to change modes status requested; indicating ready to change");
+  else if (req.mode_change_requested && !res.ready_to_change)
+    ROS_INFO("[manual_control_node] mode change requested; indicating node is busy");
+  else
+    ROS_INFO("[manual_control_node] ready to change modes status requested; indicating node is busy");
+
+  //return true to indicate service processing is complete
+  return true;
+
+}
+
 //callback function called to process messages on firing wheel motor topic
 void firingMotorCallback(const sd_msgs::Mosfet::ConstPtr& msg)
 {
@@ -81,6 +127,16 @@ void rollerCallback(const sd_msgs::ComponentMotor::ConstPtr& msg)
 
 }
 
+//callback function to process timer firing event
+void timerCallback(const ros::TimerEvent& event)
+{
+
+  //specified time since last shot fired has elapsed
+  //reset ready to fire to true
+  ready_to_fire = true;
+
+}
+
 int main(int argc, char **argv)
 {
 
@@ -94,6 +150,14 @@ int main(int argc, char **argv)
 
   //override the default SIGINT handler
   signal(SIGINT, sigintHandler);
+
+  //retrieve fire delay time from parameter server [ms]
+  float fire_delay_time;
+  if (!node_private.getParam("/control/firing_node/fire_delay_time", fire_delay_time))
+  {
+    ROS_ERROR("[manual_control_node] fire delay time not defined in config file: sd_collector_cannon/config/control.yaml");
+    ROS_BREAK();
+  }
 
   //retrieve refresh rate of node in hertz from parameter server
   float refresh_rate;
@@ -124,6 +188,13 @@ int main(int argc, char **argv)
   firing_motor_msg.enable = firing_motor_enable;
   firing_motor_msg.pwm = 0;
 
+  //create firing status message object and set default parameters
+  sd_msgs::FiringStatus firing_status_msg;
+  firing_status_msg.header.frame_id = "0";
+  firing_status_msg.balls_fired = 0;
+  firing_status_msg.balls_remaining = 0;
+  firing_status_msg.complete = false;
+
   //create gate solenoid message object and set default parameters
   //the firing node automatically disables the solenoid after a set amount of time,
   //therefore this node only needs to send a message with enable = true
@@ -149,11 +220,17 @@ int main(int argc, char **argv)
   //create publisher to publish firing wheel motor message with buffer size 10, and latch set to true
   ros::Publisher firing_motor_pub = node_public.advertise<sd_msgs::Mosfet>("firing_motor", 10, true);
 
-  //create publisher to publish control message status with buffer size 10, and latch set to true
+  //create publisher to publish firing status message with buffer size 10, and latch set to true
+  ros::Publisher firing_status_pub = node_public.advertise<sd_msgs::FiringStatus>("firing_status", 10, true);
+
+  //create publisher to publish gate solenoid message with buffer size 10, and latch set to true
   ros::Publisher gate_solenoid_pub = node_public.advertise<sd_msgs::Mosfet>("gate_solenoid", 10, false);
 
   //create publisher to publish roller motor message with buffer size 10, and latch set to true
   ros::Publisher roller_pub = node_public.advertise<sd_msgs::ComponentMotor>("roller_motor", 10, true);
+
+  //create service to process service requests on the disable manual control topic
+  ros::ServiceServer disable_manual_control_srv = node_public.advertiseService("disable_manual_control", DisableManualControlCallback);
 
   //create subscriber to subscribe to control messages topic with queue size set to 1000
   ros::Subscriber control_sub = node_public.subscribe("control", 1000, controlCallback);
@@ -169,6 +246,12 @@ int main(int argc, char **argv)
 
   //create subscriber to subscribe to roller motor messages topic with queue size set to 1000
   ros::Subscriber roller_sub = node_public.subscribe("roller_motor", 1000, rollerCallback);
+
+  //create variable for counting number of balls remaining
+  int balls_fired = 0;
+
+  //create timer to keep tracking of fire delay times
+  ros::Timer timer;
 
   //set loop rate in Hz
   ros::Rate loop_rate(refresh_rate);
@@ -228,7 +311,7 @@ int main(int argc, char **argv)
       }
 
       //if fire button on controller is pressed then publish fire request message
-      if (controller_buttons[7] == 1)
+      if (controller_buttons[7] == 1 && firing_motor_enable && ready_to_fire && ((balls_collected - balls_fired) > 0))
       {
 
         //set button status to 0 to prevent consecutive toggles for one button press
@@ -240,10 +323,35 @@ int main(int argc, char **argv)
         //publish firing motor message
         gate_solenoid_pub.publish(gate_solenoid_msg);
 
+        //increment number of balls fired
+        balls_fired++;
+
+        //set ready to fire to false until fire delay time elapses
+        ready_to_fire = false;
+
+        //set timer to keep track of fire delay time
+        timer = node_private.createTimer(ros::Duration(fire_delay_time), timerCallback, true);
+
         //output ROS_INFO messages to inform of fire ball request
         ROS_INFO("[manual_control_node] fire ball request issued");
 
+        //update message values
+        firing_status_msg.balls_fired = balls_fired;
+        firing_status_msg.balls_remaining = balls_collected - balls_fired;
+
+        //publish new firing status message
+        firing_status_pub.publish(firing_status_msg);
+
       }
+      //send notification if fire request was issued but no balls remain
+      else if (controller_buttons[7] == 1 && firing_motor_enable && ready_to_fire && ((balls_collected - balls_fired) == 0))
+        ROS_INFO("[manual_control_node] fire ball request issued but no balls remaining to fire; ignoring request");
+      //send notification if fire request was issued but firing wheel motor is not yet ready to fire
+      else if (controller_buttons[7] == 1 && firing_motor_enable && !ready_to_fire)
+        ROS_INFO("[manual_control_node] fire ball request issued but firing wheel motor is not yet ready to fire; ignoring request");
+      //send notification if fire request was issued but firing wheel motor is not enabled
+      else if (controller_buttons[7] == 1 && !firing_motor_enable)
+        ROS_INFO("[manual_control_node] fire ball request issued but firing wheel motor disabled; ignoring request");
 
       //if firing wheel button on controller is pressed then change enable status and publish message
       if (controller_buttons[0] == 1)
