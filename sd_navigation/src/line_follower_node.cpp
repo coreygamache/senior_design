@@ -8,14 +8,15 @@
 #include <errno.h>
 #include <ros/ros.h>
 #include <sd_msgs/Control.h>
+#include <sd_msgs/DisableLineFollowing.h>
 #include <sd_msgs/LineFollowing.h>
 #include <signal.h>
-#include <wiringPiI2C.h>
+#include <wiringPi.h>
 
 //global variables
-bool line_following = false; //current line following status
-bool line_following_completed = false; //line following completion status
-int fd; //i2c protocol communication address
+bool autonomous_control = false;
+bool line_following_complete = false; //line following completion status
+bool mode_change_requested = false;
 
 
 //callback function called to process SIGINT command
@@ -31,50 +32,46 @@ void sigintHandler(int sig)
 void controlCallback(const sd_msgs::Control::ConstPtr& msg)
 {
 
-  //handle message differently depending on current line following status and message request
-  //line following was disabled, now enable it if in navigation stage
-  if (!line_following && msg->autonomous_control && msg->navigation_stage)
+  //verify that local mode matches global mode
+  if (autonomous_control != msg->autonomous_control)
   {
 
-    //send message of "1" to arduino to indicate line following should be started
-    int result = wiringPiI2CWrite(fd, 1);
-
-    //output notification message and error if one occurs
-    //otherwise message was sent; set line following to true
-    if (result == -1)
-    {
-
-      //inform that i2c protocol communication failed
-      ROS_INFO("[line_follower_node] error writing to arduino via i2c: %d", errno);
-
-    }
-    else
-    {
-
-      //enable line following
-      line_following = true;
-
-      //set line following complete to false to force status check from arduino
-      line_following_completed = false;
-
-    }
+    //modes do not match; send notification and shut down node
+    ROS_INFO("[line_follower_node] local control mode does not match global control mode; killing program");
+    ROS_BREAK();
 
   }
-  //line following was enabled, now disable it
-  else if (line_following && !msg->autonomous_control)
+
+}
+
+//callback function called to process service requests on the disable line following topic
+bool DisableLineFollowingCallback(sd_msgs::DisableLineFollowing::Request& req, sd_msgs::DisableLineFollowing::Response& res)
+{
+
+    //if node isn't currently mapping then ready to change modes, otherwise not ready to change
+  res.ready_to_change = true;
+
+  //output ROS INFO message to inform of mode change request and reply status
+  if (req.mode_change_requested && res.ready_to_change)
   {
 
-    //send message of "0" to arduino to indicate line following should be stopped
-    int result = wiringPiI2CWrite(fd, 0);
+    //change modes
+    autonomous_control = !autonomous_control;
+    mode_change_requested = true;
 
-    //output notification message and error if one occurs
-    //otherwise message was sent; set line following to false
-    if (result == -1)
-      ROS_INFO("[line_follower_node] error writing to arduino via i2c: %d", errno);
-    else
-      line_following = false;
+    //output notification
+    ROS_INFO("[map_waypoints_node] mode change requested; indicating ready to change");
 
   }
+  else if (!req.mode_change_requested && res.ready_to_change)
+    ROS_INFO("[map_waypoints_node] ready to change modes status requested; indicating ready to change");
+  else if (req.mode_change_requested && !res.ready_to_change)
+    ROS_INFO("[map_waypoints_node] mode change requested; indicating node is busy");
+  else
+    ROS_INFO("[map_waypoints_node] ready to change modes status requested; indicating node is busy");
+
+  //return true to indicate service processing is complete
+  return true;
 
 }
 
@@ -92,11 +89,19 @@ int main(int argc, char **argv)
   //override the default SIGINT handler
   signal(SIGINT, sigintHandler);
 
-  //retrieve arduino i2c address from parameter server
-  int i2c_address;
-  if (!node_private.getParam("/arduino/i2c_address", i2c_address))
+  //retrieve arduino line following mode pin from parameter server
+  int line_following_pin;
+  if (!node_private.getParam("/arduino/line_following_pin", line_following_pin))
   {
-    ROS_ERROR("[line_follower_node] arduino i2c address not defined in config file: sd_bringup/config/global.yaml");
+    ROS_ERROR("[line_follower_node] arduino line following mode pin not defined in config file: sd_bringup/config/global.yaml");
+    ROS_BREAK();
+  }
+
+  //retrieve arduino line following complete from parameter server
+  int line_following_complete_pin;
+  if (!node_private.getParam("/arduino/line_following_complete_pin", line_following_complete_pin))
+  {
+    ROS_ERROR("[line_follower_node] arduino line following complete pin not defined in config file: sd_bringup/config/global.yaml");
     ROS_BREAK();
   }
 
@@ -109,26 +114,27 @@ int main(int argc, char **argv)
   }
 
   //initialize i2c protocol and verify connection
-  fd = wiringPiI2CSetup(i2c_address);
-  int result; //variable for holding i2c read/write result
-
-  //output notification message and error if one occurs
-  if (fd == -1)
-    ROS_INFO("[line_follower_node] error establishing i2c connection: %d", errno);
-  else
-    ROS_INFO("[line_follower_node] i2c connection result: %d", fd);
+  wiringPiSetup(); //i2c protocol communication address
+  pinMode(line_following_pin, OUTPUT);
+  pinMode(line_following_complete_pin, INPUT);
 
   //create line following message object and set default parameters
   sd_msgs::LineFollowing line_following_msg;
   line_following_msg.header.frame_id = "0";
-  line_following_msg.line_following = line_following;
-  line_following_msg.completed = line_following_completed;
+  line_following_msg.line_following = autonomous_control;
+  line_following_msg.complete = line_following_complete;
 
   //create publisher to publish line following message status with buffer size 10, and latch set to false
-  ros::Publisher line_following_pub = node_public.advertise<sd_msgs::LineFollowing>("line_following", 10, false);
+  ros::Publisher line_following_pub = node_public.advertise<sd_msgs::LineFollowing>("line_following", 10, true);
+
+  //create service to process service requests on the disable mapping topic
+  ros::ServiceServer disable_line_following_srv = node_public.advertiseService("disable_line_following", DisableLineFollowingCallback);
 
   //create sunscriber to subscribe to control messages message topic with queue size set to 1000
   ros::Subscriber control_sub = node_public.subscribe("/control/control", 1000, controlCallback);
+
+  //publish initial line following status message
+  line_following_pub.publish(line_following_msg);
 
   //set loop rate in Hz
   ros::Rate loop_rate(refresh_rate);
@@ -136,42 +142,46 @@ int main(int argc, char **argv)
   while (ros::ok())
   {
 
-    //set time of current iteration
-    line_following_msg.header.stamp = ros::Time::now();
-
-    //set line following field of message to current line following status
-    line_following_msg.line_following = line_following;
-
-    //check arduino line following status if line following is enabled until complete
-    //NOTE: line following is enabled/disabled by control message callback
-    if (line_following)
+    if (mode_change_requested)
     {
 
-      //read current status from arduino to check whether line following is finished
-      result = wiringPiI2CRead(fd);
+      //set mode change requested to false to prevent mode changing twice for one request
+      mode_change_requested = false;
 
-      //check whether line following is finished and output notification message if error occurs
-      if (result == -1)
-      {
-        ROS_INFO("[line_follower_node] error reading from arduino via i2c:: %d", errno);
-      }
-      else if (result == 1)
-      {
+      //set line following complete status to false to force line following start on mode change to autonomous control
+      line_following_complete = false;
 
-        //line following complete: change local variables to reflect this
-        line_following = false;
-        line_following_completed = true;
+      //set time and status of current iteration
+      line_following_msg.header.stamp = ros::Time::now();
+      line_following_msg.line_following = autonomous_control;
+      line_following_msg.complete = line_following_complete;
 
-      }
+      //publish line following status message
+      line_following_pub.publish(line_following_msg);
+
+      //set arduino line following pin status to reflect current control mode
+      //if autonomous control is true then pin is set high and vice versa
+      if (autonomous_control)
+        digitalWrite(line_following_pin, HIGH);
+      else
+        digitalWrite(line_following_pin, LOW);
 
     }
+    //if autonomous control is enabled then check if line following is complete
+    else if (autonomous_control && !line_following_complete && digitalRead(line_following_complete_pin))
+    {
 
-    //set current line following message values to match local values
-    line_following_msg.line_following = line_following;
-    line_following_msg.completed = line_following_completed;
+      //set line following complete status to true
+      line_following_complete = true;
 
-    //publish line following status message
-    line_following_pub.publish(line_following_msg);
+      //set time and status of current iteration
+      line_following_msg.header.stamp = ros::Time::now();
+      line_following_msg.complete = line_following_complete;
+
+      //publish line following status message
+      line_following_pub.publish(line_following_msg);
+
+    }
 
     //process callback function calls
     ros::spinOnce();
