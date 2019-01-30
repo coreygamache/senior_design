@@ -20,6 +20,7 @@ const int motor_right_sleep = 6;
 
 //other pin definitions
 const int buttonPin = 12;
+const int lineFollowingCompletePin = 10;
 const int modePin = 11;
 
 //motor parameter constants
@@ -88,7 +89,11 @@ void setup()
 
   //set pin modes
   pinMode(buttonPin, INPUT);
+  pinMode(lineFollowingCompletePin, OUTPUT);
   pinMode(modePin, INPUT);
+
+  //set line following complete status to false
+  digitalWrite(lineFollowingCompletePin, LOW);
 
   //initialize PID controllers and set initial setpoints
   //PID modes
@@ -171,22 +176,29 @@ void loop()
 
     //if robot is not at end of line then continue to follow line until it is
     while (!lineFollowComplete) {
+
+      //execute line following function to check if complete
       lineFollowComplete = lineFollow();
 
-      //check if line following is complete and notify RPi and user if true
-      //check is performed in loop so it will only be called once
+      //if line following is complete then notify RPi and user if true
       if (lineFollowComplete) {
+
+        //output status change to serial monitor
         Serial.println("line following complete");
-        //-->output message to raspberry pi
+
+        //output HIGH to line following complete indicator pin
+        digitalWrite(lineFollowingCompletePin, HIGH);
+
+        //wait indefinitely until mode change
+        while (digitalRead(modePin)) {
+          delay(100);
+        }
+
+        //when mode changes reset line following complete back to false
+        digitalWrite(lineFollowingCompletePin, LOW);
+
       }
 
-    }
-
-    //if line follow is complete then wait indefinitely
-    if (lineFollowComplete) {
-      while (1) {
-        delay(10000);
-      }
     }
 
   }
