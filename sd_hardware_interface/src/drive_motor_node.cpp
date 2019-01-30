@@ -8,8 +8,8 @@
 
 //global variables
 bool autonomous_control = false;
-unsigned char dirValues[2] = {0, 0}; //motor direction values (0 = forward, 1 = reverse), {left direction, right direction}
-unsigned char pwmValues[2] = {0, 0}; //motor pwm output values, {left PWM value, right PWM value}
+std::vector<unsigned char> dirValues(2, 0); //motor direction values (0 = forward, 1 = reverse), {left direction, right direction}
+std::vector<unsigned char> pwmValues(2, 0); //motor pwm output values, {left PWM value, right PWM value}
 
 //pin variables
 //must be global so that they can be accessed by callback function
@@ -41,15 +41,6 @@ void controlCallback(const sd_msgs::Control::ConstPtr& msg)
     //set value to received value
     autonomous_control = msg->autonomous_control;
 
-    //if autonomous control was just enabled then reset direction and pwm values for safety
-    if (autonomous_control)
-    {
-      dirValues[0] = 0;
-      dirValues[1] = 0;
-      pwmValues[0] = 0;
-      pwmValues[1] = 0;
-    }
-
   }
 
 }
@@ -62,53 +53,12 @@ void driveMotorsCallback(const sd_msgs::DriveMotors::ConstPtr& msg)
   if (!autonomous_control)
   {
 
-    //check left motor direction and change if necessary
-    if (dirValues[0] != msg->left_motor_dir)
-    {
-
-      //if requested left motor direction is a valid value, change direction
-      if ((msg->left_motor_dir == 0) || (msg->left_motor_dir == 1))
-        dirValues[0] = msg->left_motor_dir;
-
-    }
-
-    //check right motor direction and change if necessary
-    if (dirValues[1] != msg->right_motor_dir)
-    {
-
-      //if requested right motor direction is a valid value, change direction
-      if ((msg->right_motor_dir == 0) || (msg->right_motor_dir == 1))
-        dirValues[1] = msg->right_motor_dir;
-
-    }
-
-    //check left motor pwm value and change if necessary
-    if (pwmValues[0] != msg->left_motor_pwm)
-    {
-
-      //verify left motor PWM value is within PWM limits
-      if (msg->left_motor_pwm > 255)
-        pwmValues[0] = 255;
-      else if (msg->left_motor_pwm < 0)
-        pwmValues[0] = 0;
-      else
-        pwmValues[0] = msg->left_motor_pwm;
-
-    }
-
-    //check right motor pwm value and change if necessary
-    if (pwmValues[1] != msg->right_motor_pwm)
-    {
-
-      //verify right motor PWM value is within PWM limits
-      if (msg->right_motor_pwm > 255)
-        pwmValues[1] = 255;
-      else if (msg->right_motor_pwm < 0)
-        pwmValues[1] = 0;
-      else
-        pwmValues[1] = msg->right_motor_pwm;
-
-    }
+    //set local values to received values
+    //from top to bottom: left motor direction, left motor pwm, right motor direction, right motor pwm
+    dirValues[0] = msg->left_motor_dir;
+    dirValues[1] = msg->right_motor_dir;
+    pwmValues[0] = msg->left_motor_pwm;
+    pwmValues[1] = msg->right_motor_pwm;
 
   }
 
@@ -189,9 +139,29 @@ int main(int argc, char **argv)
   while (ros::ok())
   {
 
-    //if autonomous control is disabled then output drive motor manual control values
+    //if autonomous control is disabled then verify values are valid, then output drive motor manual control values
     if (!autonomous_control)
     {
+
+      //if left motor direction isn't valid (0 or 1) then default to 0 (forward direction)
+      if ((dirValues[0] != 0) && (dirValues[0] != 1))
+        dirValues[0] = 0;
+
+      //if right motor direction isn't valid (0 or 1) then default to 0 (forward direction)
+      if ((dirValues[1] != 0) && (dirValues[1] != 1))
+        dirValues[1] = 0;
+
+      //verify left motor PWM value is within PWM limits
+      if (pwmValues[0] > 255)
+        pwmValues[0] = 255;
+      else if (pwmValues[0] < 0)
+        pwmValues[0] = 0;
+
+      //verify left motor PWM value is within PWM limits
+      if (pwmValues[1] > 255)
+        pwmValues[1] = 255;
+      else if (pwmValues[1] < 0)
+        pwmValues[1] = 0;
 
       //set output values to current direction and pwm values
       unsigned char outputValues[4] = { dirValues[0], pwmValues[0], dirValues[1], pwmValues[1] };
