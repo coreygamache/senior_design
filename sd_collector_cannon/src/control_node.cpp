@@ -3,6 +3,9 @@
 #include <ros/ros.h>
 #include <sd_msgs/ComponentMotor.h>
 #include <sd_msgs/Control.h>
+#include <sd_msgs/DisableFiring.h>
+#include <sd_msgs/DisableLineFollowing.h>
+#include <sd_msgs/DisableManualControl.h>
 #include <sd_msgs/FiringStatus.h>
 #include <sd_msgs/LineFollowing.h>
 #include <sd_msgs/Mosfet.h>
@@ -11,8 +14,8 @@
 #include <wiringPi.h>
 
 //global variables
-bool firing_completed = false;
-bool line_following_completed = false;
+bool firing_complete = false;
+bool line_following_complete = false;
 bool mode_change_requested = false;
 
 //global controller variables
@@ -62,8 +65,8 @@ void firingStatusCallback(const sd_msgs::FiringStatus::ConstPtr& msg)
 {
 
   //set local value to match message value
-  if (firing_completed != msg->completed)
-    firing_completed = msg->completed;
+  if (firing_complete != msg->complete)
+    firing_complete = msg->complete;
 
 }
 
@@ -72,8 +75,8 @@ void lineFollowingCallback(const sd_msgs::LineFollowing::ConstPtr& msg)
 {
 
   //set local value to match message value
-  if (line_following_completed != msg->completed)
-    line_following_completed = msg->completed;
+  if (line_following_complete != msg->complete)
+    line_following_complete = msg->complete;
 
 }
 
@@ -125,6 +128,15 @@ int main(int argc, char **argv)
   conveyor_msg.direction = 0;
   conveyor_msg.pwm = 0;
 
+  sd_msgs::DisableFiring disable_firing_srv;
+  disable_firing_srv.request.mode_change_requested = true;
+
+  sd_msgs::DisableLineFollowing disable_line_following_srv;
+  disable_line_following_srv.request.mode_change_requested = true;
+
+  sd_msgs::DisableManualControl disable_manual_control_srv;
+  disable_manual_control_srv.request.mode_change_requested = true;
+
   //create firing motor message object and set default parameters
   sd_msgs::Mosfet firing_motor_msg;
   firing_motor_msg.header.frame_id = "0";
@@ -150,6 +162,15 @@ int main(int argc, char **argv)
   //create publisher to publish roller motor message with buffer size 10, and latch set to true
   ros::Publisher roller_pub = node_public.advertise<sd_msgs::ComponentMotor>("roller_motor", 10, true);
 
+  //create service client to send service requests on the disable firing topic
+  ros::ServiceClient disable_firing_clt = node_public.serviceClient<sd_msgs::DisableFiring>("disable_firing");
+
+  //create service client to send service requests on the disable line following topic
+  ros::ServiceClient disable_line_following_clt = node_public.serviceClient<sd_msgs::DisableLineFollowing>("disable_line_following");
+
+  //create service client to send service requests on the disable manual control topic
+  ros::ServiceClient disable_manual_control_clt = node_public.serviceClient<sd_msgs::DisableManualControl>("disable_manual_control");
+
   //create subscriber to subscribe to joy messages topic with queue size set to 1000
   ros::Subscriber controller_sub = node_public.subscribe("joy", 1000, controllerCallback);
 
@@ -173,7 +194,7 @@ int main(int argc, char **argv)
   //initialize control message to disable autonomous control globally
   control_msg.header.stamp = ros::Time::now();
   control_msg.autonomous_control = false;
-  control_msg.completed = false;
+  control_msg.complete = false;
   control_msg.firing_stage = false;
   control_msg.navigation_stage = false;
 
@@ -186,7 +207,7 @@ int main(int argc, char **argv)
   while (ros::ok())
   {
 
-    //CONTROL MODE CHANGE HANDLING
+    //----------------------CONTROL MODE CHANGE HANDLING------------------------
     //switch control modes if toggle button is pressed or controller button is pressed
     if (digitalRead(toggle_button_pin) || mode_change_requested)
     {
@@ -194,15 +215,57 @@ int main(int argc, char **argv)
       //reset mode change requested to prevent mode from toggling twice on one button press
       mode_change_requested = false;
 
+      //wait for verification from firing program that it's safe to change modes
+      do
+      {
+
+        //call service and verify success
+        if (!disable_firing_clt.call(disable_firing_srv))
+        {
+          ROS_INFO("[control_node] failed to call disable firing service");
+          ROS_BREAK();
+        }
+
+      }
+      while (!disable_firing_srv.response.ready_to_change);
+
+      //wait for verification from firing program that it's safe to change modes
+      do
+      {
+
+        //call service and verify success
+        if (!disable_line_following_clt.call(disable_line_following_srv))
+        {
+          ROS_INFO("[control_node] failed to call disable line following service");
+          ROS_BREAK();
+        }
+
+      }
+      while (!disable_line_following_srv.response.ready_to_change);
+
+      //wait for verification from firing program that it's safe to change modes
+      do
+      {
+
+        //call service and verify success
+        if (!disable_manual_control_clt.call(disable_line_following_srv))
+        {
+          ROS_INFO("[control_node] failed to call disable manual control service");
+          ROS_BREAK();
+        }
+
+      }
+      while (!disable_line_following_srv.response.ready_to_change);
+
       //switch control modes
       autonomous_control = !autonomous_control;
 
       //set time and parameters of control message
       //when autonomous control is activated, robot is invariably returned to navigation mode
-      //this is to ensure robot does not enter firing mode unless navigation has been completed
+      //this is to ensure robot does not enter firing mode unless navigation has been complete
       control_msg.header.stamp = ros::Time::now();
       control_msg.autonomous_control = autonomous_control;
-      control_msg.completed = false;
+      control_msg.complete = false;
       control_msg.firing_stage = false;
       control_msg.navigation_stage = true;
 
@@ -249,23 +312,23 @@ int main(int argc, char **argv)
 
     }
 
-    //[AUTONOMOUS MODE] END OF LINE REACHED HANDLING
+    //---------------[AUTONOMOUS MODE] END OF LINE REACHED HANDLING-------------
     //if autonomous mode is enabled, line following is complete, and robot is still in navigation stage:
-    //line following has just been completed; disable navigation and switch to firing stage
+    //line following has just been complete; disable navigation and switch to firing stage
     //conveyor and roller motors and their driver are disabled in firing stage to conserve power
     //firing motor must be enabled if it is not already
-    if (autonomous_control && line_following_completed && control_msg.navigation_stage)
+    if (autonomous_control && line_following_complete && control_msg.navigation_stage)
     {
 
       //set time and parameters of control message
       control_msg.header.stamp = ros::Time::now();
       control_msg.autonomous_control = autonomous_control;
-      control_msg.completed = false;
+      control_msg.complete = false;
       control_msg.firing_stage = true;
       control_msg.navigation_stage = false;
 
-      //set line following completed to false to ensure rechecking if mode changes
-      line_following_completed = false;
+      //set line following complete to false to ensure rechecking if mode changes
+      line_following_complete = false;
 
       //publish control message
       control_pub.publish(control_msg);
@@ -316,22 +379,22 @@ int main(int argc, char **argv)
 
     }
 
-    //[AUTONOMOUS MODE] END OF FIRING ROUTINE HANDLING
+    //-------------[AUTONOMOUS MODE] END OF FIRING ROUTINE HANDLING-------------
     //if autonomous mode is enabled, firing stage is complete, and robot is still in firing stage:
-    //firing has just been completed; disable firing and switch to completed status
+    //firing has just been complete; disable firing and switch to complete status
     //firing motor is disabled to conserve power
-    if (autonomous_control && firing_completed && control_msg.firing_stage)
+    if (autonomous_control && firing_complete && control_msg.firing_stage)
     {
 
       //set time and parameters of control message
       control_msg.header.stamp = ros::Time::now();
       control_msg.autonomous_control = autonomous_control;
-      control_msg.completed = true;
+      control_msg.complete = true;
       control_msg.firing_stage = false;
       control_msg.navigation_stage = false;
 
-      //set firing completed to false to ensure rechecking if mode changes
-      firing_completed = false;
+      //set firing complete to false to ensure rechecking if mode changes
+      firing_complete = false;
 
       //publish control message
       control_pub.publish(control_msg);
