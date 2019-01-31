@@ -236,6 +236,10 @@ int main(int argc, char **argv)
 
     }
 
+    //if firing stage completed but control mode changed then reset firing complete status to force new firing stage
+    if (autonomous_control && firing_status_msg.complete)
+      firing_status_msg.complete = false;
+
     //process callback function calls
     ros::spinOnce();
 
