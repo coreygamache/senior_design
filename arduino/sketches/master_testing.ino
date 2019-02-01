@@ -28,9 +28,9 @@ const int line_following_complete_pin = 4;
 //motor parameter constants
 const float encoder_counts_per_rev = 48.0;    //motor encoder event counts per revolution
 const float motor_gear_ratio = 9.68;          //drive motor gear ratios
-const int motor_base_speed = 150;             //default target drive motor speed [pwm value]
+const int motor_base_speed = 30;             //default target drive motor speed [pwm value]
 const int motor_max_RPM = 990;                //drive motor maximum mechanical RPM [rpm]
-const int motor_max_speed = 255;              //imposed speed limit on drive motors [pwm value]
+const int motor_max_speed = 50;              //imposed speed limit on drive motors [pwm value]
 
 
 //motor objects and variables
@@ -120,8 +120,8 @@ void setup()
 
   //PID initial setpoints
   setPoint_line_follow = qtrCenterPosition;
-  setPoint_motor_left = 50;
-  setPoint_motor_right = 50;
+  setPoint_motor_left = 0;
+  setPoint_motor_right = 0;
 
   //initialize i2c communication with slave address 0x04
   Wire.begin(0x04);
@@ -283,11 +283,11 @@ bool lineFollow() {
   if ((qtrSensorValues[0] > 750) && (qtrSensorValues[1] > 750) && (qtrSensorValues[2] > 750) && (qtrSensorValues[3] > 750) && (qtrSensorValues[4] > 750) && (qtrSensorValues[5] > 750)) {
 
     //stop drive motors
-    motor_left.stop();
-    motor_right.stop();
+    //motor_left.stop();
+    //motor_right.stop();
 
     //return true to indicate line following is complete
-    return true;
+    //return true;
 
   }
 
