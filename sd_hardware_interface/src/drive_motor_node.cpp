@@ -108,10 +108,10 @@ int main(int argc, char **argv)
     ROS_BREAK();
   }
 
-  //create subscriber to subscribe to control messages message topic with queue size set to 1000
+  //create subscriber to subscribe to control message topic with queue size set to 1000
   ros::Subscriber control_sub = node_public.subscribe("/control/control", 1000, controlCallback);
 
-  //create subscriber to subscribe to drive motor messages message topic with queue size set to 1000
+  //create subscriber to subscribe to drive motor message topic with queue size set to 1000
   ros::Subscriber drive_motor_sub = node_public.subscribe("drive_motors", 1000, driveMotorsCallback);
 
   //run wiringPi GPIO setup function and set pin modes
