@@ -43,7 +43,6 @@
     <remap from="/control/drive_motors" to="/hardware/drive_motors" />
     <remap from="/control/firing_motor" to="/hardware/firing_motor" />
     <remap from="/control/gate_solenoid" to="/hardware/gate_solenoid" />
-    <remap from="/control/line_following" to="/navigation/line_following" />
     <remap from="/control/roller_motor" to="/hardware/roller_motor" />
   </node>
 </group>
