@@ -32,15 +32,11 @@ void sigintHandler(int sig)
 void controlCallback(const sd_msgs::Control::ConstPtr& msg)
 {
 
-  //verify that local mode matches global mode
-  if (autonomous_control != msg->autonomous_control)
-  {
+  //change local control mode to match message
+  autonomous_control = msg->autonomous_control;
 
-    //modes do not match; send notification and shut down node
-    ROS_INFO("[line_follower_node] local control mode does not match global control mode; killing program");
-    ROS_BREAK();
-
-  }
+  //set mode change requested flag to true
+  mode_change_requested = true;
 
 }
 
@@ -53,16 +49,7 @@ bool DisableLineFollowingCallback(sd_msgs::DisableLineFollowing::Request& req, s
 
   //output ROS INFO message to inform of mode change request and reply status
   if (req.mode_change_requested && res.ready_to_change)
-  {
-
-    //change modes
-    autonomous_control = !autonomous_control;
-    mode_change_requested = true;
-
-    //output notification
     ROS_INFO("[line_follower_node] mode change requested; changing control modes");
-
-  }
   else if (!req.mode_change_requested && res.ready_to_change)
     ROS_INFO("[line_follower_node] ready to change modes status requested; indicating ready to change");
   else if (req.mode_change_requested && !res.ready_to_change)
