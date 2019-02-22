@@ -216,97 +216,90 @@ int main(int argc, char **argv)
       mode_change_requested = false;
 
       //wait for verification from firing program that it's safe to change modes
-      do
+      if (!disable_firing_clt.call(disable_firing_srv))
       {
-
-        //call service and verify success
-        if (!disable_firing_clt.call(disable_firing_srv))
-        {
-          ROS_INFO("[control_node] failed to call disable firing service");
-          ROS_BREAK();
-        }
-
+        ROS_INFO("[control_node] failed to call disable firing service");
+        ROS_BREAK();
       }
-      while (!disable_firing_srv.response.ready_to_change);
 
       //wait for verification from firing program that it's safe to change modes
-      do
+      if (!disable_line_following_clt.call(disable_line_following_srv))
       {
-
-        //call service and verify success
-        if (!disable_line_following_clt.call(disable_line_following_srv))
-        {
-          ROS_INFO("[control_node] failed to call disable line following service");
-          ROS_BREAK();
-        }
-
+        ROS_INFO("[control_node] failed to call disable line following service");
+        ROS_BREAK();
       }
-      while (!disable_line_following_srv.response.ready_to_change);
 
       //wait for verification from firing program that it's safe to change modes
-      do
+      if (!disable_manual_control_clt.call(disable_line_following_srv))
+      {
+        ROS_INFO("[control_node] failed to call disable manual control service");
+        ROS_BREAK();
+      }
+
+      //notify of any busy nodes
+      if (!disable_firing_srv.response.ready_to_change)
+        ROS_INFO("[control_node] firing node not ready for mode change");
+      if (!disable_line_following_srv.response.ready_to_change)
+        ROS_INFO("[control_node] line following node not ready for mode change");
+      if (!disable_manual_control_srv.response.ready_to_change)
+        ROS_INFO("[control_node] manual control node not ready for mode change");
+
+
+      if (disable_firing_srv.response.ready_to_change && disable_line_following_srv.response.ready_to_change && disable_manual_control_srv.response.ready_to_change)
       {
 
-        //call service and verify success
-        if (!disable_manual_control_clt.call(disable_line_following_srv))
+        //switch control modes
+        autonomous_control = !autonomous_control;
+
+        //set time and parameters of control message
+        //when autonomous control is activated, robot is invariably returned to navigation mode
+        //this is to ensure robot does not enter firing mode unless navigation has been complete
+        control_msg.header.stamp = ros::Time::now();
+        control_msg.autonomous_control = autonomous_control;
+        control_msg.complete = false;
+        control_msg.firing_stage = false;
+        control_msg.navigation_stage = true;
+
+        //publish control message
+        control_pub.publish(control_msg);
+
+        //disable component motor driver standby mode
+        digitalWrite(component_motor_standby_pin, HIGH);
+
+        //if autonomous control is enabled then ensure all hardware is enabled
+        if (autonomous_control)
         {
-          ROS_INFO("[control_node] failed to call disable manual control service");
-          ROS_BREAK();
+
+          //set time and parameters of conveyor motor message
+          conveyor_msg.header.stamp = ros::Time::now();
+          conveyor_msg.enable = true;
+
+          //set time and parameters of firing motor message
+          firing_motor_msg.header.stamp = ros::Time::now();
+          firing_motor_msg.enable = true;
+
+          //set time and parameters of roller motor message
+          roller_msg.header.stamp = ros::Time::now();
+          roller_msg.enable = true;
+
+          //publish motor messages
+          conveyor_pub.publish(conveyor_msg);
+          firing_motor_pub.publish(firing_motor_msg);
+          roller_pub.publish(roller_msg);
+
+          //output ROS_INFO messages to inform of autonomous mode enabled
+          ROS_INFO("[control_mode_node] control mode changed, autonomous control enabled");
+          ROS_INFO("[control_mode_node] conveyor, firing wheel, and roller motors enabled");
+
         }
+        //if autonomous control is disabled leave hardware status unchanged
+        else
+        {
 
-      }
-      while (!disable_line_following_srv.response.ready_to_change);
+          //output ROS_INFO messages to inform of autonomous mode disabled
+          ROS_INFO("[control_mode_node] control mode changed, autonomous control disabled");
 
-      //switch control modes
-      autonomous_control = !autonomous_control;
-
-      //set time and parameters of control message
-      //when autonomous control is activated, robot is invariably returned to navigation mode
-      //this is to ensure robot does not enter firing mode unless navigation has been complete
-      control_msg.header.stamp = ros::Time::now();
-      control_msg.autonomous_control = autonomous_control;
-      control_msg.complete = false;
-      control_msg.firing_stage = false;
-      control_msg.navigation_stage = true;
-
-      //publish control message
-      control_pub.publish(control_msg);
-
-      //disable component motor driver standby mode
-      digitalWrite(component_motor_standby_pin, HIGH);
-
-      //if autonomous control is enabled then ensure all hardware is enabled
-      if (autonomous_control)
-      {
-
-        //set time and parameters of conveyor motor message
-        conveyor_msg.header.stamp = ros::Time::now();
-        conveyor_msg.enable = true;
-
-        //set time and parameters of firing motor message
-        firing_motor_msg.header.stamp = ros::Time::now();
-        firing_motor_msg.enable = true;
-
-        //set time and parameters of roller motor message
-        roller_msg.header.stamp = ros::Time::now();
-        roller_msg.enable = true;
-
-        //publish motor messages
-        conveyor_pub.publish(conveyor_msg);
-        firing_motor_pub.publish(firing_motor_msg);
-        roller_pub.publish(roller_msg);
-
-        //output ROS_INFO messages to inform of autonomous mode enabled
-        ROS_INFO("[control_mode_node] control mode changed, autonomous control enabled");
-        ROS_INFO("[control_mode_node] conveyor, firing wheel, and roller motors enabled");
-
-      }
-      //if autonomous control is disabled leave hardware status unchanged
-      else
-      {
-
-        //output ROS_INFO messages to inform of autonomous mode disabled
-        ROS_INFO("[control_mode_node] control mode changed, autonomous control disabled");
+        }
 
       }
 
