@@ -96,7 +96,7 @@ int main(int argc, char **argv)
   signal(SIGINT, sigintHandler);
 
   //retrieve toggle control mode pin from parameter server
-  if (!node_private.getParam("/control/control_mode_node/control_mode_pin", control_mode_pin))
+  if (!node_private.getParam("/control/control_node/control_mode_pin", control_mode_pin))
   {
     ROS_ERROR("[control_node] control mode pin not defined in config file: sd_collector_cannon/config/control.yaml");
     ROS_BREAK();
@@ -111,7 +111,7 @@ int main(int argc, char **argv)
 
   //retrieve refresh rate of node in hertz from parameter server
   float refresh_rate;
-  if (!node_private.getParam("/control/control_mode_node/refresh_rate", refresh_rate))
+  if (!node_private.getParam("/control/control_node/refresh_rate", refresh_rate))
   {
     ROS_ERROR("[control_node] control mode node refresh rate not defined in config file: sd_collector_cannon/config/control.yaml");
     ROS_BREAK();
