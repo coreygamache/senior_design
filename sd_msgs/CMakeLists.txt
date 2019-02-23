@@ -44,9 +44,7 @@ add_message_files(
 add_service_files(
   DIRECTORY srv
   FILES
-  DisableFiring.srv
-  DisableLineFollowing.srv
-  DisableManualControl.srv
+  ChangeControlMode.srv
 )
 
 ## Generate actions in the 'action' folder
