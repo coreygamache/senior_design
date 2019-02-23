@@ -3,7 +3,6 @@ firing_node:
   refresh_rate: 10
 
 control_node:
-  control_mode_pin: 2
   refresh_rate: 10
 
 manual_control_node:
