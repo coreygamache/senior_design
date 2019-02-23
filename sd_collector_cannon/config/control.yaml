@@ -2,9 +2,9 @@ firing_node:
   fire_delay_time: 3 # [s]
   refresh_rate: 10
 
-control_mode_node:
+control_node:
+  control_mode_pin: 2
   refresh_rate: 10
-  toggle_button_pin: 2
 
 manual_control_node:
   refresh_rate: 10
