@@ -18,6 +18,11 @@ bool autonomous_control = false;
 bool line_following_complete = false; //line following completion status
 bool mode_change_requested = false;
 
+//pin variables
+//must be global so that they can be accessed by callback functions
+int line_following_pin;
+int line_following_complete_pin;
+
 
 //callback function called to process SIGINT command
 void sigintHandler(int sig)
@@ -77,7 +82,6 @@ int main(int argc, char **argv)
   signal(SIGINT, sigintHandler);
 
   //retrieve arduino line following mode pin from parameter server
-  int line_following_pin;
   if (!node_private.getParam("/arduino/line_following_pin", line_following_pin))
   {
     ROS_ERROR("[line_follower_node] arduino line following mode pin not defined in config file: sd_bringup/config/global.yaml");
@@ -85,7 +89,6 @@ int main(int argc, char **argv)
   }
 
   //retrieve arduino line following complete from parameter server
-  int line_following_complete_pin;
   if (!node_private.getParam("/arduino/line_following_complete_pin", line_following_complete_pin))
   {
     ROS_ERROR("[line_follower_node] arduino line following complete pin not defined in config file: sd_bringup/config/global.yaml");
@@ -119,6 +122,11 @@ int main(int argc, char **argv)
 
   //create sunscriber to subscribe to control messages message topic with queue size set to 1000
   ros::Subscriber control_sub = node_public.subscribe("/control/control", 1000, controlCallback);
+
+  //run wiringPi GPIO setup function and set pin modes
+  wiringPiSetup();
+  pinMode(line_following_pin, OUTPUT);
+  pinMode(line_following_complete_pin, INPUT);
 
   //publish initial line following status message
   line_following_pub.publish(line_following_msg);
