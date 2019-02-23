@@ -3,9 +3,7 @@
 #include <ros/ros.h>
 #include <sd_msgs/ComponentMotor.h>
 #include <sd_msgs/Control.h>
-#include <sd_msgs/DisableFiring.h>
-#include <sd_msgs/DisableLineFollowing.h>
-#include <sd_msgs/DisableManualControl.h>
+#include <sd_msgs/ChangeControlMode.h>
 #include <sd_msgs/FiringStatus.h>
 #include <sd_msgs/LineFollowing.h>
 #include <sd_msgs/Mosfet.h>
@@ -128,13 +126,13 @@ int main(int argc, char **argv)
   conveyor_msg.direction = 0;
   conveyor_msg.pwm = 0;
 
-  sd_msgs::DisableFiring disable_firing_srv;
+  sd_msgs::ChangeControlMode disable_firing_srv;
   disable_firing_srv.request.mode_change_requested = true;
 
-  sd_msgs::DisableLineFollowing disable_line_following_srv;
+  sd_msgs::ChangeControlMode disable_line_following_srv;
   disable_line_following_srv.request.mode_change_requested = true;
 
-  sd_msgs::DisableManualControl disable_manual_control_srv;
+  sd_msgs::ChangeControlMode disable_manual_control_srv;
   disable_manual_control_srv.request.mode_change_requested = true;
 
   //create firing motor message object and set default parameters
@@ -163,13 +161,13 @@ int main(int argc, char **argv)
   ros::Publisher roller_pub = node_public.advertise<sd_msgs::ComponentMotor>("roller_motor", 10, true);
 
   //create service client to send service requests on the disable firing topic
-  ros::ServiceClient disable_firing_clt = node_public.serviceClient<sd_msgs::DisableFiring>("disable_firing");
+  ros::ServiceClient disable_firing_clt = node_public.serviceClient<sd_msgs::ChangeControlMode>("disable_firing");
 
   //create service client to send service requests on the disable line following topic
-  ros::ServiceClient disable_line_following_clt = node_public.serviceClient<sd_msgs::DisableLineFollowing>("disable_line_following");
+  ros::ServiceClient disable_line_following_clt = node_public.serviceClient<sd_msgs::ChangeControlMode>("disable_line_following");
 
   //create service client to send service requests on the disable manual control topic
-  ros::ServiceClient disable_manual_control_clt = node_public.serviceClient<sd_msgs::DisableManualControl>("disable_manual_control");
+  ros::ServiceClient disable_manual_control_clt = node_public.serviceClient<sd_msgs::ChangeControlMode>("disable_manual_control");
 
   //create subscriber to subscribe to joy messages topic with queue size set to 1000
   ros::Subscriber controller_sub = node_public.subscribe("joy", 1000, controllerCallback);
