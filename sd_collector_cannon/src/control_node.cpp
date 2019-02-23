@@ -22,7 +22,6 @@ std::vector<int> controller_buttons(13, 0);
 //pin variables
 //must be global so that they can be accessed by callback functions
 int component_motor_standby_pin;
-int control_mode_pin;
 
 
 //callback function called to process SIGINT command
@@ -92,13 +91,6 @@ int main(int argc, char **argv)
 
   //override the default SIGINT handler
   signal(SIGINT, sigintHandler);
-
-  //retrieve toggle control mode pin from parameter server
-  if (!node_private.getParam("/control/control_node/control_mode_pin", control_mode_pin))
-  {
-    ROS_ERROR("[control_node] control mode pin not defined in config file: sd_collector_cannon/config/control.yaml");
-    ROS_BREAK();
-  }
 
   //retrieve component from parameter server
   if (!node_private.getParam("/component_motor_driver/standby_pin", component_motor_standby_pin))
@@ -181,7 +173,6 @@ int main(int argc, char **argv)
   //run wiringPi GPIO setup function and set pin modes
   wiringPiSetup();
   pinMode(component_motor_standby_pin, OUTPUT);
-  pinMode(control_mode_pin, OUTPUT);
 
   //disable component motor driver standby mode on startup
   digitalWrite(component_motor_standby_pin, HIGH);
@@ -260,12 +251,6 @@ int main(int argc, char **argv)
 
         //publish control message
         control_pub.publish(control_msg);
-
-        if (autonomous_control)
-          digitalWrite(control_mode_pin, HIGH);
-        else
-          digitalWrite(control_mode_pin, LOW);
-
 
         //disable component motor driver standby mode
         digitalWrite(component_motor_standby_pin, HIGH);
