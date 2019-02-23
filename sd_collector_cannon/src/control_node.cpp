@@ -24,6 +24,7 @@ std::vector<int> controller_buttons(13, 0);
 //pin variables
 //must be global so that they can be accessed by callback functions
 int component_motor_standby_pin;
+int control_mode_pin;
 
 
 //callback function called to process SIGINT command
@@ -84,20 +85,27 @@ int main(int argc, char **argv)
 {
 
   //send notification that node is launching
-  ROS_INFO("[NODE LAUNCH]: starting control_mode_node");
+  ROS_INFO("[NODE LAUNCH]: starting control_node");
 
   //initialize node and create node handler
-  ros::init(argc, argv, "control_mode_node");
+  ros::init(argc, argv, "control_node");
   ros::NodeHandle node_private("~");
   ros::NodeHandle node_public;
 
   //override the default SIGINT handler
   signal(SIGINT, sigintHandler);
 
+  //retrieve toggle control mode pin from parameter server
+  if (!node_private.getParam("/control/control_mode_node/control_mode_pin", control_mode_pin))
+  {
+    ROS_ERROR("[control_node] control mode pin not defined in config file: sd_collector_cannon/config/control.yaml");
+    ROS_BREAK();
+  }
+
   //retrieve component from parameter server
   if (!node_private.getParam("/component_motor_driver/standby_pin", component_motor_standby_pin))
   {
-    ROS_ERROR("[control_mode_node] component motor driver standby pin not defined in config file: sd_bringup/config/global.yaml");
+    ROS_ERROR("[control_node] component motor driver standby pin not defined in config file: sd_bringup/config/global.yaml");
     ROS_BREAK();
   }
 
@@ -105,15 +113,7 @@ int main(int argc, char **argv)
   float refresh_rate;
   if (!node_private.getParam("/control/control_mode_node/refresh_rate", refresh_rate))
   {
-    ROS_ERROR("[control_mode_node] control mode node refresh rate not defined in config file: sd_collector_cannon/config/control.yaml");
-    ROS_BREAK();
-  }
-
-  //retrieve toggle button pin from parameter server
-  int toggle_button_pin;
-  if (!node_private.getParam("/control/control_mode_node/toggle_button_pin", toggle_button_pin))
-  {
-    ROS_ERROR("[control_mode_node] toggle button pin not defined in config file: sd_collector_cannon/config/control.yaml");
+    ROS_ERROR("[control_node] control mode node refresh rate not defined in config file: sd_collector_cannon/config/control.yaml");
     ROS_BREAK();
   }
 
@@ -183,7 +183,7 @@ int main(int argc, char **argv)
   //run wiringPi GPIO setup function and set pin modes
   wiringPiSetup();
   pinMode(component_motor_standby_pin, OUTPUT);
-  pinMode(toggle_button_pin, INPUT);
+  pinMode(control_mode_pin, OUTPUT);
 
   //disable component motor driver standby mode on startup
   digitalWrite(component_motor_standby_pin, HIGH);
@@ -208,8 +208,8 @@ int main(int argc, char **argv)
   {
 
     //----------------------CONTROL MODE CHANGE HANDLING------------------------
-    //switch control modes if toggle button is pressed or controller button is pressed
-    if (digitalRead(toggle_button_pin) || mode_change_requested)
+    //switch control modes if controller button is pressed
+    if (digitalRead(mode_change_requested))
     {
 
       //reset mode change requested to prevent mode from toggling twice on one button press
@@ -262,6 +262,12 @@ int main(int argc, char **argv)
 
         //publish control message
         control_pub.publish(control_msg);
+
+        if (autonomous_control)
+          digitalWrite(control_mode_pin, HIGH);
+        else
+          digitalWrite(control_mode_pin, LOW);
+
 
         //disable component motor driver standby mode
         digitalWrite(component_motor_standby_pin, HIGH);
