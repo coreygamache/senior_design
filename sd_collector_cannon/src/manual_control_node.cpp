@@ -3,9 +3,9 @@
 #include <math.h>
 #include <ros/ros.h>
 #include <sd_msgs/BallsCollected.h>
+#include <sd_msgs/ChangeControlMode.h>
 #include <sd_msgs/ComponentMotor.h>
 #include <sd_msgs/Control.h>
-#include <sd_msgs/DisableManualControl.h>
 #include <sd_msgs/DriveMotors.h>
 #include <sd_msgs/FiringStatus.h>
 #include <sd_msgs/Mosfet.h>
@@ -73,7 +73,7 @@ void controllerCallback(const sensor_msgs::Joy::ConstPtr& msg)
 }
 
 //callback function called to process service requests on the disable manual control topic
-bool DisableManualControlCallback(sd_msgs::DisableManualControl::Request& req, sd_msgs::DisableManualControl::Response& res)
+bool DisableManualControlCallback(sd_msgs::ChangeControlMode::Request& req, sd_msgs::ChangeControlMode::Response& res)
 {
 
   //if node isn't currently mapping then ready to change modes, otherwise not ready to change
