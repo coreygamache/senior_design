@@ -1,8 +1,8 @@
 //ball firing logic node
 #include <ros/ros.h>
 #include <sd_msgs/BallsCollected.h>
+#include <sd_msgs/ChangeControlMode.h>
 #include <sd_msgs/Control.h>
-#include <sd_msgs/DisableFiring.h>
 #include <sd_msgs/FiringStatus.h>
 #include <sd_msgs/Mosfet.h>
 #include <signal.h>
@@ -47,7 +47,7 @@ void controlCallback(const sd_msgs::Control::ConstPtr& msg)
 }
 
 //callback function called to process service requests on the disable firing topic
-bool DisableFiringCallback(sd_msgs::DisableFiring::Request& req, sd_msgs::DisableFiring::Response& res)
+bool DisableFiringCallback(sd_msgs::ChangeControlMode::Request& req, sd_msgs::ChangeControlMode::Response& res)
 {
 
   //if node isn't currently busy then ready to change modes, otherwise not ready to change
