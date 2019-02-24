@@ -219,7 +219,7 @@ int main(int argc, char **argv)
       }
 
       //wait for verification from firing program that it's safe to change modes
-      if (!disable_manual_control_clt.call(disable_line_following_srv))
+      if (!disable_manual_control_clt.call(disable_manual_control_srv))
       {
         ROS_INFO("[control_node] failed to call disable manual control service");
         ROS_BREAK();
