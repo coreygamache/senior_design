@@ -7,8 +7,8 @@
 
 #include <errno.h>
 #include <ros/ros.h>
+#include <sd_msgs/ChangeControlMode.h>
 #include <sd_msgs/Control.h>
-#include <sd_msgs/DisableLineFollowing.h>
 #include <sd_msgs/LineFollowing.h>
 #include <signal.h>
 #include <wiringPi.h>
@@ -28,6 +28,9 @@ int line_following_complete_pin;
 void sigintHandler(int sig)
 {
 
+  //disable component motor driver
+  digitalWrite(line_following_pin, LOW);
+
   //call the default shutdown function
   ros::shutdown();
 
@@ -46,7 +49,7 @@ void controlCallback(const sd_msgs::Control::ConstPtr& msg)
 }
 
 //callback function called to process service requests on the disable line following topic
-bool DisableLineFollowingCallback(sd_msgs::DisableLineFollowing::Request& req, sd_msgs::DisableLineFollowing::Response& res)
+bool DisableLineFollowingCallback(sd_msgs::ChangeControlMode::Request& req, sd_msgs::ChangeControlMode::Response& res)
 {
 
   //if node isn't currently busy then ready to change modes, otherwise not ready to change
