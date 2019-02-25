@@ -7,7 +7,7 @@ conveyor:
 drive_motor:
   left_motor_sleep_pin: 22
   right_motor_sleep_pin: 21
-  refresh_rate: 20
+  refresh_rate: 50
 
 firing_wheel:
   output_pin: 25
