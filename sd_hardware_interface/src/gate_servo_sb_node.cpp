@@ -7,7 +7,7 @@
 #include <signal.h>
 
 //global variables
-bool open = false; //servo angle open status
+bool gate_open = false; //servo angle open status
 int closed_angle;
 int open_angle;
 int sb_servo_number;
