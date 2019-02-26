@@ -3,11 +3,11 @@
 #include <fstream>
 #include <errno.h>
 #include <ros/ros.h>
-#include <sd_msgs/Servo.h>
+#include <sd_msgs/GateServo.h>
 #include <signal.h>
 
 //global variables
-bool open = false; //servo angle open status
+/*bool open = false; //servo angle open status
 int closed_angle;
 int open_angle;
 int sb_servo_number;
@@ -22,7 +22,7 @@ void sigintHandler(int sig)
   ros::shutdown();
 
 }
-/*
+
 //callback function called to process messages on gate_servo topic
 void gateServoCallback(const sd_msgs::Servo::ConstPtr& msg)
 {
@@ -61,10 +61,10 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "gate_servo_sb_node");
   ros::NodeHandle node_private("~");
   ros::NodeHandle node_public;
-
+/*
   //override the default SIGINT handler
   signal(SIGINT, sigintHandler);
-/*
+
   //retrieve gate closed angle value from parameter server [us]
   if (!node_private.getParam("/hardware/gate_servo_sb_node/closed_angle", closed_angle))
   {
