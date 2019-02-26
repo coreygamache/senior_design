@@ -8,6 +8,7 @@
 
 //global variables
 bool gate_open = false; //servo angle open status
+bool open_requested = false;
 int closed_angle;
 int open_angle;
 int sb_servo_number;
@@ -28,7 +29,8 @@ void gateServoCallback(const sd_msgs::GateServo::ConstPtr& msg)
 {
 
   //set local value to match message value
-  gate_open = msg->open;
+  if (msg->open)
+    open_requested = true;
 
 }
 
@@ -48,6 +50,9 @@ void timerCallback(const ros::TimerEvent& event)
 
   //close file
   sb_driver.close();
+
+  //change gate open status
+  gate_open = false;
 
 }
 
@@ -128,11 +133,14 @@ int main(int argc, char **argv)
   {
 
     //if servo gate has been requested to open since last iteration then handle request
-    if (gate_open)
+    if (open_requested && !gate_open)
     {
 
       //set open to false until next gate open request is received
-      gate_open = false;
+      open_requested = false;
+
+      //set open status of gate to true
+      gate_open = true;
 
       //inform of gate open request
       ROS_INFO("[gate_servo_sb_node] gate open request received; opening gate servo");
@@ -150,6 +158,18 @@ int main(int argc, char **argv)
       timer = node_private.createTimer(ros::Duration(open_time), timerCallback, true);
 
     }
+    //if gate open was requested but gate is already open inform user
+    else if (open_requested && gate_open)
+    {
+
+      //inform of problem
+      ROS_INFO("[gate_servo_sb_node] gate open request received but gate already open; ignoring request");
+
+      //reset open request to false
+      open_requested = false;
+      
+    }
+
 
     //process callback function calls
     ros::spinOnce();
