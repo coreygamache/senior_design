@@ -7,7 +7,7 @@
 #include <signal.h>
 
 //global variables
-/*bool open = false; //servo angle open status
+bool open = false; //servo angle open status
 int closed_angle;
 int open_angle;
 int sb_servo_number;
@@ -50,7 +50,7 @@ void timerCallback(const ros::TimerEvent& event)
   sb_driver.close();
 
 }
-*/
+
 int main(int argc, char **argv)
 {
 
