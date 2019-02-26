@@ -5,8 +5,6 @@
 #include <ros/ros.h>
 #include <sd_msgs/Servo.h>
 #include <signal.h>
-#include <softServo.h>
-#include <wiringPi.h>
 
 //global variables
 bool open = false; //servo angle open status
