@@ -221,6 +221,9 @@ int main(int argc, char **argv)
   //create service to process service requests on the disable manual control topic
   ros::ServiceServer disable_manual_control_srv = node_public.advertiseService("disable_manual_control", DisableManualControlCallback);
 
+  //create subscriber to subscribe to balls collected messages topic with queue size set to 1000
+  ros::Subscriber balls_collected_sub = node_public.subscribe("/sensor/balls_collected", 1000, ballsCollectedCallback);
+
   //create subscriber to subscribe to control messages topic with queue size set to 1000
   ros::Subscriber control_sub = node_public.subscribe("control", 1000, controlCallback);
 
