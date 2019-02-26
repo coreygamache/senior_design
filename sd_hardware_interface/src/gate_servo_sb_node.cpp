@@ -22,7 +22,7 @@ void sigintHandler(int sig)
   ros::shutdown();
 
 }
-
+/*
 //callback function called to process messages on gate_servo topic
 void gateServoCallback(const sd_msgs::Servo::ConstPtr& msg)
 {
@@ -50,7 +50,7 @@ void timerCallback(const ros::TimerEvent& event)
   sb_driver.close();
 
 }
-
+*/
 int main(int argc, char **argv)
 {
 
@@ -64,7 +64,7 @@ int main(int argc, char **argv)
 
   //override the default SIGINT handler
   signal(SIGINT, sigintHandler);
-
+/*
   //retrieve gate closed angle value from parameter server [us]
   if (!node_private.getParam("/hardware/gate_servo_sb_node/closed_angle", closed_angle))
   {
@@ -157,6 +157,6 @@ int main(int argc, char **argv)
     //sleep until next cycle
     loop_rate.sleep();
   }
-
+*/
   return 0;
 }
