@@ -71,6 +71,10 @@ void controllerCallback(const sensor_msgs::Joy::ConstPtr& msg)
   controller_axes = msg->axes;
   controller_buttons = msg->buttons;
 
+  //if not ready to fire then set firing button to 0 to prevent firing when not ready
+  if (!ready_to_fire)
+    controller_buttons[7] = 0;
+
 }
 
 //callback function called to process service requests on the disable manual control topic
