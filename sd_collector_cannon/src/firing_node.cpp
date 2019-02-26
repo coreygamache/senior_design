@@ -125,7 +125,7 @@ int main(int argc, char **argv)
   firing_status_msg.complete = false;
 
   //create gate servo message object and set default parameters
-  sd_msgs::Mosfet gate_servo_msg;
+  sd_msgs::Servo gate_servo_msg;
   gate_servo_msg.header.frame_id = "0";
   gate_servo_msg.open = true;
 
