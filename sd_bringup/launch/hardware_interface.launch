@@ -4,7 +4,7 @@
   <arg name="hardware_conveyor_enable" value="true" />
   <arg name="hardware_drive_motor_enable" value="true" />
   <arg name="hardware_firing_wheel_enable" value="true" />
-  <arg name="hardware_gate_servo_enable" value="true" />
+  <arg name="hardware_gate_servo_enable" value="false" />
   <arg name="hardware_gate_solenoid_enable" value="false" />
   <arg name="hardware_roller_enable" value="true" />
 
