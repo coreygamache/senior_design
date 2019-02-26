@@ -38,6 +38,7 @@ add_message_files(
   LineFollowing.msg
   LineSensor.msg
   Mosfet.msg
+  Servo.msg
 )
 
 ## Generate services in the 'srv' folder
