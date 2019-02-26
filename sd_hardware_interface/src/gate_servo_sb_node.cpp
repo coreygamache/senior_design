@@ -13,7 +13,7 @@ int open_angle;
 int sb_servo_number;
 std::string sb_driver_path;
 
-/*
+
 //callback function called to process SIGINT command
 void sigintHandler(int sig)
 {
@@ -28,7 +28,7 @@ void gateServoCallback(const sd_msgs::GateServo::ConstPtr& msg)
 {
 
   //set local value to match message value
-  open = msg->open;
+  gate_open = msg->open;
 
 }
 
@@ -50,7 +50,7 @@ void timerCallback(const ros::TimerEvent& event)
   sb_driver.close();
 
 }
-*/
+
 int main(int argc, char **argv)
 {
 
@@ -61,7 +61,7 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "gate_servo_sb_node");
   ros::NodeHandle node_private("~");
   ros::NodeHandle node_public;
-/*
+
   //override the default SIGINT handler
   signal(SIGINT, sigintHandler);
 
@@ -128,11 +128,11 @@ int main(int argc, char **argv)
   {
 
     //if servo gate has been requested to open since last iteration then handle request
-    if (open)
+    if (gate_open)
     {
 
       //set open to false until next gate open request is received
-      open = false;
+      gate_open = false;
 
       //inform of gate open request
       ROS_INFO("[gate_servo_sb_node] gate open request received; opening gate servo");
@@ -157,6 +157,6 @@ int main(int argc, char **argv)
     //sleep until next cycle
     loop_rate.sleep();
   }
-*/
+
   return 0;
 }
