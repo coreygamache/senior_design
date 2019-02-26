@@ -35,10 +35,10 @@ add_message_files(
   Control.msg
   DriveMotors.msg
   FiringStatus.msg
+  GateServo.msg
   LineFollowing.msg
   LineSensor.msg
   Mosfet.msg
-  Servo.msg
 )
 
 ## Generate services in the 'srv' folder
