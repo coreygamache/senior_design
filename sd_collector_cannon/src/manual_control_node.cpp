@@ -8,8 +8,8 @@
 #include <sd_msgs/Control.h>
 #include <sd_msgs/DriveMotors.h>
 #include <sd_msgs/FiringStatus.h>
+#include <sd_msgs/GateServo.h>
 #include <sd_msgs/Mosfet.h>
-#include <sd_msgs/Servo.h>
 #include <sensor_msgs/Joy.h>
 #include <signal.h>
 
@@ -185,7 +185,7 @@ int main(int argc, char **argv)
   //the firing node automatically closes the servo after a set amount of time,
   //therefore this node only needs to send a message with enable = true
   //when a ball is to be fired
-  sd_msgs::Servo gate_servo_msg;
+  sd_msgs::GateServo gate_servo_msg;
   gate_servo_msg.header.frame_id = "0";
   gate_servo_msg.open = true;
 
@@ -209,7 +209,7 @@ int main(int argc, char **argv)
   ros::Publisher firing_status_pub = node_public.advertise<sd_msgs::FiringStatus>("firing_status", 10, true);
 
   //create publisher to publish gate servo message with buffer size 10, and latch set to false
-  ros::Publisher gate_servo_pub = node_public.advertise<sd_msgs::Servo>("gate_servo", 10, false);
+  ros::Publisher gate_servo_pub = node_public.advertise<sd_msgs::GateServo>("gate_servo", 10, false);
 
   //create publisher to publish roller motor message with buffer size 10, and latch set to true
   ros::Publisher roller_pub = node_public.advertise<sd_msgs::ComponentMotor>("roller_motor", 10, true);
