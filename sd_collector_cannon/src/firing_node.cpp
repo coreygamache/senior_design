@@ -4,7 +4,7 @@
 #include <sd_msgs/ChangeControlMode.h>
 #include <sd_msgs/Control.h>
 #include <sd_msgs/FiringStatus.h>
-#include <sd_msgs/Mosfet.h>
+#include <sd_msgs/Servo.h>
 #include <signal.h>
 
 //global variables
@@ -124,17 +124,16 @@ int main(int argc, char **argv)
   firing_status_msg.balls_remaining = balls_collected;
   firing_status_msg.complete = false;
 
-  //create gate solenoid message object and set default parameters
-  sd_msgs::Mosfet gate_solenoid_msg;
-  gate_solenoid_msg.header.frame_id = "0";
-  gate_solenoid_msg.enable = true;
-  gate_solenoid_msg.pwm = 0;
+  //create gate servo message object and set default parameters
+  sd_msgs::Mosfet gate_servo_msg;
+  gate_servo_msg.header.frame_id = "0";
+  gate_servo_msg.open = true;
 
   //create publisher to publish firing status message with buffer size 10, and latch set to true
   ros::Publisher firing_status_pub = node_public.advertise<sd_msgs::FiringStatus>("firing_status", 10, true);
 
-  //create publisher to publish gate solenoid message with buffer size 10, and latch set to true
-  ros::Publisher gate_solenoid_pub = node_public.advertise<sd_msgs::Mosfet>("gate_solenoid", 10, false);
+  //create publisher to publish gate servo message with buffer size 10, and latch set to true
+  ros::Publisher gate_servo_pub = node_public.advertise<sd_msgs::Servo>("gate_servo", 10, false);
 
   //create service to process service requests on the disable firing topic
   ros::ServiceServer disable_firing_srv = node_public.advertiseService("disable_firing", DisableFiringCallback);
@@ -167,13 +166,13 @@ int main(int argc, char **argv)
   {
 
     //if line following is complete, fire delay time has elapsed (since last shot if there was one),
-    //firing motor is on, at least one ball is remaining, request gate solenoid to open to fire a ball
+    //firing motor is on, at least one ball is remaining, request gate servo to open to fire a ball
     //NOTE: line_following_complete can only be true if control mode is set to autonomous
     if (firing_stage && ready_to_fire && firing_motor_on && ((balls_collected - balls_fired) > 0))
     {
 
-      //publish gate solenoid message to request gate to be opened
-      gate_solenoid_pub.publish(gate_solenoid_msg);
+      //publish gate servo message to request gate to be opened
+      gate_servo_pub.publish(gate_servo_msg);
 
       //increment number of balls fired
       balls_fired++;
