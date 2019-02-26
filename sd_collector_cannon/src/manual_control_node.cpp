@@ -306,7 +306,7 @@ int main(int argc, char **argv)
         gate_servo_msg.header.stamp = ros::Time::now();
 
         //publish firing motor message
-        gate_servo_msg.publish(gate_servo_msg);
+        gate_servo_pub.publish(gate_servo_msg);
 
         //increment number of balls fired
         balls_fired++;
