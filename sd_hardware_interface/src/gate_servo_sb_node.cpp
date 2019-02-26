@@ -46,7 +46,7 @@ void timerCallback(const ros::TimerEvent& event)
   std::fstream sb_driver(sb_driver_path.c_str(), std::fstream::out | std::fstream::trunc);
 
   //output angle change command to servo driver
-  sb_driver << sb_servo_number << "=" << sb_closed_angle << "\n";
+  sb_driver << sb_servo_number << "=" << closed_angle << "\n";
 
   //close file
   sb_driver.close();
@@ -143,7 +143,7 @@ int main(int argc, char **argv)
       std::fstream sb_driver(sb_driver_path.c_str(), std::fstream::out | std::fstream::trunc);
 
       //output angle change command to servo driver
-      sb_driver << sb_servo_number << "=" << sb_open_angle << "\n";
+      sb_driver << sb_servo_number << "=" << open_angle << "\n";
 
       //close file
       sb_driver.close();
