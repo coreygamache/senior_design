@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(sd_hardware_interface)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-add_compile_options(-std=c++11)
+# add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -117,6 +117,7 @@ add_executable(conveyor_motor_node src/conveyor_motor_node.cpp)
 add_executable(drive_motor_node src/drive_motor_node.cpp)
 add_executable(firing_wheel_motor_node src/firing_wheel_motor_node.cpp)
 add_executable(gate_servo_sb_node src/gate_servo_sb_node.cpp)
+# add_executable(gate_solenoid_node src/gate_solenoid_node.cpp)
 add_executable(roller_motor_node src/roller_motor_node.cpp)
 add_executable(i2c_comm_test_node src/i2c_comm_test_node.cpp)
 
@@ -133,6 +134,7 @@ add_dependencies(conveyor_motor_node ${catkin_EXPORTED_TARGETS})
 add_dependencies(drive_motor_node ${catkin_EXPORTED_TARGETS})
 add_dependencies(firing_wheel_motor_node ${catkin_EXPORTED_TARGETS})
 add_dependencies(gate_servo_sb_node ${catkin_EXPORTED_TARGETS})
+# add_dependencies(gate_solenoid_node ${catkin_EXPORTED_TARGETS})
 add_dependencies(roller_motor_node ${catkin_EXPORTED_TARGETS})
 add_dependencies(i2c_comm_test_node ${catkin_EXPORTED_TARGETS})
 
@@ -144,5 +146,6 @@ target_link_libraries(conveyor_motor_node ${catkin_LIBRARIES} wiringPi)
 target_link_libraries(drive_motor_node ${catkin_LIBRARIES} wiringPi)
 target_link_libraries(firing_wheel_motor_node ${catkin_LIBRARIES} wiringPi)
 target_link_libraries(gate_servo_sb_node ${catkin_LIBRARIES})
+# target_link_libraries(gate_solenoid_node ${catkin_LIBRARIES} wiringPi)
 target_link_libraries(roller_motor_node ${catkin_LIBRARIES} wiringPi)
 target_link_libraries(i2c_comm_test_node ${catkin_LIBRARIES} wiringPi)
