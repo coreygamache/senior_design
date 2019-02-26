@@ -59,7 +59,7 @@ void gateSolenoidCallback(const sd_msgs::Mosfet::ConstPtr& msg)
 //specified time since gate was opened has elapsed; close gate
 void timerCallback(const ros::TimerEvent& event)
 {
-  
+
   //inform of gate closure
   ROS_INFO("[gate_solenoid_node] gate open time elapsed; discharging gate solenoid");
 
@@ -82,7 +82,7 @@ int main(int argc, char **argv)
   //override the default SIGINT handler
   signal(SIGINT, sigintHandler);
 
-  //retrieve gate open time value from parameter server [ms]
+  //retrieve gate open time value from parameter server [s]
   int gate_open_time;
   if (!node_private.getParam("/hardware/gate_solenoid/gate_open_time", gate_open_time))
   {
