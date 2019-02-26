@@ -291,7 +291,7 @@ int main(int argc, char **argv)
         conveyor_pub.publish(conveyor_msg);
 
         //output ROS_INFO messages to inform of conveyor enable status change
-        ROS_INFO("[manual_control_node] conveyor motor enable status changed: %d", conveyor_enable);
+        //ROS_INFO("[manual_control_node] conveyor motor enable status changed: %d", conveyor_enable);
 
       }
 
@@ -318,7 +318,7 @@ int main(int argc, char **argv)
         timer = node_private.createTimer(ros::Duration(fire_delay_time), timerCallback, true);
 
         //output ROS_INFO messages to inform of fire ball request
-        ROS_INFO("[manual_control_node] fire ball request issued");
+        //ROS_INFO("[manual_control_node] fire ball request issued");
 
         //update message values
         firing_status_msg.balls_fired = balls_fired;
@@ -356,7 +356,7 @@ int main(int argc, char **argv)
         firing_motor_pub.publish(firing_motor_msg);
 
         //output ROS_INFO messages to inform of firing motor enable status change
-        ROS_INFO("[manual_control_node] firing wheel motor enable status changed: %d", firing_motor_enable);
+        //ROS_INFO("[manual_control_node] firing wheel motor enable status changed: %d", firing_motor_enable);
 
       }
 
@@ -378,7 +378,7 @@ int main(int argc, char **argv)
         roller_pub.publish(roller_msg);
 
         //output ROS_INFO messages to inform of roller enable status change
-        ROS_INFO("[manual_control_node] roller motor enable status changed: %d", roller_enable);
+        //ROS_INFO("[manual_control_node] roller motor enable status changed: %d", roller_enable);
 
       }
 
