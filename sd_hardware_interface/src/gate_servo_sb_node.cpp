@@ -60,7 +60,7 @@ int main(int argc, char **argv)
   ROS_INFO("[NODE LAUNCH]: starting gate_servo_sb_node");
 
   //initialize node and create node handler
-  ros::init(argc, argv, "gate_servo_node");
+  ros::init(argc, argv, "gate_servo_sb_node");
   ros::NodeHandle node_private("~");
   ros::NodeHandle node_public;
 
