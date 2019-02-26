@@ -13,7 +13,7 @@ int open_angle;
 int sb_servo_number;
 std::string sb_driver_path;
 
-
+/*
 //callback function called to process SIGINT command
 void sigintHandler(int sig)
 {
@@ -50,7 +50,7 @@ void timerCallback(const ros::TimerEvent& event)
   sb_driver.close();
 
 }
-
+*/
 int main(int argc, char **argv)
 {
 
