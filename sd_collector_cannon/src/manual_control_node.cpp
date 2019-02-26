@@ -228,16 +228,16 @@ int main(int argc, char **argv)
   ros::Subscriber control_sub = node_public.subscribe("control", 1000, controlCallback);
 
   //create subscriber to subscribe to conveyor motor messages topic with queue size set to 1000
-  ros::Subscriber conveyor_sub = node_public.subscribe("conveyor_motor", 1000, conveyorCallback);
+  ros::Subscriber conveyor_sub = node_public.subscribe("/hardware/conveyor_motor", 1000, conveyorCallback);
 
   //create subscriber to subscribe to joy messages topic with queue size set to 1000
   ros::Subscriber controller_sub = node_public.subscribe("joy", 1000, controllerCallback);
 
   //create subscriber to subscribe to firing wheel motor messages topic with queue size set to 1000
-  ros::Subscriber firing_motor_sub = node_public.subscribe("firing_motor", 1000, firingMotorCallback);
+  ros::Subscriber firing_motor_sub = node_public.subscribe("/hardware/firing_motor", 1000, firingMotorCallback);
 
   //create subscriber to subscribe to roller motor messages topic with queue size set to 1000
-  ros::Subscriber roller_sub = node_public.subscribe("roller_motor", 1000, rollerCallback);
+  ros::Subscriber roller_sub = node_public.subscribe("/hardware/roller_motor", 1000, rollerCallback);
 
   //create variable for counting number of balls remaining
   int balls_fired = 0;
@@ -308,6 +308,9 @@ int main(int argc, char **argv)
 
         //set button status to 0 to prevent consecutive toggles for one button press
         controller_buttons[7] = 0;
+
+        //inform of fire request
+        ROS_INFO("[manual_control_node] fire ball request issued");
 
         //if ball can be fired
         if (firing_motor_enable && ready_to_fire && ((balls_collected - balls_fired) > 0))
