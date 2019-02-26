@@ -296,47 +296,53 @@ int main(int argc, char **argv)
       }
 
       //if fire button on controller is pressed then publish fire request message
-      if (controller_buttons[7] == 1 && firing_motor_enable && ready_to_fire && ((balls_collected - balls_fired) > 0))
+      if (controller_buttons[7] == 1)
       {
 
         //set button status to 0 to prevent consecutive toggles for one button press
         controller_buttons[7] = 0;
 
-        //set time and parameters of firing motor message
-        gate_servo_msg.header.stamp = ros::Time::now();
+        //if ball can be fired
+        if (firing_motor_enable && ready_to_fire && ((balls_collected - balls_fired) > 0))
+        {
 
-        //publish firing motor message
-        gate_servo_pub.publish(gate_servo_msg);
+          //set time and parameters of firing motor message
+          gate_servo_msg.header.stamp = ros::Time::now();
 
-        //increment number of balls fired
-        balls_fired++;
+          //publish firing motor message
+          gate_servo_pub.publish(gate_servo_msg);
 
-        //set ready to fire to false until fire delay time elapses
-        ready_to_fire = false;
+          //increment number of balls fired
+          balls_fired++;
 
-        //set timer to keep track of fire delay time
-        timer = node_private.createTimer(ros::Duration(fire_delay_time), timerCallback, true);
+          //set ready to fire to false until fire delay time elapses
+          ready_to_fire = false;
 
-        //output ROS_INFO messages to inform of fire ball request
-        //ROS_INFO("[manual_control_node] fire ball request issued");
+          //set timer to keep track of fire delay time
+          timer = node_private.createTimer(ros::Duration(fire_delay_time), timerCallback, true);
 
-        //update message values
-        firing_status_msg.balls_fired = balls_fired;
-        firing_status_msg.balls_remaining = balls_collected - balls_fired;
+          //output ROS_INFO messages to inform of fire ball request
+          //ROS_INFO("[manual_control_node] fire ball request issued");
 
-        //publish new firing status message
-        firing_status_pub.publish(firing_status_msg);
+          //update message values
+          firing_status_msg.balls_fired = balls_fired;
+          firing_status_msg.balls_remaining = balls_collected - balls_fired;
+
+          //publish new firing status message
+          firing_status_pub.publish(firing_status_msg);
+
+        }
+        //send notification if fire request was issued but no balls remain
+        else if (firing_motor_enable && ready_to_fire && ((balls_collected - balls_fired) == 0))
+          ROS_INFO("[manual_control_node] fire ball request issued but no balls remaining to fire; ignoring request");
+        //send notification if fire request was issued but firing wheel motor is not yet ready to fire
+        else if (firing_motor_enable && !ready_to_fire)
+          ROS_INFO("[manual_control_node] fire ball request issued but firing wheel motor is not yet ready to fire; ignoring request");
+        //send notification if fire request was issued but firing wheel motor is not enabled
+        else if (!firing_motor_enable)
+          ROS_INFO("[manual_control_node] fire ball request issued but firing wheel motor disabled; ignoring request");
 
       }
-      //send notification if fire request was issued but no balls remain
-      else if (controller_buttons[7] == 1 && firing_motor_enable && ready_to_fire && ((balls_collected - balls_fired) == 0))
-        ROS_INFO("[manual_control_node] fire ball request issued but no balls remaining to fire; ignoring request");
-      //send notification if fire request was issued but firing wheel motor is not yet ready to fire
-      else if (controller_buttons[7] == 1 && firing_motor_enable && !ready_to_fire)
-        ROS_INFO("[manual_control_node] fire ball request issued but firing wheel motor is not yet ready to fire; ignoring request");
-      //send notification if fire request was issued but firing wheel motor is not enabled
-      else if (controller_buttons[7] == 1 && !firing_motor_enable)
-        ROS_INFO("[manual_control_node] fire ball request issued but firing wheel motor disabled; ignoring request");
 
       //if firing wheel button on controller is pressed then change enable status and publish message
       if (controller_buttons[0] == 1)
