@@ -28,7 +28,7 @@
 
   <!-- if gate servo is enabled, launch servo interface node -->
   <group if="$(arg hardware_gate_servo_enable)">
-    <node name="gate_servo_node" pkg="sd_hardware_interface" type="gate_servo_sb_node" ns="hardware" output="screen" />
+    <node name="gate_servo_sb_node" pkg="sd_hardware_interface" type="gate_servo_sb_node" ns="hardware" output="screen" />
   </group>
 
   <!-- if gate solenoid is enabled, launch solenoid interface node -->
