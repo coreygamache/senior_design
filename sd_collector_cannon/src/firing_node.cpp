@@ -4,6 +4,7 @@
 #include <sd_msgs/ChangeControlMode.h>
 #include <sd_msgs/Control.h>
 #include <sd_msgs/FiringStatus.h>
+#include <sd_msgs/Mosfet.h>
 #include <sd_msgs/Servo.h>
 #include <signal.h>
 
