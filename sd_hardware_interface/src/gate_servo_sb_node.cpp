@@ -24,7 +24,7 @@ void sigintHandler(int sig)
 }
 
 //callback function called to process messages on gate_servo topic
-void gateServoCallback(const sd_msgs::Servo::ConstPtr& msg)
+void gateServoCallback(const sd_msgs::GateServo::ConstPtr& msg)
 {
 
   //set local value to match message value
