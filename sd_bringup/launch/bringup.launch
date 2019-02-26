@@ -37,13 +37,13 @@
   </node>
   <node name="controller_node" pkg="joy" type="joy_node" ns="control" output="screen" />
   <node name="firing_node" pkg="sd_collector_cannon" type="firing_node" ns="control" output="screen">
-    <remap from="/control/gate_solenoid" to="/hardware/gate_solenoid" />
+    <remap from="/control/gate_servo" to="/hardware/gate_servo" />
   </node>
   <node name="manual_control_node" pkg="sd_collector_cannon" type="manual_control_node" ns="control" output="screen">
     <remap from="/control/conveyor_motor" to="/hardware/conveyor_motor" />
     <remap from="/control/drive_motors" to="/hardware/drive_motors" />
     <remap from="/control/firing_motor" to="/hardware/firing_motor" />
-    <remap from="/control/gate_solenoid" to="/hardware/gate_solenoid" />
+    <remap from="/control/gate_servo" to="/hardware/gate_servo" />
     <remap from="/control/roller_motor" to="/hardware/roller_motor" />
   </node>
 </group>
