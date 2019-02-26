@@ -4,8 +4,8 @@
 #include <sd_msgs/ChangeControlMode.h>
 #include <sd_msgs/Control.h>
 #include <sd_msgs/FiringStatus.h>
+#include <sd_msgs/GateServo.h>
 #include <sd_msgs/Mosfet.h>
-#include <sd_msgs/Servo.h>
 #include <signal.h>
 
 //global variables
@@ -126,7 +126,7 @@ int main(int argc, char **argv)
   firing_status_msg.complete = false;
 
   //create gate servo message object and set default parameters
-  sd_msgs::Servo gate_servo_msg;
+  sd_msgs::GateServo gate_servo_msg;
   gate_servo_msg.header.frame_id = "0";
   gate_servo_msg.open = true;
 
@@ -134,7 +134,7 @@ int main(int argc, char **argv)
   ros::Publisher firing_status_pub = node_public.advertise<sd_msgs::FiringStatus>("firing_status", 10, true);
 
   //create publisher to publish gate servo message with buffer size 10, and latch set to true
-  ros::Publisher gate_servo_pub = node_public.advertise<sd_msgs::Servo>("gate_servo", 10, false);
+  ros::Publisher gate_servo_pub = node_public.advertise<sd_msgs::GateServo>("gate_servo", 10, false);
 
   //create service to process service requests on the disable firing topic
   ros::ServiceServer disable_firing_srv = node_public.advertiseService("disable_firing", DisableFiringCallback);
