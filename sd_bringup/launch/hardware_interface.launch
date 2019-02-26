@@ -4,7 +4,7 @@
   <arg name="hardware_conveyor_enable" value="true" />
   <arg name="hardware_drive_motor_enable" value="true" />
   <arg name="hardware_firing_wheel_enable" value="true" />
-  <arg name="hardware_gate_servo_enable" value="false" />
+  <arg name="hardware_gate_servo_enable" value="true" />
   <arg name="hardware_gate_solenoid_enable" value="false" />
   <arg name="hardware_roller_enable" value="true" />
 
@@ -28,7 +28,7 @@
 
   <!-- if gate servo is enabled, launch servo interface node -->
   <group if="$(arg hardware_gate_servo_enable)">
-    <node name="gate_servo_node" pkg="sd_hardware_interface" type="gate_servo_node" ns="hardware" output="screen" />
+    <node name="gate_servo_node" pkg="sd_hardware_interface" type="gate_servo_sb_node" ns="hardware" output="screen" />
   </group>
 
   <!-- if gate solenoid is enabled, launch solenoid interface node -->
