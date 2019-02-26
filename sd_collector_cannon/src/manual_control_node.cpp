@@ -9,6 +9,7 @@
 #include <sd_msgs/DriveMotors.h>
 #include <sd_msgs/FiringStatus.h>
 #include <sd_msgs/Mosfet.h>
+#include <sd_msgs/Servo.h>
 #include <sensor_msgs/Joy.h>
 #include <signal.h>
 
@@ -180,14 +181,13 @@ int main(int argc, char **argv)
   firing_status_msg.balls_remaining = 0;
   firing_status_msg.complete = false;
 
-  //create gate solenoid message object and set default parameters
-  //the firing node automatically disables the solenoid after a set amount of time,
+  //create gate servo message object and set default parameters
+  //the firing node automatically closes the servo after a set amount of time,
   //therefore this node only needs to send a message with enable = true
   //when a ball is to be fired
-  sd_msgs::Mosfet gate_solenoid_msg;
-  gate_solenoid_msg.header.frame_id = "0";
-  gate_solenoid_msg.enable = true;
-  gate_solenoid_msg.pwm = 0;
+  sd_msgs::Servo gate_servo_msg;
+  gate_servo_msg.header.frame_id = "0";
+  gate_servo_msg.open = true;
 
   //create roller motor message object and set default parameters
   sd_msgs::ComponentMotor roller_msg;
@@ -208,8 +208,8 @@ int main(int argc, char **argv)
   //create publisher to publish firing status message with buffer size 10, and latch set to true
   ros::Publisher firing_status_pub = node_public.advertise<sd_msgs::FiringStatus>("firing_status", 10, true);
 
-  //create publisher to publish gate solenoid message with buffer size 10, and latch set to true
-  ros::Publisher gate_solenoid_pub = node_public.advertise<sd_msgs::Mosfet>("gate_solenoid", 10, false);
+  //create publisher to publish gate servo message with buffer size 10, and latch set to false
+  ros::Publisher gate_servo_pub = node_public.advertise<sd_msgs::Servo>("gate_servo", 10, false);
 
   //create publisher to publish roller motor message with buffer size 10, and latch set to true
   ros::Publisher roller_pub = node_public.advertise<sd_msgs::ComponentMotor>("roller_motor", 10, true);
@@ -303,10 +303,10 @@ int main(int argc, char **argv)
         controller_buttons[7] = 0;
 
         //set time and parameters of firing motor message
-        gate_solenoid_msg.header.stamp = ros::Time::now();
+        gate_servo_msg.header.stamp = ros::Time::now();
 
         //publish firing motor message
-        gate_solenoid_pub.publish(gate_solenoid_msg);
+        gate_servo_msg.publish(gate_servo_msg);
 
         //increment number of balls fired
         balls_fired++;
