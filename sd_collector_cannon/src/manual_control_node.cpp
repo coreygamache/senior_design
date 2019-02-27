@@ -341,6 +341,9 @@ int main(int argc, char **argv)
           //publish new firing status message
           firing_status_pub.publish(firing_status_msg);
 
+          //inform that a ball was fired
+          ROS_INFO("[firing_node] ball fired, balls remaining: %d", balls_collected - balls_fired);
+
         }
         //send notification if fire request was issued but no balls remain
         else if (firing_motor_enable && ready_to_fire && ((balls_collected - balls_fired) == 0))
