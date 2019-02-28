@@ -198,7 +198,7 @@ int main(int argc, char **argv)
 
     //----------------------CONTROL MODE CHANGE HANDLING------------------------
     //switch control modes if controller button is pressed
-    if (digitalRead(mode_change_requested))
+    if (mode_change_requested)
     {
 
       //reset mode change requested to prevent mode from toggling twice on one button press
