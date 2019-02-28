@@ -285,6 +285,23 @@ int main(int argc, char **argv)
         else
         {
 
+          //set time and parameters of conveyor motor message
+          conveyor_msg.header.stamp = ros::Time::now();
+          conveyor_msg.enable = false;
+
+          //set time and parameters of firing motor message
+          firing_motor_msg.header.stamp = ros::Time::now();
+          firing_motor_msg.enable = false;
+
+          //set time and parameters of roller motor message
+          roller_msg.header.stamp = ros::Time::now();
+          roller_msg.enable = false;
+
+          //publish motor messages
+          conveyor_pub.publish(conveyor_msg);
+          firing_motor_pub.publish(firing_motor_msg);
+          roller_pub.publish(roller_msg);
+
           //output ROS_INFO messages to inform of autonomous mode disabled
           ROS_INFO("[control_mode_node] control mode changed, autonomous control disabled");
 
