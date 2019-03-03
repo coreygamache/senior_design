@@ -167,9 +167,8 @@ int main(int argc, char **argv)
 
       //reset open request to false
       open_requested = false;
-      
-    }
 
+    }
 
     //process callback function calls
     ros::spinOnce();
