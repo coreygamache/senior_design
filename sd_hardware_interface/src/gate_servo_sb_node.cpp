@@ -116,7 +116,7 @@ int main(int argc, char **argv)
   //retrieve servoblaster servo number from parameter server
   if (!node_private.getParam("/hardware/gate_servo_sb_node/sb_servo_number", sb_servo_number))
   {
-    ROS_ERROR("[gate_servo_sb_node] servoblaster driver path not defined in config file: sd_hardware_interface/config/hardware_interface.yaml");
+    ROS_ERROR("[gate_servo_sb_node] gate servo number not defined in config file: sd_hardware_interface/config/hardware_interface.yaml");
     ROS_BREAK();
   }
 
