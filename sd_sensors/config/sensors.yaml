@@ -3,12 +3,12 @@
 
 # ball sensor parameters
 ball_sensor:
-  output_pin: 1 # (using wiringPi numbering scheme)
+  output_pin: 255 # not used
   refresh_rate: 1.0 # [Hz]
 
 # ball sensor for counting collected balls parameters
 balls_collected_sensor:
-  output_pin: 1 # (using wiringPi numbering scheme)
+  output_pin: 31 # (using wiringPi numbering scheme)
   refresh_rate: 10.0 # [Hz]
 
 # line sensor parameters
