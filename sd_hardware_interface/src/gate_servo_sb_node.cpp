@@ -36,7 +36,7 @@ void gateServoCallback(const sd_msgs::GateServo::ConstPtr& msg)
 
 //callback function to process timer firing event
 //specified time since gate was opened has elapsed; close gate
-void timerCallback(const ros::TimerEvent& event)
+void openTimerCallback(const ros::TimerEvent& event)
 {
 
   //inform of gate closure
@@ -53,6 +53,28 @@ void timerCallback(const ros::TimerEvent& event)
 
   //change gate open status
   gate_open = false;
+
+}
+
+//callback function to process timer firing event
+//specified time since gate was opened has elapsed; close gate
+void periodicTimerCallback(const ros::TimerEvent& event)
+{
+
+  //inform of gate closure
+  ROS_DEBUG("[gate_servo_sb_node] outputting periodic signal to servo");
+
+  //open servo driver
+  std::fstream sb_driver(sb_driver_path.c_str(), std::fstream::out | std::fstream::trunc);
+
+  //re-output current open/closed angle command to servo driver
+  if (gate_open)
+    sb_driver << sb_servo_number << "=" << open_angle << "\n";
+  else
+    sb_driver << sb_servo_number << "=" << closed_angle << "\n";
+
+  //close file
+  sb_driver.close();
 
 }
 
@@ -98,6 +120,14 @@ int main(int argc, char **argv)
     ROS_BREAK();
   }
 
+  //retrieve gate periodic output time value from parameter server [s]
+  float periodic_time;
+  if (!node_private.getParam("/hardware/gate_servo_sb_node/periodic_time", periodic_time))
+  {
+    ROS_ERROR("[gate_servo_sb_node] gate servo periodic time not defined in config file: sd_hardware_interface/config/hardware_interface.yaml");
+    ROS_BREAK();
+  }
+
   //retrieve refresh rate of servo gate node in hertz from parameter server
   float refresh_rate;
   if (!node_private.getParam("/hardware/gate_servo_sb_node/refresh_rate", refresh_rate))
@@ -123,8 +153,14 @@ int main(int argc, char **argv)
   //create subscriber to subscribe to gate servo messages message topic with queue size set to 1000
   ros::Subscriber gate_servo_sub = node_public.subscribe("gate_servo", 1000, gateServoCallback);
 
-  //create timer to keep tracking of gate open time
-  ros::Timer timer;
+  //create timer to keep track of gate open time
+  ros::Timer open_timer;
+
+  //create timer to periodically re-output signal to servo to prevent timeout
+  ros::Timer periodic_timer;
+
+  //initialize periodic timer
+  periodic_timer = node_private.createTimer(ros::Duration(periodic_time), periodicTimerCallback, false);
 
   //set loop rate in Hz
   ros::Rate loop_rate(refresh_rate);
@@ -155,7 +191,7 @@ int main(int argc, char **argv)
       sb_driver.close();
 
       //set timer to keep track of gate open time
-      timer = node_private.createTimer(ros::Duration(open_time), timerCallback, true);
+      open_timer = node_private.createTimer(ros::Duration(open_time), openTimerCallback, true);
 
     }
     //if gate open was requested but gate is already open inform user
