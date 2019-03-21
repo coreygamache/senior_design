@@ -255,7 +255,7 @@ int main(int argc, char **argv)
         //disable component motor driver standby mode
         digitalWrite(component_motor_standby_pin, HIGH);
 
-        //if autonomous control is enabled then ensure all hardware is enabled
+        //if autonomous control is enabled then ensure all hardware except firing motor is enabled
         if (autonomous_control)
         {
 
@@ -265,7 +265,7 @@ int main(int argc, char **argv)
 
           //set time and parameters of firing motor message
           firing_motor_msg.header.stamp = ros::Time::now();
-          firing_motor_msg.enable = true;
+          firing_motor_msg.enable = false;
 
           //set time and parameters of roller motor message
           roller_msg.header.stamp = ros::Time::now();
