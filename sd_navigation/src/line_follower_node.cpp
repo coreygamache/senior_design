@@ -61,8 +61,8 @@ void controllerCallback(const sensor_msgs::Joy::ConstPtr& msg)
   //set local values to match message values
   controller_buttons = msg->buttons;
 
-  //if mode change controller button is pressed then set change mode request true
-  if (controller_buttons[0] == 1)
+  //if line follow button is pressed and currently in autonomous mode then set toggle line following true
+  if ((controller_buttons[0] == 1) && autonomous_control)
   {
 
     //set toggle line following to true to indicate request to change line following status
