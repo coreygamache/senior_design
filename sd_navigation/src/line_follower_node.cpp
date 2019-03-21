@@ -10,13 +10,19 @@
 #include <sd_msgs/ChangeControlMode.h>
 #include <sd_msgs/Control.h>
 #include <sd_msgs/LineFollowing.h>
+#include <sensor_msgs/Joy.h>
 #include <signal.h>
 #include <wiringPi.h>
 
 //global variables
 bool autonomous_control = false;
+bool line_following = false;
 bool line_following_complete = false; //line following completion status
 bool mode_change_requested = false;
+bool toggle_line_following = false;
+
+//global controller variables
+std::vector<int> controller_buttons(13, 0);
 
 //pin variables
 //must be global so that they can be accessed by callback functions
@@ -45,6 +51,28 @@ void controlCallback(const sd_msgs::Control::ConstPtr& msg)
 
   //set mode change requested flag to true
   mode_change_requested = true;
+
+}
+
+//callback function called to process messages on joy topic
+void controllerCallback(const sensor_msgs::Joy::ConstPtr& msg)
+{
+
+  //set local values to match message values
+  controller_buttons = msg->buttons;
+
+  //if mode change controller button is pressed then set change mode request true
+  if (controller_buttons[0] == 1)
+  {
+
+    //set toggle line following to true to indicate request to change line following status
+    toggle_line_following = true;
+
+    //reset controller button if pressed to prevent mode from toggling twice on one button press
+    if (controller_buttons[0] == 1)
+      controller_buttons[0] = 0;
+
+  }
 
 }
 
@@ -140,18 +168,43 @@ int main(int argc, char **argv)
   while (ros::ok())
   {
 
+    //handle mode change request
     if (mode_change_requested)
     {
 
       //set mode change requested to false to prevent mode changing twice for one request
       mode_change_requested = false;
 
-      //set line following complete status to false to force line following start on mode change to autonomous control
+      //set line following and line following complete status to false to force line following start on mode change to autonomous control
+      line_following = false;
       line_following_complete = false;
 
       //set time and status of current iteration
       line_following_msg.header.stamp = ros::Time::now();
-      line_following_msg.line_following = autonomous_control;
+      line_following_msg.line_following = line_following;
+      line_following_msg.complete = line_following_complete;
+
+      //publish line following status message
+      line_following_pub.publish(line_following_msg);
+
+    }
+    //handle line following status change request
+    else if (toggle_line_following)
+    {
+
+      //set mode change requested to false to prevent mode changing twice for one request
+      toggle_line_following = false;
+
+      //set line following and line following complete status to false to force line following start on mode change to autonomous control
+      line_following = !line_following;
+
+      //if line following has just been enabled then reset line following complete flag
+      if (line_following)
+        line_following_complete = false;
+
+      //set time and status of current iteration
+      line_following_msg.header.stamp = ros::Time::now();
+      line_following_msg.line_following = line_following;
       line_following_msg.complete = line_following_complete;
 
       //publish line following status message
