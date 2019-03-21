@@ -68,9 +68,8 @@ void controllerCallback(const sensor_msgs::Joy::ConstPtr& msg)
     //set toggle line following to true to indicate request to change line following status
     toggle_line_following = true;
 
-    //reset controller button if pressed to prevent mode from toggling twice on one button press
-    if (controller_buttons[0] == 1)
-      controller_buttons[0] = 0;
+    //reset controller button to prevent mode from toggling twice on one button press
+    controller_buttons[0] = 0;
 
   }
 
@@ -153,6 +152,9 @@ int main(int argc, char **argv)
 
   //create sunscriber to subscribe to control messages message topic with queue size set to 1000
   ros::Subscriber control_sub = node_public.subscribe("/control/control", 1000, controlCallback);
+
+  //create subscriber to subscribe to joy messages topic with queue size set to 1000
+  ros::Subscriber controller_sub = node_public.subscribe("joy", 1000, controllerCallback);
 
   //run wiringPi GPIO setup function and set pin modes
   wiringPiSetup();
