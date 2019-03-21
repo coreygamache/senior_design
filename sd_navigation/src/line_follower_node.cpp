@@ -214,7 +214,7 @@ int main(int argc, char **argv)
 
       //set arduino line following pin status to reflect current control mode
       //if autonomous control is true then pin is set high and vice versa
-      if (autonomous_control)
+      if (line_following)
         digitalWrite(line_following_pin, HIGH);
       else
         digitalWrite(line_following_pin, LOW);
