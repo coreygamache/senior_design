@@ -276,8 +276,8 @@ int main(int argc, char **argv)
           roller_pub.publish(roller_msg);
 
           //output ROS_INFO messages to inform of autonomous mode enabled
-          ROS_INFO("[control_mode_node] control mode changed, autonomous control enabled");
-          ROS_INFO("[control_mode_node] conveyor, firing wheel, and roller motors enabled");
+          ROS_DEBUG("[control_mode_node] control mode changed, autonomous control enabled");
+          ROS_DEBUG("[control_mode_node] conveyor and roller motors enabled, firing motor disabled");
 
         }
         //if autonomous control is disabled leave hardware status unchanged
