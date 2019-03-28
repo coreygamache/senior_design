@@ -36,6 +36,7 @@
     <remap from="/control/roller_motor" to="/hardware/roller_motor" />
   </node>
   <node name="controller_node" pkg="joy" type="joy_node" ns="control" output="screen" />
+  <node name="emergency_stop_node" pkg="sd_collector_cannon" type="emergency_stop_node" ns="control" output="screen" required="true" />
   <node name="firing_node" pkg="sd_collector_cannon" type="firing_node" ns="control" output="screen">
     <remap from="/control/gate_servo" to="/hardware/gate_servo" />
   </node>
