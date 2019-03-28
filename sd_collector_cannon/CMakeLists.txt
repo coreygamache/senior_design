@@ -105,6 +105,7 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/sd_collector_cannon_node.cpp)
 add_executable(control_node src/control_node.cpp)
+add_executable(emergency_stop_node src/emergency_stop_node.cpp)
 add_executable(firing_node src/firing_node.cpp)
 add_executable(manual_control_node src/manual_control_node.cpp)
 
@@ -118,6 +119,7 @@ add_executable(manual_control_node src/manual_control_node.cpp)
 ## same as for the library above
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(control_node ${catkin_EXPORTED_TARGETS})
+add_dependencies(emergency_stop_node ${catkin_EXPORTED_TARGETS})
 add_dependencies(firing_node ${catkin_EXPORTED_TARGETS})
 add_dependencies(manual_control_node ${catkin_EXPORTED_TARGETS})
 
@@ -126,5 +128,6 @@ add_dependencies(manual_control_node ${catkin_EXPORTED_TARGETS})
 #   ${catkin_LIBRARIES}
 # )
 target_link_libraries(control_node ${catkin_LIBRARIES} wiringPi)
+target_link_libraries(emergency_stop_node ${catkin_LIBRARIES})
 target_link_libraries(firing_node ${catkin_LIBRARIES})
 target_link_libraries(manual_control_node ${catkin_LIBRARIES})
