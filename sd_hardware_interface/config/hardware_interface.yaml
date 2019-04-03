@@ -14,8 +14,8 @@ firing_wheel:
   refresh_rate: 10
 
 gate_servo_sb_node:
-  closed_angle: 1700 # pulsewidth to achieve desired gate closed angle [us]
-  open_angle: 2000 # pulsewidth to achieve desired gate open angle [us]
+  closed_angle: 1750 # pulsewidth to achieve desired gate closed angle [us]
+  open_angle: 2300 # pulsewidth to achieve desired gate open angle [us]
   open_time: 0.5 # [s]
   periodic_time: 0.5 # [s]
   refresh_rate: 10
