@@ -313,7 +313,7 @@ int main(int argc, char **argv)
         ROS_INFO("[manual_control_node] fire ball request issued");
 
         //if ball can be fired
-        if (firing_motor_enable && ready_to_fire && ((balls_collected - balls_fired) > 0))
+        if (firing_motor_enable && ready_to_fire)// && ((balls_collected - balls_fired) > 0))
         {
 
           //set time and parameters of firing motor message
@@ -322,8 +322,9 @@ int main(int argc, char **argv)
           //publish firing motor message
           gate_servo_pub.publish(gate_servo_msg);
 
-          //increment number of balls fired
-          balls_fired++;
+          //if there was a ball to fire, increment number of balls fired
+          if ((balls_collected - balls_fired) > 0)
+            balls_fired++;
 
           //set ready to fire to false until fire delay time elapses
           ready_to_fire = false;
@@ -346,8 +347,8 @@ int main(int argc, char **argv)
 
         }
         //send notification if fire request was issued but no balls remain
-        else if (firing_motor_enable && ready_to_fire && ((balls_collected - balls_fired) == 0))
-          ROS_INFO("[manual_control_node] fire ball request issued but no balls remaining to fire; ignoring request");
+        //else if (firing_motor_enable && ready_to_fire && ((balls_collected - balls_fired) == 0))
+          //ROS_INFO("[manual_control_node] fire ball request issued but no balls remaining to fire; ignoring request");
         //send notification if fire request was issued but firing wheel motor is not yet ready to fire
         else if (firing_motor_enable && !ready_to_fire)
           ROS_INFO("[manual_control_node] fire ball request issued but firing wheel motor is not yet ready to fire; ignoring request");
