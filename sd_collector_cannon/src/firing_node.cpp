@@ -169,14 +169,15 @@ int main(int argc, char **argv)
     //if line following is complete, fire delay time has elapsed (since last shot if there was one),
     //firing motor is on, at least one ball is remaining, request gate servo to open to fire a ball
     //NOTE: line_following_complete can only be true if control mode is set to autonomous
-    if (firing_stage && ready_to_fire && firing_motor_on && ((balls_collected - balls_fired) > 0))
+    if (firing_stage && ready_to_fire && firing_motor_on) // && ((balls_collected - balls_fired) > 0))
     {
 
       //publish gate servo message to request gate to be opened
       gate_servo_pub.publish(gate_servo_msg);
 
-      //increment number of balls fired
-      balls_fired++;
+      //increment number of balls fired if there was a ball to fire
+      if ((balls_collected - balls_fired) > 0)
+        balls_fired++;
 
       //set ready to fire to false until fire delay time elapses
       ready_to_fire = false;
