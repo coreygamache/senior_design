@@ -80,7 +80,10 @@ bool DisableLineFollowingCallback(sd_msgs::ChangeControlMode::Request& req, sd_m
 {
 
   //if node isn't currently busy then ready to change modes, otherwise not ready to change
-  res.ready_to_change = true;
+  if (line_following)
+    res.ready_to_change = false;
+  else
+    res.ready_to_change = true;
 
   //output ROS INFO message to inform of mode change request and reply status
   if (req.mode_change_requested && res.ready_to_change)
