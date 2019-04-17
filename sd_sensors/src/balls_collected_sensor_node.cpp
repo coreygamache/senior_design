@@ -64,11 +64,13 @@ int main(int argc, char **argv)
   bool ball_detected = false;
   bool last_reading = false;
 
+  //send initial message stating three balls collected (for bypassing sensor)
+  balls_collected_msg.header.stamp = ros::Time::now();
+  balls_collected_msg.balls_collected = 3;
+  balls_collected_sensor_pub.publish(balls_collected_msg);
+
   while (ros::ok())
   {
-
-    //set time of current sensor reading
-    balls_collected_msg.header.stamp = ros::Time::now();
 
     //get current sensor reading
     ball_detected = sensor.ballDetected();
@@ -80,6 +82,9 @@ int main(int argc, char **argv)
 
       //increment number of balls collected
       balls_collected++;
+
+      //set time of current sensor reading
+      balls_collected_msg.header.stamp = ros::Time::now();
 
       //set balls collected data in message to number of balls currently collected
       balls_collected_msg.balls_collected = balls_collected;
