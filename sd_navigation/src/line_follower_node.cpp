@@ -204,7 +204,7 @@ int main(int argc, char **argv)
       line_following = !line_following;
 
       //output line following status
-      ROS_INFO("[line_follower_node] line following enabled: %b", line_following);
+      ROS_INFO("[line_follower_node] line following enabled: %s", line_following ? "true" : "false");
 
       //if line following has just been enabled then reset line following complete flag
       if (line_following)
