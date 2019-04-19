@@ -10,10 +10,12 @@
 
 //global variables
 bool autonomous_control = false;
+bool firing_complete = false;
 bool firing_motor_on = false;
 bool firing_stage = false;
 bool ready_to_fire = true;
 int balls_collected = 0;
+int balls_fired = 0;
 
 
 //callback function called to process SIGINT command
@@ -42,6 +44,17 @@ void controlCallback(const sd_msgs::Control::ConstPtr& msg)
   //change local control mode to match message
   autonomous_control = msg->autonomous_control;
 
+  //if firing stage changes from false to true reset all firing values
+  if (!firing_stage && msg->firing_stage)
+  {
+
+    //reset variables
+    firing_complete = false;
+    balls_collected = 3;
+    balls_fired = 0;
+
+  }
+  
   //set local value to match message value
   firing_stage = msg->firing_stage;
 
@@ -151,12 +164,6 @@ int main(int argc, char **argv)
   //publish initial firing status message
   firing_status_pub.publish(firing_status_msg);
 
-  //create variable for tracking whether firing is complete
-  bool firing_complete = false;
-
-  //create variable for counting number of balls remaining
-  int balls_fired = 0;
-
   //create timer to keep tracking of fire delay times
   ros::Timer timer;
 
@@ -169,7 +176,7 @@ int main(int argc, char **argv)
     //if line following is complete, fire delay time has elapsed (since last shot if there was one),
     //firing motor is on, at least one ball is remaining, request gate servo to open to fire a ball
     //NOTE: line_following_complete can only be true if control mode is set to autonomous
-    if (firing_stage && ready_to_fire && firing_motor_on) // && ((balls_collected - balls_fired) > 0))
+    if (autonomous_control && firing_stage && ready_to_fire && firing_motor_on) // && ((balls_collected - balls_fired) > 0))
     {
 
       //publish gate servo message to request gate to be opened
@@ -190,7 +197,7 @@ int main(int argc, char **argv)
 
     }
     //if all of above conditions are met except the firing motor isn't on then inform of status without firing
-    else if (firing_stage && ready_to_fire && !firing_motor_on && ((balls_collected - balls_fired) > 0))
+    else if (autonomous_control && firing_stage && ready_to_fire && !firing_motor_on && ((balls_collected - balls_fired) > 0))
     {
 
       //inform that firing wheel motor is not enabled; do not fire
@@ -217,10 +224,6 @@ int main(int argc, char **argv)
       firing_status_pub.publish(firing_status_msg);
 
     }
-
-    //if firing stage completed but control mode changed then reset firing complete status to force new firing stage
-    if (autonomous_control && firing_status_msg.complete)
-      firing_status_msg.complete = false;
 
     //process callback function calls
     ros::spinOnce();
