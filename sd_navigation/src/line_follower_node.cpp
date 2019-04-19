@@ -247,6 +247,9 @@ int main(int argc, char **argv)
       //publish line following status message
       line_following_pub.publish(line_following_msg);
 
+      //set arduino line following pin low to stop line following
+      digitalWrite(line_following_pin, LOW);
+
     }
 
     //process callback function calls
