@@ -318,15 +318,15 @@ int main(int argc, char **argv)
     if (autonomous_control && line_following_complete && control_msg.navigation_stage)
     {
 
+      //set line following complete to false to ensure rechecking if mode changes
+      line_following_complete = false;
+
       //set time and parameters of control message
       control_msg.header.stamp = ros::Time::now();
       control_msg.autonomous_control = autonomous_control;
       control_msg.complete = false;
       control_msg.firing_stage = true;
       control_msg.navigation_stage = false;
-
-      //set line following complete to false to ensure rechecking if mode changes
-      line_following_complete = false;
 
       //publish control message
       control_pub.publish(control_msg);
