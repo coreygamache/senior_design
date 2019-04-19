@@ -194,7 +194,7 @@ int main(int argc, char **argv)
 
     }
     //handle line following status change request
-    else if (toggle_line_following)
+    else if (autonomous_control && toggle_line_following)
     {
 
       //set mode change requested to false to prevent mode changing twice for one request
@@ -202,6 +202,9 @@ int main(int argc, char **argv)
 
       //set line following and line following complete status to false to force line following start on mode change to autonomous control
       line_following = !line_following;
+
+      //output line following status
+      ROS_INFO("[line_follower_node] line following enabled: %b", line_following);
 
       //if line following has just been enabled then reset line following complete flag
       if (line_following)
@@ -226,6 +229,9 @@ int main(int argc, char **argv)
     //if autonomous control is enabled then check if line following is complete
     else if (autonomous_control && !line_following_complete && digitalRead(line_following_complete_pin))
     {
+
+      //
+      ROS_INFO("[line_follower_node] line following complete");
 
       //set line following complete status to true
       line_following_complete = true;
