@@ -16,6 +16,7 @@
 
 //global variables
 bool autonomous_control = false;
+bool navigation_stage = false;
 bool line_following = false;
 bool line_following_complete = false; //line following completion status
 bool mode_change_requested = false;
@@ -49,6 +50,9 @@ void controlCallback(const sd_msgs::Control::ConstPtr& msg)
   //change local control mode to match message
   autonomous_control = msg->autonomous_control;
 
+  //change local navigation state state to match message
+  navigation_stage = msg->navigation_stage;
+
   //set mode change requested flag to true
   mode_change_requested = true;
 
@@ -62,7 +66,7 @@ void controllerCallback(const sensor_msgs::Joy::ConstPtr& msg)
   controller_buttons = msg->buttons;
 
   //if line follow button is pressed and currently in autonomous mode then set toggle line following true
-  if ((controller_buttons[0] == 1) && autonomous_control)
+  if ((controller_buttons[0] == 1) && autonomous_control && navigation_stage)
   {
 
     //set toggle line following to true to indicate request to change line following status
@@ -194,7 +198,7 @@ int main(int argc, char **argv)
 
     }
     //handle line following status change request
-    else if (autonomous_control && toggle_line_following)
+    else if (autonomous_control && navigation_stage && toggle_line_following)
     {
 
       //set mode change requested to false to prevent mode changing twice for one request
@@ -227,7 +231,7 @@ int main(int argc, char **argv)
 
     }
     //if autonomous control is enabled then check if line following is complete
-    else if (autonomous_control && !line_following_complete && digitalRead(line_following_complete_pin))
+    else if (autonomous_control && navigation_stage && !line_following_complete && digitalRead(line_following_complete_pin))
     {
 
       //
