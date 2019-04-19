@@ -66,7 +66,7 @@ int main(int argc, char **argv)
 
   //send initial message stating three balls collected (for bypassing sensor)
   balls_collected_msg.header.stamp = ros::Time::now();
-  balls_collected_msg.balls_collected = 3;
+  balls_collected_msg.balls_collected = 0;
   balls_collected_sensor_pub.publish(balls_collected_msg);
 
   while (ros::ok())
