@@ -13,9 +13,13 @@ bool autonomous_control = false;
 bool firing_complete = false;
 bool firing_motor_on = false;
 bool firing_stage = false;
-bool ready_to_fire = true;
+bool ready_to_fire = false;
+float fire_delay_time;
 int balls_collected = 0;
 int balls_fired = 0;
+
+//create timer to keep tracking of fire delay times
+ros::Timer timer;
 
 
 //callback function called to process SIGINT command
@@ -54,7 +58,7 @@ void controlCallback(const sd_msgs::Control::ConstPtr& msg)
     balls_fired = 0;
 
   }
-  
+
   //set local value to match message value
   firing_stage = msg->firing_stage;
 
@@ -89,6 +93,11 @@ void firingMotorCallback(const sd_msgs::Mosfet::ConstPtr& msg)
   //set local value to match message value
   firing_motor_on = msg->enable;
 
+  if (firing_motor_on)
+    timer = node_private.createTimer(ros::Duration(fire_delay_time), timerCallback, true);
+  else
+    ready_to_fire = false;
+
 }
 
 //callback function to process timer firing event
@@ -116,7 +125,6 @@ int main(int argc, char **argv)
   signal(SIGINT, sigintHandler);
 
   //retrieve fire delay time from parameter server [ms]
-  float fire_delay_time;
   if (!node_private.getParam("/control/firing_node/fire_delay_time", fire_delay_time))
   {
     ROS_ERROR("[firing_node] fire delay time not defined in config file: sd_collector_cannon/config/control.yaml");
@@ -164,9 +172,6 @@ int main(int argc, char **argv)
   //publish initial firing status message
   firing_status_pub.publish(firing_status_msg);
 
-  //create timer to keep tracking of fire delay times
-  ros::Timer timer;
-
   //set loop rate in Hz
   ros::Rate loop_rate(refresh_rate);
 
@@ -184,7 +189,7 @@ int main(int argc, char **argv)
 
       //increment number of balls fired if there was a ball to fire
       if ((balls_collected - balls_fired) > 0)
-        balls_fired++;
+        balls_fired += 3;
 
       //set ready to fire to false until fire delay time elapses
       ready_to_fire = false;
