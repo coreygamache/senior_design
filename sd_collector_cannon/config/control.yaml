@@ -1,5 +1,5 @@
 firing_node:
-  fire_delay_time: 3 # [s]
+  fire_delay_time: 5 # [s]
   refresh_rate: 10
 
 control_node:
