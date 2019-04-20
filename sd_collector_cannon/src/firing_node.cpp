@@ -93,10 +93,8 @@ void firingMotorCallback(const sd_msgs::Mosfet::ConstPtr& msg)
   //set local value to match message value
   firing_motor_on = msg->enable;
 
-  if (firing_motor_on)
-    timer = node_private.createTimer(ros::Duration(fire_delay_time), timerCallback, true);
-  else
-    ready_to_fire = false;
+  //reset ready to fire status
+  ready_to_fire = false;
 
 }
 
@@ -207,6 +205,14 @@ int main(int argc, char **argv)
 
       //inform that firing wheel motor is not enabled; do not fire
       ROS_INFO("[firing_node] firing wheel motor not enabled; waiting to fire");
+
+    }
+    //if in firing stage and firing motor is on but not ready to fire and no pending timer then firing wheel was just turned on
+    else if (autonomous_control && firing_stage && firing_motor_on && !ready_to_fire && !timer.hasPending())
+    {
+
+      //set timer to keep track of fire delay time until firing can begin
+      timer = node_private.createTimer(ros::Duration(fire_delay_time), timerCallback, true);
 
     }
 
