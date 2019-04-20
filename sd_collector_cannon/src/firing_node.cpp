@@ -18,9 +18,6 @@ float fire_delay_time;
 int balls_collected = 0;
 int balls_fired = 0;
 
-//create timer to keep tracking of fire delay times
-ros::Timer timer;
-
 
 //callback function called to process SIGINT command
 void sigintHandler(int sig)
@@ -53,6 +50,7 @@ void controlCallback(const sd_msgs::Control::ConstPtr& msg)
   {
 
     //reset variables
+    ready_to_fire = false;
     firing_complete = false;
     balls_collected = 3;
     balls_fired = 0;
@@ -169,6 +167,9 @@ int main(int argc, char **argv)
 
   //publish initial firing status message
   firing_status_pub.publish(firing_status_msg);
+
+  //create timer to keep tracking of fire delay times
+  ros::Timer timer;
 
   //set loop rate in Hz
   ros::Rate loop_rate(refresh_rate);
