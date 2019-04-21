@@ -381,7 +381,7 @@ int main(int argc, char **argv)
     //if autonomous mode is enabled, firing stage is complete, and robot is still in firing stage:
     //firing has just been complete; disable firing and switch to complete status
     //firing motor is disabled to conserve power
-    if (autonomous_control && firing_complete && control_msg.firing_stage)
+    if (autonomous_control && control_msg.firing_stage && firing_complete)
     {
 
       //set time and parameters of control message
