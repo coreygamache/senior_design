@@ -208,8 +208,9 @@ int main(int argc, char **argv)
       ROS_INFO("[firing_node] firing wheel motor not enabled; waiting to fire");
 
     }
-    //if in firing stage and firing motor is on but not ready to fire and no pending timer then firing wheel was just turned on
-    else if (autonomous_control && firing_stage && firing_motor_on && !ready_to_fire && !timer.hasPending())
+    //if in autonomous control and firing stage and firing motor is on then call create timer to ensure ready to fire will be toggled
+    //this call will be ignored if the timer is already active
+    else if (autonomous_control && firing_stage && firing_motor_on && !ready_to_fire)
     {
 
       //set timer to keep track of fire delay time until firing can begin
