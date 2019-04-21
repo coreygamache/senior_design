@@ -262,11 +262,6 @@ int main(int argc, char **argv)
 
     }
 
-    if (firing_complete)
-      ROS_INFO("[firing_node] firing complete in main loop");
-    else if (end_timer_active)
-      ROS_INFO("[firing_node] end timer active in main loop");
-
     //if currently in firing stage and no balls remain then firing is complete
     if (autonomous_control && firing_stage && !firing_complete && !end_timer_active && ((balls_collected - balls_fired) == 0))
     {
@@ -285,9 +280,6 @@ int main(int argc, char **argv)
     //if number of balls fired, balls remaining, or complete status has changed then publish new message
     if ((balls_fired != firing_status_msg.balls_fired) || ((balls_collected - balls_fired) != firing_status_msg.balls_remaining) || (firing_complete != firing_status_msg.complete))
     {
-
-      if (firing_complete)
-        ROS_INFO("[firing_node] firing complete message being sent");
 
       //update message values
       firing_status_msg.balls_fired = balls_fired;
