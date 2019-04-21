@@ -87,11 +87,14 @@ bool DisableFiringCallback(sd_msgs::ChangeControlMode::Request& req, sd_msgs::Ch
 
 }
 
-//callback function to process timer firing event
+//callback function to process endTimer firing event
 void endTimerCallback(const ros::TimerEvent& event)
 {
 
   //specified time since last shot fired has elapsed
+  //inform of firing finished
+  ROS_INFO("[firing_node] all balls fired and end timer elapsed; setting firing complete flag to true");
+
   //set firing complete to true
   firing_complete = true;
 
@@ -226,7 +229,7 @@ int main(int argc, char **argv)
     //if line following is complete, fire delay time has elapsed (since last shot if there was one),
     //firing motor is on, at least one ball is remaining, request gate servo to open to fire a ball
     //NOTE: line_following_complete can only be true if control mode is set to autonomous
-    if (autonomous_control && firing_stage && ready_to_fire && firing_motor_on) // && ((balls_collected - balls_fired) > 0))
+    if (autonomous_control && firing_stage && ready_to_fire && firing_motor_on && ((balls_collected - balls_fired) > 0))
     {
 
       //publish gate servo message to request gate to be opened
@@ -234,7 +237,7 @@ int main(int argc, char **argv)
 
       //increment number of balls fired if there was a ball to fire
       if ((balls_collected - balls_fired) > 0)
-        balls_fired += 3;
+        balls_fired += balls_collected;
 
       //set ready to fire to false until fire delay time elapses
       ready_to_fire = false;
@@ -247,17 +250,13 @@ int main(int argc, char **argv)
 
     }
     //if all of above conditions are met except the firing motor isn't on then inform of status without firing
-    else if (autonomous_control && firing_stage && ready_to_fire && !firing_motor_on) // && ((balls_collected - balls_fired) > 0))
+    else if (autonomous_control && firing_stage && !firing_motor_on && ((balls_collected - balls_fired) > 0))
     {
 
       //inform that firing wheel motor is not enabled; do not fire
       ROS_INFO("[firing_node] firing wheel motor not enabled; waiting to fire");
 
     }
-
-    //if currently in firing stage and no balls remain then firing is complete; set message value
-    if (autonomous_control && firing_stage && ((balls_collected - balls_fired) == 0))
-      endTimer = node_private.createTimer(ros::Duration(end_delay_time), endTimerCallback, true);
 
     //if number of balls fired, balls remaining, or complete status has changed then publish new message
     if ((balls_fired != firing_status_msg.balls_fired) || ((balls_collected - balls_fired) != firing_status_msg.balls_remaining) || (firing_complete != firing_status_msg.complete))
@@ -270,6 +269,18 @@ int main(int argc, char **argv)
 
       //publish new message
       firing_status_pub.publish(firing_status_msg);
+
+    }
+
+    //if currently in firing stage and no balls remain then firing is complete
+    if (autonomous_control && firing_stage && !firing_complete && ((balls_collected - balls_fired) == 0))
+    {
+
+      //inform that end timer is being started
+      ROS_INFO("[firing_node] all balls fired; starting end timer");
+
+      //start timer to delay before sending firing complete message
+      endTimer = node_private.createTimer(ros::Duration(end_delay_time), endTimerCallback, true);
 
     }
 
