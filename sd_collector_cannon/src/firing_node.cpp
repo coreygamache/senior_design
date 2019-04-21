@@ -241,7 +241,7 @@ int main(int argc, char **argv)
 
       //increment number of balls fired if there was a ball to fire
       if ((balls_collected - balls_fired) > 0)
-        balls_fired += balls_collected;
+        balls_fired++;
 
       //set ready to fire to false until fire delay time elapses
       ready_to_fire = false;
