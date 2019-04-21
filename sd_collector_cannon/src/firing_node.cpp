@@ -15,7 +15,9 @@ bool firing_motor_on = false;
 bool firing_motor_turned_on = false;
 bool firing_stage = false;
 bool ready_to_fire = false;
+float end_delay_time;
 float fire_delay_time;
+float spinup_delay_time;
 int balls_collected = 0;
 int balls_fired = 0;
 
@@ -85,6 +87,16 @@ bool DisableFiringCallback(sd_msgs::ChangeControlMode::Request& req, sd_msgs::Ch
 
 }
 
+//callback function to process timer firing event
+void endTimerCallback(const ros::TimerEvent& event)
+{
+
+  //specified time since last shot fired has elapsed
+  //set firing complete to true
+  firing_complete = true;
+
+}
+
 //callback function called to process messages on firing motor topic
 void firingMotorCallback(const sd_msgs::Mosfet::ConstPtr& msg)
 {
@@ -125,10 +137,24 @@ int main(int argc, char **argv)
   //override the default SIGINT handler
   signal(SIGINT, sigintHandler);
 
+  //retrieve end delay time from parameter server [ms]
+  if (!node_private.getParam("/control/firing_node/end_delay_time", end_delay_time))
+  {
+    ROS_ERROR("[firing_node] end delay time not defined in config file: sd_collector_cannon/config/control.yaml");
+    ROS_BREAK();
+  }
+
   //retrieve fire delay time from parameter server [ms]
   if (!node_private.getParam("/control/firing_node/fire_delay_time", fire_delay_time))
   {
     ROS_ERROR("[firing_node] fire delay time not defined in config file: sd_collector_cannon/config/control.yaml");
+    ROS_BREAK();
+  }
+
+  //retrieve spinup delay time from parameter server [ms]
+  if (!node_private.getParam("/control/firing_node/spinup_delay_time", spinup_delay_time))
+  {
+    ROS_ERROR("[firing_node] firing wheel motor spinup delay time not defined in config file: sd_collector_cannon/config/control.yaml");
     ROS_BREAK();
   }
 
@@ -190,7 +216,7 @@ int main(int argc, char **argv)
       firing_motor_turned_on = false;
 
       //set timer to keep track of fire delay time until firing can begin
-      timer = node_private.createTimer(ros::Duration(fire_delay_time), timerCallback, true);
+      timer = node_private.createTimer(ros::Duration(spinup_delay_time), timerCallback, true);
 
     }
 
@@ -228,9 +254,7 @@ int main(int argc, char **argv)
 
     //if currently in firing stage and no balls remain then firing is complete; set message value
     if (autonomous_control && firing_stage && ((balls_collected - balls_fired) == 0))
-      firing_complete = true;
-    else
-      firing_complete = false;
+      timer = node_private.createTimer(ros::Duration(end_delay_time), endTimerCallback, true);
 
     //if number of balls fired, balls remaining, or complete status has changed then publish new message
     if ((balls_fired != firing_status_msg.balls_fired) || ((balls_collected - balls_fired) != firing_status_msg.balls_remaining) || (firing_complete != firing_status_msg.complete))
