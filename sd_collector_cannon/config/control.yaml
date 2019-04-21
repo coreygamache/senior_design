@@ -1,5 +1,7 @@
 firing_node:
-  fire_delay_time: 5 # [s]
+  end_delay_time: 3 # delay after firing last ball before firing complete is flagged [s]
+  fire_delay_time: 2 # delay between firing balls [s]
+  spinup_delay_time: 5 # delay between turning on firing wheel motor and firing [s]
   refresh_rate: 10
 
 control_node:
