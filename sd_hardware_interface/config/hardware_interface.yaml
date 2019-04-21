@@ -16,7 +16,7 @@ firing_wheel:
 gate_servo_sb_node:
   closed_angle: 2000 # pulsewidth to achieve desired gate closed angle [us]
   open_angle: 2300 # pulsewidth to achieve desired gate open angle [us]
-  open_time: 2.0 # [s]
+  open_time: 0.5 # [s]
   periodic_time: 0.5 # [s]
   refresh_rate: 10
   sb_driver_path: "/dev/servoblaster"
