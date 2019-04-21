@@ -258,9 +258,15 @@ int main(int argc, char **argv)
 
     }
 
+    if (firing_complete)
+      ROS_INFO("[firing_node] firing complete in main loop");
+
     //if number of balls fired, balls remaining, or complete status has changed then publish new message
     if ((balls_fired != firing_status_msg.balls_fired) || ((balls_collected - balls_fired) != firing_status_msg.balls_remaining) || (firing_complete != firing_status_msg.complete))
     {
+
+      if (firing_complete)
+        ROS_INFO("[firing_node] firing complete message being sent");
 
       //update message values
       firing_status_msg.balls_fired = balls_fired;
