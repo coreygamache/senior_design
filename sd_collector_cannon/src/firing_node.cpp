@@ -12,6 +12,7 @@
 bool autonomous_control = false;
 bool firing_complete = false;
 bool firing_motor_on = false;
+bool firing_motor_turned_on = false;
 bool firing_stage = false;
 bool ready_to_fire = false;
 float fire_delay_time;
@@ -93,6 +94,10 @@ void firingMotorCallback(const sd_msgs::Mosfet::ConstPtr& msg)
 
   //reset ready to fire status
   ready_to_fire = false;
+
+  //set firing motor turn on flag if just turned on
+  if (firing_motor_on)
+    firing_motor_turned_on = true;
 
 }
 
@@ -177,6 +182,18 @@ int main(int argc, char **argv)
   while (ros::ok())
   {
 
+    //if firing motor was turned on since last iteration then start timer to countdown untl ready to fire
+    if (firing_motor_turned_on)
+    {
+
+      //disable flag
+      firing_motor_turned_on = false;
+
+      //set timer to keep track of fire delay time until firing can begin
+      timer = node_private.createTimer(ros::Duration(fire_delay_time), timerCallback, true);
+
+    }
+
     //if line following is complete, fire delay time has elapsed (since last shot if there was one),
     //firing motor is on, at least one ball is remaining, request gate servo to open to fire a ball
     //NOTE: line_following_complete can only be true if control mode is set to autonomous
@@ -201,25 +218,16 @@ int main(int argc, char **argv)
 
     }
     //if all of above conditions are met except the firing motor isn't on then inform of status without firing
-    else if (autonomous_control && firing_stage && ready_to_fire && !firing_motor_on && ((balls_collected - balls_fired) > 0))
+    else if (autonomous_control && firing_stage && ready_to_fire && !firing_motor_on) // && ((balls_collected - balls_fired) > 0))
     {
 
       //inform that firing wheel motor is not enabled; do not fire
       ROS_INFO("[firing_node] firing wheel motor not enabled; waiting to fire");
 
     }
-    //if in autonomous control and firing stage and firing motor is on then call create timer to ensure ready to fire will be toggled
-    //this call will be ignored if the timer is already active
-    else if (autonomous_control && firing_stage && firing_motor_on && !ready_to_fire)
-    {
-
-      //set timer to keep track of fire delay time until firing can begin
-      timer = node_private.createTimer(ros::Duration(fire_delay_time), timerCallback, true);
-
-    }
 
     //if currently in firing stage and no balls remain then firing is complete; set message value
-    if (firing_stage && ((balls_collected - balls_fired) == 0))
+    if (autonomous_control && firing_stage && ((balls_collected - balls_fired) == 0))
       firing_complete = true;
     else
       firing_complete = false;
