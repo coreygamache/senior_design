@@ -202,6 +202,9 @@ int main(int argc, char **argv)
   //create timer to keep tracking of fire delay times
   ros::Timer timer;
 
+  //create timer to delay while balls fire before setting firing complete flag
+  ros::Timer endTimer;
+
   //set loop rate in Hz
   ros::Rate loop_rate(refresh_rate);
 
@@ -254,7 +257,7 @@ int main(int argc, char **argv)
 
     //if currently in firing stage and no balls remain then firing is complete; set message value
     if (autonomous_control && firing_stage && ((balls_collected - balls_fired) == 0))
-      timer = node_private.createTimer(ros::Duration(end_delay_time), endTimerCallback, true);
+      endTimer = node_private.createTimer(ros::Duration(end_delay_time), endTimerCallback, true);
 
     //if number of balls fired, balls remaining, or complete status has changed then publish new message
     if ((balls_fired != firing_status_msg.balls_fired) || ((balls_collected - balls_fired) != firing_status_msg.balls_remaining) || (firing_complete != firing_status_msg.complete))
